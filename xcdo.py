@@ -120,11 +120,18 @@ class ICdoHandler(ABC):
 
 
 class _Utils:
-    def is_symlink_to(self, file_path: str, target_path: str) -> bool:
+    def _is_symlink_to(self, file_path: str, target_path: str) -> bool:
         file_path = Path(file_path)
         return file_path.is_symlink() and file_path.readlink() == Path(target_path)
 
-    def symlink_to(self, file_path: str, target_path: str) -> None:
+    def are_all_linked_to(
+        self,
+        file_paths: t.List[str],
+        target_paths: t.List[str],
+    ) -> bool:
+        pass
+
+    def link_all(self, file_path: t.List[str], target_path: t.List[str]) -> None:
         pass
 
     def generate_hash(self, strings: t.List[str]) -> str:
@@ -133,13 +140,13 @@ class _Utils:
         hash_code = hash_object.hexdigest()
         return hash_code
 
-    def move(self, file1: str, file2: str) -> None:
+    def move_all(self, files1: t.List[str], files2: t.List[str]) -> None:
         pass
 
-    def file_exists(self, file: str) -> bool:
+    def all_files_exist(self, files: t.List[str]) -> bool:
         pass
 
-    def are_older_than(self, files1: t.List[str], files2: t.List[str]) -> bool:
+    def is_any_file_new(self, files1: t.List[str], files2: t.List[str]) -> bool:
         pass
 
 
@@ -177,82 +184,41 @@ class XCdo:
         hash_code = utils.generate_hash([*argv[:first_output_index], cdo_version])
         cache_files = self._generate_cache_file_paths(hash_code, output_files)
 
-        if not utils.file_exists(cache_files[output_files[0]]):
-            self._cdo.run(argv)
-            utils.move(output_files[0], cache_files[output_files[0]])
-            utils.symlink_to(output_files[0], cache_files[output_files[0]])
-            return
+        if not utils.all_files_exist(cache_files):
+            return self._run_and_cache(argv, output_files, cache_files)
 
         input_files = self._cdo.get_input_files(argv, exclude_files=output_files)
 
-        if not utils.are_older_than(input_files, output_files):
-            self._cdo.run(argv)
-            utils.move(output_files[0], cache_files[output_files[0]])
-            utils.symlink_to(output_files[0], cache_files[output_files[0]])
-            return
+        if not utils.is_any_file_new(input_files, cache_files):
+            return self._run_and_cache(argv, output_files, cache_files)
 
-        if not utils.is_symlink_to(output_files[0], cache_files[output_files[0]]):
-            utils.symlink_to(output_files[0], cache_files[output_files[0]])
+        if not utils.are_all_linked_to(output_files, cache_files):
+            utils.link_all(output_files, cache_files)
+
+    def _run_and_cache(
+        self,
+        argv,
+        output_files,
+        cache_files,
+    ) -> None:
+        utils = _Utils()
+        self._cdo.run(argv)
+        utils.move_all(output_files, cache_files)
+        utils.link_all(output_files, cache_files)
 
     def _generate_cache_file_paths(
         self,
         hash_code: str,
         output_files: t.List[str],
-    ) -> t.Dict[str, str]:
-        res: t.Dict[str, str] = {}
+    ) -> t.List[str]:
+        res: t.List[str] = []
 
         for i, f in enumerate(output_files):
             ipath = Path(f)
-            cpath = ipath.parent / self._cachedir_name / hash_code
-            res[f] = str(cpath)
+            cpath = ipath.parent / self._cachedir_name / f"{hash_code}_{i}"
+            res.append(str(cpath))
 
         return res
-
-    def _get_input_files(self, argv: t.List[str]) -> t.Set[str]:
-        """
-        It expects all operators in the argv to be dashed.
-
-        All comma separated parameters of operators will be returned as input files if it exist as a file
-        However, this can lead to unneccesarily recalculations for e.g.
-        xcdo -subc,10 in.nc out.nc
-        touch 10
-        xcdo -subc,10 in.nc out.nc
-        """
-        res: t.Set[str] = set()
-        apply_syntax = ("[", "]", ":")
-        for arg in argv:
-            if not arg:  # For some reason if it is empty string
-                continue
-            if arg in apply_syntax:  # The --apply & --argument_groups
-                continue
-            if arg.startswith("-"):
-                arg_words = arg.split(",")
-                if len(arg_words) > 1:
-                    res.update(self._get_input_files(arg_words[1:]))
-            elif "=" in arg:
-                arg_words = arg.split("=")
-                res.update(self._get_input_files(arg_words))
-            elif Path(arg).is_file():
-                res.add(arg)
-        return res
-
-    def _get_output_files(self, argv: t.List[str]) -> t.List[str]:
-        processed_call = self._cdo.get_processed_call(argv)
-        o1 = processed_call.split()[0]
-        try:
-            o1_index = argv.index(o1)
-        except ValueError:
-            return ()
-
-        if o1_index == len(argv) - 1:
-            return (o1,)
-
-        o2_index = o1_index + 1
-
-        if argv[o2_index].lstrip("-") in processed_call:
-            return ()
-
-        return tuple(argv[o1_index:])
 
 
 def main():

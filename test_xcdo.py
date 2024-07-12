@@ -17,6 +17,79 @@ def xcdo(cdo_mock):
     return XCdo(cdo_mock)
 
 
+@pytest.fixture
+def setup_env(mocker, cdo_mock, utils_mock, xcdo):
+
+    class Setup:
+        def __init__(self):
+            self.cdo_version = "x.x.x"
+            self.hash_code = "xxxxxxxx"
+
+        def prepare_mocks(
+            self,
+            input_files=[],
+            output_files=[],
+            commands=[],
+            all_cache_files_exist=False,
+            input_younger=False,
+            cache_linked=False,
+        ):
+            self.input_files = input_files
+            self.output_files = output_files
+            self.cache_files = [self.hash_code + i for i in output_files]
+            self.commands = commands
+            self.iargv = self.commands + self.input_files
+            self.argv = self.commands + self.input_files + self.output_files
+
+            cdo_mock.get_output_files.return_value = self.output_files
+            cdo_mock.version.return_value = self.cdo_version
+            utils_mock.generate_hash.return_value = self.hash_code
+            utils_mock.all_files_exist.return_value = all_cache_files_exist
+            cdo_mock.get_input_files.return_value = self.input_files
+            utils_mock.is_any_file_new.return_value = not input_younger
+            utils_mock.are_all_linked_to.return_value = cache_linked
+
+            mocker.patch("xcdo._Utils", return_value=utils_mock)
+            mocker.patch.object(
+                xcdo,
+                "_generate_cache_file_paths",
+                return_value=self.cache_files,
+            )
+
+            self.cdo_get_output_files_call = mocker.call.get_output_files(self.argv)
+            self.cdo_version_call = mocker.call.version()
+            self.cdo_get_input_files_call = mocker.call.get_input_files(
+                self.argv,
+                exclude_files=self.output_files,
+            )
+            self.cdo_run_call = mocker.call.run(self.argv)
+
+            self.generate_hash_call = mocker.call.generate_hash(
+                [*self.iargv, self.cdo_version]
+            )
+            self.cache_files_exist_call = mocker.call.all_files_exist(
+                self.cache_files,
+            )
+
+            self.move_output_to_cache_call = mocker.call.move_all(
+                self.output_files, self.cache_files
+            )
+
+            self.link_output_to_cache_call = mocker.call.link_all(
+                self.output_files, self.cache_files
+            )
+
+            self.are_output_cache_linked_call = mocker.call.are_all_linked_to(
+                self.output_files, self.cache_files
+            )
+
+            self.are_inputs_new_call = mocker.call.is_any_file_new(
+                self.input_files, self.cache_files
+            )
+
+    return Setup()
+
+
 def test_empty_argv(mocker, cdo_mock, xcdo):
     # Act
     xcdo([])
@@ -40,181 +113,141 @@ def test_no_output(mocker, cdo_mock, xcdo):
     ]
 
 
-class SingleOutput:
-    out_file = "o1.nc"
-    input_files = "i1.nc i2.nc i3.nc".split()
-    cache_file = "xxxxxxxxxxx1"
-    cdo_version = "x.x.x"
-    hash_code = "xxxxxxxx"
-    iargv = "-some -operators ".split()
+class TestSingleOutputSingleInput:
+    input_files = ["in.nc"]
+    output_files = ["out.nc"]
+    commands = "-some -commands".split()
 
-    def _arrange(self, mocker, cdo_mock, utils_mock, xcdo):
-        argv = self.iargv + [self.out_file]
-        cdo_mock.get_output_files.return_value = [self.out_file]
-        cdo_mock.version.return_value = self.cdo_version
-        utils_mock.generate_hash.return_value = self.hash_code
-        utils_mock.file_exists.return_value = False
-        mocker.patch("xcdo._Utils", return_value=utils_mock)
-        mocker.patch.object(
-            xcdo,
-            "_generate_cache_file_paths",
-            return_value={self.out_file: self.cache_file},
+    def test_cache_does_not_exist(self, mocker, setup_env, cdo_mock, utils_mock, xcdo):
+        # Arrange
+        env = setup_env
+        env.prepare_mocks(
+            input_files=self.input_files,
+            output_files=self.output_files,
+            commands=self.commands,
         )
 
-        return argv
+        # Act
+        xcdo(env.argv)
 
-    def _assert(self, mocker, cdo_mock, utils_mock, argv):
+        # Assert
         cdo_calls = []
         utils_calls = []
-
-        cdo_calls.append(mocker.call.get_output_files(argv))
-        cdo_calls.append(mocker.call.version())
-        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
-        utils_calls.append(mocker.call.file_exists(self.cache_file))
-        cdo_calls.append(mocker.call.run(argv))
-        utils_calls.append(mocker.call.move(self.out_file, self.cache_file))
-        utils_calls.append(mocker.call.symlink_to(self.out_file, self.cache_file))
+        cdo_calls.append(env.cdo_get_output_files_call)
+        cdo_calls.append(env.cdo_version_call)
+        utils_calls.append(env.generate_hash_call)
+        utils_calls.append(env.cache_files_exist_call)
+        cdo_calls.append(env.cdo_run_call)
+        utils_calls.append(env.move_output_to_cache_call)
+        utils_calls.append(env.link_output_to_cache_call)
 
         assert cdo_mock.mock_calls == cdo_calls
         assert utils_mock.mock_calls == utils_calls
 
-
-class TestSingleOutput_Cache(SingleOutput):
-    def test_does_not_exist(self, mocker, cdo_mock, utils_mock, xcdo):
-        # Arrange
-        argv = self._arrange(mocker, cdo_mock, utils_mock, xcdo)
-
-        # Act
-        xcdo(argv)
-
-        # Assert
-        self._assert(mocker, cdo_mock, utils_mock, argv)
-
-    def test_cache_exist_but_input_files_younger(
-        self, mocker, cdo_mock, utils_mock, xcdo
+    def test_cache_exist_but_input_file_younger(
+        self, mocker, setup_env, cdo_mock, utils_mock, xcdo
     ):
         # Arrange
-        argv = self.iargv + [self.out_file]
-        cdo_mock.get_output_files.return_value = [self.out_file]
-        cdo_mock.version.return_value = self.cdo_version
-        utils_mock.generate_hash.return_value = self.hash_code
-        utils_mock.file_exists.return_value = True
-        cdo_mock.get_input_files.return_value = self.input_files
-        utils_mock.are_older_than.return_value = False
-        utils_mock.is_symlink_to.return_value = False
-
-        mocker.patch("xcdo._Utils", return_value=utils_mock)
-        mocker.patch.object(
-            xcdo,
-            "_generate_cache_file_paths",
-            return_value={self.out_file: self.cache_file},
+        env = setup_env
+        env.prepare_mocks(
+            input_files=self.input_files,
+            output_files=self.output_files,
+            commands=self.commands,
+            all_cache_files_exist=True,
+            input_younger=True,
         )
 
         # Act
-        xcdo(argv)
+        xcdo(env.argv)
 
         # Assert
         cdo_calls = []
         utils_calls = []
-
-        cdo_calls.append(mocker.call.get_output_files(argv))
-        cdo_calls.append(mocker.call.version())
-        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
-        utils_calls.append(mocker.call.file_exists(self.cache_file))
-        cdo_calls.append(
-            mocker.call.get_input_files(argv, exclude_files=[self.out_file])
-        )
-        utils_calls.append(
-            mocker.call.are_older_than(self.input_files, [self.out_file])
-        )
-        cdo_calls.append(mocker.call.run(argv))
-        utils_calls.append(mocker.call.move(self.out_file, self.cache_file))
-        utils_calls.append(mocker.call.symlink_to(self.out_file, self.cache_file))
+        cdo_calls.append(env.cdo_get_output_files_call)
+        cdo_calls.append(env.cdo_version_call)
+        utils_calls.append(env.generate_hash_call)
+        utils_calls.append(env.cache_files_exist_call)
+        cdo_calls.append(env.cdo_get_input_files_call)
+        utils_calls.append(env.are_inputs_new_call)
+        cdo_calls.append(env.cdo_run_call)
+        utils_calls.append(env.move_output_to_cache_call)
+        utils_calls.append(env.link_output_to_cache_call)
 
         assert cdo_mock.mock_calls == cdo_calls
         assert utils_mock.mock_calls == utils_calls
 
-    def test_cache_exist_and_input_files_older_and_cache_linked(
-        self, mocker, cdo_mock, utils_mock, xcdo
+    def test_cache_exist_and_input_file_older_and_cache_linked(
+        self, mocker, setup_env, cdo_mock, utils_mock, xcdo
     ):
         # Arrange
-        argv = self.iargv + [self.out_file]
-        cdo_mock.get_output_files.return_value = [self.out_file]
-        cdo_mock.version.return_value = self.cdo_version
-        utils_mock.generate_hash.return_value = self.hash_code
-        utils_mock.file_exists.return_value = True
-        cdo_mock.get_input_files.return_value = self.input_files
-        utils_mock.are_older_than.return_value = True
-        utils_mock.is_symlink_to.return_value = True
-
-        mocker.patch("xcdo._Utils", return_value=utils_mock)
-        mocker.patch.object(
-            xcdo,
-            "_generate_cache_file_paths",
-            return_value={self.out_file: self.cache_file},
+        env = setup_env
+        env.prepare_mocks(
+            input_files=self.input_files,
+            output_files=self.output_files,
+            commands=self.commands,
+            all_cache_files_exist=True,
+            input_younger=False,
+            cache_linked=True,
         )
 
         # Act
-        xcdo(argv)
+        xcdo(env.argv)
 
         # Assert
         cdo_calls = []
         utils_calls = []
-
-        cdo_calls.append(mocker.call.get_output_files(argv))
-        cdo_calls.append(mocker.call.version())
-        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
-        utils_calls.append(mocker.call.file_exists(self.cache_file))
-        cdo_calls.append(
-            mocker.call.get_input_files(argv, exclude_files=[self.out_file])
-        )
-        utils_calls.append(
-            mocker.call.are_older_than(self.input_files, [self.out_file])
-        )
-        utils_calls.append(mocker.call.is_symlink_to(self.out_file, self.cache_file))
+        cdo_calls.append(env.cdo_get_output_files_call)
+        cdo_calls.append(env.cdo_version_call)
+        utils_calls.append(env.generate_hash_call)
+        utils_calls.append(env.cache_files_exist_call)
+        cdo_calls.append(env.cdo_get_input_files_call)
+        utils_calls.append(env.are_inputs_new_call)
+        utils_calls.append(env.are_output_cache_linked_call)
 
         assert cdo_mock.mock_calls == cdo_calls
         assert utils_mock.mock_calls == utils_calls
 
     def test_cache_exist_and_input_files_older_and_cache_not_linked(
-        self, mocker, cdo_mock, utils_mock, xcdo
+        self, mocker, setup_env, cdo_mock, utils_mock, xcdo
     ):
         # Arrange
-        argv = self.iargv + [self.out_file]
-        cdo_mock.get_output_files.return_value = [self.out_file]
-        cdo_mock.version.return_value = self.cdo_version
-        utils_mock.generate_hash.return_value = self.hash_code
-        utils_mock.file_exists.return_value = True
-        cdo_mock.get_input_files.return_value = self.input_files
-        utils_mock.are_older_than.return_value = True
-        utils_mock.is_symlink_to.return_value = False
-
-        mocker.patch("xcdo._Utils", return_value=utils_mock)
-        mocker.patch.object(
-            xcdo,
-            "_generate_cache_file_paths",
-            return_value={self.out_file: self.cache_file},
+        env = setup_env
+        env.prepare_mocks(
+            input_files=self.input_files,
+            output_files=self.output_files,
+            commands=self.commands,
+            all_cache_files_exist=True,
+            input_younger=False,
+            cache_linked=False,
         )
 
         # Act
-        xcdo(argv)
+        xcdo(env.argv)
 
         # Assert
         cdo_calls = []
         utils_calls = []
-
-        cdo_calls.append(mocker.call.get_output_files(argv))
-        cdo_calls.append(mocker.call.version())
-        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
-        utils_calls.append(mocker.call.file_exists(self.cache_file))
-        cdo_calls.append(
-            mocker.call.get_input_files(argv, exclude_files=[self.out_file])
-        )
-        utils_calls.append(
-            mocker.call.are_older_than(self.input_files, [self.out_file])
-        )
-        utils_calls.append(mocker.call.is_symlink_to(self.out_file, self.cache_file))
-        utils_calls.append(mocker.call.symlink_to(self.out_file, self.cache_file))
+        cdo_calls.append(env.cdo_get_output_files_call)
+        cdo_calls.append(env.cdo_version_call)
+        utils_calls.append(env.generate_hash_call)
+        utils_calls.append(env.cache_files_exist_call)
+        cdo_calls.append(env.cdo_get_input_files_call)
+        utils_calls.append(env.are_inputs_new_call)
+        utils_calls.append(env.are_output_cache_linked_call)
+        utils_calls.append(env.link_output_to_cache_call)
 
         assert cdo_mock.mock_calls == cdo_calls
         assert utils_mock.mock_calls == utils_calls
+
+
+class TestSingleOutputMultipleInput(TestSingleOutputSingleInput):
+    input_files = ["in1.nc", "in2.nc", "in3.nc"]
+
+
+class TestMulitpleOutputSingleInput(TestSingleOutputSingleInput):
+    output_files = ["o1.nc", "o2.nc", "o3.nc"]
+
+
+class TestMulitpleOutputMultipleInput(TestSingleOutputSingleInput):
+    input_files = ["in1.nc", "in2.nc", "in3.nc"]
+    output_files = ["o1.nc", "o2.nc", "o3.nc"]
