@@ -11,20 +11,6 @@ class TestXCdoCallSuccess(unittest.TestCase):
     def setUp(self) -> None:
         self.mock_cdo = MagicMock(spec=ICdoHandler)
         self.obj = XCdo(self.mock_cdo)
-        #    self.hash_code = "abcdef123456"
-        #    self.output_files = [
-        #        "/home/user/projects/file1.txt",
-        #        "/home/user/projects/file2.txt",
-        #    ]
-        #    # self.cachedir_name = self.xcdo._cachedir_name
-        #    self.helper_options_ = [
-        #        "--dryrun",
-        #        "-A",
-        #        "--help",
-        #        "-h",
-        #        "--apply",
-        #        "--argument_groups",
-        #    ]
         return super().setUp()
 
     def test_with_empty_argv(self):
@@ -55,63 +41,205 @@ class TestXCdoCallSuccess(unittest.TestCase):
             [call.get_output_files(argv), call.run(argv)],
         )
 
-    @patch.multiple(
-        "xcdo",
-        _generate_hash=DEFAULT,
-        _mv_and_link_back=DEFAULT,
-    )
-    def test_single_output_in_cwd(self, **mocks):
-        # Arrange
-        out_file = "out.nc"
-        iargv = "-some -operators ".split()
-        argv = iargv + [out_file]
-        cdo_version = "x.x.x"
-        hash_code = "xxxxxxxx"
-        cache_file = f"{XCdo._cachedir_name}/{hash_code}"
-        self.mock_cdo.get_output_files.return_value = [out_file]
-        self.mock_cdo.version.return_value = cdo_version
-        mocks["_generate_hash"].return_value = hash_code
-
-        # Act
-        self.obj(argv)
-
-        # Assert
-        self.mock_cdo.get_output_files.assert_called_once_with(argv)
-        self.mock_cdo.version.assert_called_once_with()
-        mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
-        self.mock_cdo.run.assert_called_once_with(argv)
-        mocks["_mv_and_link_back"].assert_called_once_with(out_file, cache_file)
-
-    @patch.multiple(
-        "xcdo",
-        _generate_hash=DEFAULT,
-        _mv_and_link_back=DEFAULT,
-    )
-    def test_multiple_output_in_cwd(self, **mocks):
-        # Arrange
-        hash_code = "xxxxxxxx"
-        out_files = "o1.nc o2.nc o3.nc".split()
+    def _arrange(self, out_files, cdo_version, hash_code, mocks):
         iargv = "-some -operators ".split()
         argv = iargv + out_files
-        cdo_version = "x.x.x"
-        cache_files = (
-            f"{XCdo._cachedir_name}/0_{hash_code}"
-            + f"{XCdo._cachedir_name}/1_{hash_code}"
-            + f"{XCdo._cachedir_name}/2_{hash_code}".split()
-        )
         self.mock_cdo.get_output_files.return_value = out_files
         self.mock_cdo.version.return_value = cdo_version
         mocks["_generate_hash"].return_value = hash_code
+        return iargv, argv
+
+    def _assert(self, argv, out_files, iargv, cdo_version, mocks):
+        self.mock_cdo.get_output_files.assert_called_once_with(argv)
+        self.mock_cdo.version.assert_called_once_with()
+        mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
+        self.mock_cdo.run.assert_called_once_with(argv)
+        expected_calls = [call(o, o) for o in out_files]
+        mocks["_mv_and_link_back"].assert_has_calls(expected_calls)
+
+    @patch.multiple(
+        "xcdo",
+        _generate_hash=DEFAULT,
+        _is_symlink_to=DEFAULT,
+        _mv_and_link_back=DEFAULT,
+    )
+    def test_single_output_cache_linked(self, **mocks):
+        # Arrange
+        out_files = "o1.nc".split()
+        cdo_version = "x.x.x"
+        hash_code = "xxxxxxxx"
+        iargv, argv = self._arrange(out_files, cdo_version, hash_code, mocks)
 
         # Act
-        self.obj(argv)
+        with patch.object(
+            self.obj,
+            "_generate_cache_file_paths",
+            return_value={o: o for o in out_files},
+        ):
+            self.obj(argv)
 
         # Assert
         self.mock_cdo.get_output_files.assert_called_once_with(argv)
         self.mock_cdo.version.assert_called_once_with()
         mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
-        self.mock_cdo.run.assert_called_once_with(argv)
-        mocks["_mv_and_link_back"].assert_called_once_with(out_file, cache_file)
+        mocks["_is_symlink_to"].assert_has_calls([call(o, o) for o in out_files])
+        self.mock_cdo.run.assert_not_called()
+        mocks["_mv_and_link_back"].assert_not_called()
+
+    @patch.multiple(
+        "xcdo",
+        _generate_hash=DEFAULT,
+        _is_symlink_to=DEFAULT,
+        _mv_and_link_back=DEFAULT,
+    )
+    def test_single_output_cache_linked(self, **mocks):
+        # Arrange
+        out_files = "o1.nc".split()
+        cdo_version = "x.x.x"
+        hash_code = "xxxxxxxx"
+        iargv, argv = self._arrange(out_files, cdo_version, hash_code, mocks)
+
+        # Act
+        with patch.object(
+            self.obj,
+            "_generate_cache_file_paths",
+            return_value={o: o for o in out_files},
+        ):
+            self.obj(argv)
+
+        # Assert
+        self.mock_cdo.get_output_files.assert_called_once_with(argv)
+        self.mock_cdo.version.assert_called_once_with()
+        mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
+        mocks["_is_symlink_to"].assert_has_calls([call(o, o) for o in out_files])
+        self.mock_cdo.run.assert_not_called()
+        mocks["_mv_and_link_back"].assert_not_called()
+
+    @patch.multiple(
+        "xcdo",
+        _generate_hash=DEFAULT,
+        _mv_and_link_back=DEFAULT,
+    )
+    def test_single_output(self, **mocks):
+        # Arrange
+        out_file = ["out.nc"]
+        cdo_version = "x.x.x"
+        hash_code = "xxxxxxxx"
+        iargv, argv = self._arrange(out_file, cdo_version, hash_code, mocks)
+
+        # Act
+        with patch.object(
+            self.obj,
+            "_generate_cache_file_paths",
+            return_value={out_file[0]: out_file[0]},
+        ):
+            self.obj(argv)
+
+        # Assert
+        self._assert(argv, out_file, iargv, cdo_version, mocks)
+
+    @patch.multiple(
+        "xcdo",
+        _generate_hash=DEFAULT,
+        _mv_and_link_back=DEFAULT,
+    )
+    def test_multiple_output(self, **mocks):
+        # Arrange
+        out_files = "o1.nc o2.nc o3.nc".split()
+        cdo_version = "x.x.x"
+        hash_code = "xxxxxxxx"
+        iargv, argv = self._arrange(out_files, cdo_version, hash_code, mocks)
+
+        # Act
+        with patch.object(
+            self.obj,
+            "_generate_cache_file_paths",
+            return_value={o: o for o in out_files},
+        ):
+            self.obj(argv)
+
+        # Assert
+        self._assert(argv, out_files, iargv, cdo_version, mocks)
+
+        #    self.hash_code = "abcdef123456"
+        #    self.output_files = [
+        #        "/home/user/projects/file1.txt",
+        #        "/home/user/projects/file2.txt",
+        #    ]
+        #    # self.cachedir_name = self.xcdo._cachedir_name
+        #    self.helper_options_ = [
+        #        "--dryrun",
+        #        "-A",
+        #        "--help",
+        #        "-h",
+        #        "--apply",
+        #        "--argument_groups",
+        #    ]
+
+    # @patch.multiple(
+    #    "xcdo",
+    #     _generate_hash=DEFAULT,
+    #     _mv_and_link_back=DEFAULT,
+    # )
+    # def test_single_output(self, **mocks):
+    #     # Arrange
+    #     out_file = "out.nc"
+    #     iargv = "-some -operators ".split()
+    #     argv = iargv + [out_file]
+    #     cdo_version = "x.x.x"
+    #     hash_code = "xxxxxxxx"
+    #     self.mock_cdo.get_output_files.return_value = [out_file]
+    #     self.mock_cdo.version.return_value = cdo_version
+    #     mocks["_generate_hash"].return_value = hash_code
+
+    #     # Act
+    #     with patch.object(
+    #         self.obj,
+    #         "_generate_cache_file_paths",
+    #         return_value={out_file: out_file},
+    #     ):
+    #         self.obj(argv)
+
+    #     # Assert
+    #     self.mock_cdo.get_output_files.assert_called_once_with(argv)
+    #     self.mock_cdo.version.assert_called_once_with()
+    #     mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
+    #     self.mock_cdo.run.assert_called_once_with(argv)
+    #     mocks["_mv_and_link_back"].assert_called_once_with(out_file, out_file)
+
+    # @patch.multiple(
+    #     "xcdo",
+    #     _generate_hash=DEFAULT,
+    #     _mv_and_link_back=DEFAULT,
+    # )
+    # def test_multiple_output(self, **mocks):
+    #     # Arrange
+    #     hash_code = "xxxxxxxx"
+    #     out_files = "o1.nc o2.nc o3.nc".split()
+    #     iargv = "-some -operators ".split()
+    #     argv = iargv + out_files
+    #     cdo_version = "x.x.x"
+    #     self.mock_cdo.get_output_files.return_value = out_files
+    #     self.mock_cdo.version.return_value = cdo_version
+    #     mocks["_generate_hash"].return_value = hash_code
+
+    #     # Act
+    #     with patch.object(
+    #         self.obj,
+    #         "_generate_cache_file_paths",
+    #         return_value={o: o for o in out_files},
+    #     ):
+    #         self.obj(argv)
+
+    #     # Assert
+    #     self.mock_cdo.get_output_files.assert_called_once_with(argv)
+    #     self.mock_cdo.version.assert_called_once_with()
+    #     mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
+    #     self.mock_cdo.run.assert_called_once_with(argv)
+    #     excepted_calls = []
+    #     for o in out_files:
+    #         excepted_calls.append(call(o, o))
+    #     mocks["_mv_and_link_back"].assert_has_calls(excepted_calls)
 
     # def test__get_input_files(self):
     #     with (

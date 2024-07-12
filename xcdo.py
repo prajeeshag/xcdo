@@ -169,11 +169,11 @@ class XCdo:
         cdo_version = self._cdo.version()
         first_output_index = argv.index(output_files[0])
         hash_code = _generate_hash([*argv[:first_output_index], cdo_version])
+        cache_files = self._generate_cache_file_paths(hash_code, output_files)
+        if all([_is_symlink_to(f, c) for f, c in cache_files.items()]):
+            return
         self._cdo.run(argv)
-        for f, c in self._generate_cache_file_paths(
-            hash_code,
-            output_files,
-        ).items():
+        for f, c in cache_files.items():
             _mv_and_link_back(f, c)
 
         # self._futil.files_exist(output_files)
