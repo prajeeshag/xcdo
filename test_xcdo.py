@@ -1,348 +1,210 @@
-import unittest
-from unittest.mock import MagicMock, call, patch, DEFAULT
-import tempfile
+from xcdo import XCdo, ICdoHandler, _Utils
+import pytest
 
 
-from xcdo import XCdo, ICdoHandler
-import xcdo
+@pytest.fixture
+def cdo_mock(mocker):
+    return mocker.MagicMock(spec=ICdoHandler)
 
 
-class TestXCdoCallSuccess(unittest.TestCase):
-    def setUp(self) -> None:
-        self.mock_cdo = MagicMock(spec=ICdoHandler)
-        self.obj = XCdo(self.mock_cdo)
-        return super().setUp()
+@pytest.fixture
+def utils_mock(mocker):
+    return mocker.MagicMock(spec=_Utils)
 
-    def test_with_empty_argv(self):
+
+@pytest.fixture
+def xcdo(cdo_mock):
+    return XCdo(cdo_mock)
+
+
+def test_empty_argv(mocker, cdo_mock, xcdo):
+    # Act
+    xcdo([])
+
+    # Assert
+    assert cdo_mock.mock_calls == [mocker.call.run([])]
+
+
+def test_no_output(mocker, cdo_mock, xcdo):
+    # Arrange
+    argv = "-some -arguments -without -output".split()
+    cdo_mock.get_output_files.return_value = []
+
+    # Act
+    xcdo(argv)
+
+    # Assert
+    assert cdo_mock.mock_calls == [
+        mocker.call.get_output_files(argv),
+        mocker.call.run(argv),
+    ]
+
+
+class TestSingleOutput:
+    out_file = "o1.nc"
+    input_files = "i1.nc i2.nc i3.nc".split()
+    cache_file = "xxxxxxxxxxx1"
+    cdo_version = "x.x.x"
+    hash_code = "xxxxxxxx"
+    iargv = "-some -operators ".split()
+
+    def test_cache_does_not_exist(self, mocker, cdo_mock, utils_mock, xcdo):
         # Arrange
-
-        # Act
-        self.obj([])
-
-        # Assert
-        self.mock_cdo.run.assert_called_once_with([])
-        self.assertEqual(
-            self.mock_cdo.method_calls, [call.run([])], "Should only call run"
+        argv = self.iargv + [self.out_file]
+        cdo_mock.get_output_files.return_value = [self.out_file]
+        cdo_mock.version.return_value = self.cdo_version
+        utils_mock.generate_hash.return_value = self.hash_code
+        utils_mock.file_exists.return_value = False
+        mocker.patch("xcdo._Utils", return_value=utils_mock)
+        mocker.patch.object(
+            xcdo,
+            "_generate_cache_file_paths",
+            return_value={self.out_file: self.cache_file},
         )
 
-    def test_no_output(self, **mocks):
-        # Arrange
-        argv = "-some -arguments -without -output".split()
-        self.mock_cdo.get_output_files.return_value = []
-
         # Act
-        self.obj(argv)
+        xcdo(argv)
 
         # Assert
-        self.mock_cdo.get_output_files.assert_called_once_with(argv)
-        self.mock_cdo.run.assert_called_once_with(argv)
-        self.assertEqual(
-            self.mock_cdo.method_calls,
-            [call.get_output_files(argv), call.run(argv)],
+        cdo_calls = []
+        utils_calls = []
+
+        cdo_calls.append(mocker.call.get_output_files(argv))
+        cdo_calls.append(mocker.call.version())
+        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
+        utils_calls.append(mocker.call.file_exists(self.cache_file))
+        cdo_calls.append(mocker.call.run(argv))
+        utils_calls.append(mocker.call.move(self.out_file, self.cache_file))
+        utils_calls.append(mocker.call.symlink_to(self.out_file, self.cache_file))
+
+        assert cdo_mock.mock_calls == cdo_calls
+        assert utils_mock.mock_calls == utils_calls
+
+    def test_cache_exist_but_input_files_younger(
+        self, mocker, cdo_mock, utils_mock, xcdo
+    ):
+        # Arrange
+        argv = self.iargv + [self.out_file]
+        cdo_mock.get_output_files.return_value = [self.out_file]
+        cdo_mock.version.return_value = self.cdo_version
+        utils_mock.generate_hash.return_value = self.hash_code
+        utils_mock.file_exists.return_value = True
+        cdo_mock.get_input_files.return_value = self.input_files
+        utils_mock.are_older_than.return_value = False
+        utils_mock.is_symlink_to.return_value = False
+
+        mocker.patch("xcdo._Utils", return_value=utils_mock)
+        mocker.patch.object(
+            xcdo,
+            "_generate_cache_file_paths",
+            return_value={self.out_file: self.cache_file},
         )
 
-    def _arrange(self, out_files, cdo_version, hash_code, mocks):
-        iargv = "-some -operators ".split()
-        argv = iargv + out_files
-        self.mock_cdo.get_output_files.return_value = out_files
-        self.mock_cdo.version.return_value = cdo_version
-        mocks["_generate_hash"].return_value = hash_code
-        return iargv, argv
-
-    def _assert(self, argv, out_files, iargv, cdo_version, mocks):
-        self.mock_cdo.get_output_files.assert_called_once_with(argv)
-        self.mock_cdo.version.assert_called_once_with()
-        mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
-        self.mock_cdo.run.assert_called_once_with(argv)
-        expected_calls = [call(o, o) for o in out_files]
-        mocks["_mv_and_link_back"].assert_has_calls(expected_calls)
-
-    @patch.multiple(
-        "xcdo",
-        _generate_hash=DEFAULT,
-        _is_symlink_to=DEFAULT,
-        _mv_and_link_back=DEFAULT,
-    )
-    def test_single_output_cache_linked(self, **mocks):
-        # Arrange
-        out_files = "o1.nc".split()
-        cdo_version = "x.x.x"
-        hash_code = "xxxxxxxx"
-        iargv, argv = self._arrange(out_files, cdo_version, hash_code, mocks)
-
         # Act
-        with patch.object(
-            self.obj,
-            "_generate_cache_file_paths",
-            return_value={o: o for o in out_files},
-        ):
-            self.obj(argv)
+        xcdo(argv)
 
         # Assert
-        self.mock_cdo.get_output_files.assert_called_once_with(argv)
-        self.mock_cdo.version.assert_called_once_with()
-        mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
-        mocks["_is_symlink_to"].assert_has_calls([call(o, o) for o in out_files])
-        self.mock_cdo.run.assert_not_called()
-        mocks["_mv_and_link_back"].assert_not_called()
+        cdo_calls = []
+        utils_calls = []
 
-    @patch.multiple(
-        "xcdo",
-        _generate_hash=DEFAULT,
-        _is_symlink_to=DEFAULT,
-        _mv_and_link_back=DEFAULT,
-    )
-    def test_single_output_cache_linked(self, **mocks):
+        cdo_calls.append(mocker.call.get_output_files(argv))
+        cdo_calls.append(mocker.call.version())
+        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
+        utils_calls.append(mocker.call.file_exists(self.cache_file))
+        cdo_calls.append(
+            mocker.call.get_input_files(argv, exclude_files=[self.out_file])
+        )
+        utils_calls.append(
+            mocker.call.are_older_than(self.input_files, [self.out_file])
+        )
+        cdo_calls.append(mocker.call.run(argv))
+        utils_calls.append(mocker.call.move(self.out_file, self.cache_file))
+        utils_calls.append(mocker.call.symlink_to(self.out_file, self.cache_file))
+
+        assert cdo_mock.mock_calls == cdo_calls
+        assert utils_mock.mock_calls == utils_calls
+
+    def test_cache_exist_and_input_files_older_and_cache_linked(
+        self, mocker, cdo_mock, utils_mock, xcdo
+    ):
         # Arrange
-        out_files = "o1.nc".split()
-        cdo_version = "x.x.x"
-        hash_code = "xxxxxxxx"
-        iargv, argv = self._arrange(out_files, cdo_version, hash_code, mocks)
+        argv = self.iargv + [self.out_file]
+        cdo_mock.get_output_files.return_value = [self.out_file]
+        cdo_mock.version.return_value = self.cdo_version
+        utils_mock.generate_hash.return_value = self.hash_code
+        utils_mock.file_exists.return_value = True
+        cdo_mock.get_input_files.return_value = self.input_files
+        utils_mock.are_older_than.return_value = True
+        utils_mock.is_symlink_to.return_value = True
+
+        mocker.patch("xcdo._Utils", return_value=utils_mock)
+        mocker.patch.object(
+            xcdo,
+            "_generate_cache_file_paths",
+            return_value={self.out_file: self.cache_file},
+        )
 
         # Act
-        with patch.object(
-            self.obj,
-            "_generate_cache_file_paths",
-            return_value={o: o for o in out_files},
-        ):
-            self.obj(argv)
+        xcdo(argv)
 
         # Assert
-        self.mock_cdo.get_output_files.assert_called_once_with(argv)
-        self.mock_cdo.version.assert_called_once_with()
-        mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
-        mocks["_is_symlink_to"].assert_has_calls([call(o, o) for o in out_files])
-        self.mock_cdo.run.assert_not_called()
-        mocks["_mv_and_link_back"].assert_not_called()
+        cdo_calls = []
+        utils_calls = []
 
-    @patch.multiple(
-        "xcdo",
-        _generate_hash=DEFAULT,
-        _mv_and_link_back=DEFAULT,
-    )
-    def test_single_output(self, **mocks):
+        cdo_calls.append(mocker.call.get_output_files(argv))
+        cdo_calls.append(mocker.call.version())
+        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
+        utils_calls.append(mocker.call.file_exists(self.cache_file))
+        cdo_calls.append(
+            mocker.call.get_input_files(argv, exclude_files=[self.out_file])
+        )
+        utils_calls.append(
+            mocker.call.are_older_than(self.input_files, [self.out_file])
+        )
+        utils_calls.append(mocker.call.is_symlink_to(self.out_file, self.cache_file))
+
+        assert cdo_mock.mock_calls == cdo_calls
+        assert utils_mock.mock_calls == utils_calls
+
+    def test_cache_exist_and_input_files_older_and_cache_not_linked(
+        self, mocker, cdo_mock, utils_mock, xcdo
+    ):
         # Arrange
-        out_file = ["out.nc"]
-        cdo_version = "x.x.x"
-        hash_code = "xxxxxxxx"
-        iargv, argv = self._arrange(out_file, cdo_version, hash_code, mocks)
+        argv = self.iargv + [self.out_file]
+        cdo_mock.get_output_files.return_value = [self.out_file]
+        cdo_mock.version.return_value = self.cdo_version
+        utils_mock.generate_hash.return_value = self.hash_code
+        utils_mock.file_exists.return_value = True
+        cdo_mock.get_input_files.return_value = self.input_files
+        utils_mock.are_older_than.return_value = True
+        utils_mock.is_symlink_to.return_value = False
+
+        mocker.patch("xcdo._Utils", return_value=utils_mock)
+        mocker.patch.object(
+            xcdo,
+            "_generate_cache_file_paths",
+            return_value={self.out_file: self.cache_file},
+        )
 
         # Act
-        with patch.object(
-            self.obj,
-            "_generate_cache_file_paths",
-            return_value={out_file[0]: out_file[0]},
-        ):
-            self.obj(argv)
+        xcdo(argv)
 
         # Assert
-        self._assert(argv, out_file, iargv, cdo_version, mocks)
+        cdo_calls = []
+        utils_calls = []
 
-    @patch.multiple(
-        "xcdo",
-        _generate_hash=DEFAULT,
-        _mv_and_link_back=DEFAULT,
-    )
-    def test_multiple_output(self, **mocks):
-        # Arrange
-        out_files = "o1.nc o2.nc o3.nc".split()
-        cdo_version = "x.x.x"
-        hash_code = "xxxxxxxx"
-        iargv, argv = self._arrange(out_files, cdo_version, hash_code, mocks)
+        cdo_calls.append(mocker.call.get_output_files(argv))
+        cdo_calls.append(mocker.call.version())
+        utils_calls.append(mocker.call.generate_hash([*self.iargv, self.cdo_version]))
+        utils_calls.append(mocker.call.file_exists(self.cache_file))
+        cdo_calls.append(
+            mocker.call.get_input_files(argv, exclude_files=[self.out_file])
+        )
+        utils_calls.append(
+            mocker.call.are_older_than(self.input_files, [self.out_file])
+        )
+        utils_calls.append(mocker.call.is_symlink_to(self.out_file, self.cache_file))
+        utils_calls.append(mocker.call.symlink_to(self.out_file, self.cache_file))
 
-        # Act
-        with patch.object(
-            self.obj,
-            "_generate_cache_file_paths",
-            return_value={o: o for o in out_files},
-        ):
-            self.obj(argv)
-
-        # Assert
-        self._assert(argv, out_files, iargv, cdo_version, mocks)
-
-        #    self.hash_code = "abcdef123456"
-        #    self.output_files = [
-        #        "/home/user/projects/file1.txt",
-        #        "/home/user/projects/file2.txt",
-        #    ]
-        #    # self.cachedir_name = self.xcdo._cachedir_name
-        #    self.helper_options_ = [
-        #        "--dryrun",
-        #        "-A",
-        #        "--help",
-        #        "-h",
-        #        "--apply",
-        #        "--argument_groups",
-        #    ]
-
-    # @patch.multiple(
-    #    "xcdo",
-    #     _generate_hash=DEFAULT,
-    #     _mv_and_link_back=DEFAULT,
-    # )
-    # def test_single_output(self, **mocks):
-    #     # Arrange
-    #     out_file = "out.nc"
-    #     iargv = "-some -operators ".split()
-    #     argv = iargv + [out_file]
-    #     cdo_version = "x.x.x"
-    #     hash_code = "xxxxxxxx"
-    #     self.mock_cdo.get_output_files.return_value = [out_file]
-    #     self.mock_cdo.version.return_value = cdo_version
-    #     mocks["_generate_hash"].return_value = hash_code
-
-    #     # Act
-    #     with patch.object(
-    #         self.obj,
-    #         "_generate_cache_file_paths",
-    #         return_value={out_file: out_file},
-    #     ):
-    #         self.obj(argv)
-
-    #     # Assert
-    #     self.mock_cdo.get_output_files.assert_called_once_with(argv)
-    #     self.mock_cdo.version.assert_called_once_with()
-    #     mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
-    #     self.mock_cdo.run.assert_called_once_with(argv)
-    #     mocks["_mv_and_link_back"].assert_called_once_with(out_file, out_file)
-
-    # @patch.multiple(
-    #     "xcdo",
-    #     _generate_hash=DEFAULT,
-    #     _mv_and_link_back=DEFAULT,
-    # )
-    # def test_multiple_output(self, **mocks):
-    #     # Arrange
-    #     hash_code = "xxxxxxxx"
-    #     out_files = "o1.nc o2.nc o3.nc".split()
-    #     iargv = "-some -operators ".split()
-    #     argv = iargv + out_files
-    #     cdo_version = "x.x.x"
-    #     self.mock_cdo.get_output_files.return_value = out_files
-    #     self.mock_cdo.version.return_value = cdo_version
-    #     mocks["_generate_hash"].return_value = hash_code
-
-    #     # Act
-    #     with patch.object(
-    #         self.obj,
-    #         "_generate_cache_file_paths",
-    #         return_value={o: o for o in out_files},
-    #     ):
-    #         self.obj(argv)
-
-    #     # Assert
-    #     self.mock_cdo.get_output_files.assert_called_once_with(argv)
-    #     self.mock_cdo.version.assert_called_once_with()
-    #     mocks["_generate_hash"].assert_called_once_with([*iargv, cdo_version])
-    #     self.mock_cdo.run.assert_called_once_with(argv)
-    #     excepted_calls = []
-    #     for o in out_files:
-    #         excepted_calls.append(call(o, o))
-    #     mocks["_mv_and_link_back"].assert_has_calls(excepted_calls)
-
-    # def test__get_input_files(self):
-    #     with (
-    #         tempfile.NamedTemporaryFile() as file1,
-    #         tempfile.NamedTemporaryFile() as file2,
-    #     ):
-    #         argc = f"-sub [-timmean {file1.name} ] -remapbil,{file1.name} {file2.name}"
-    #         argsv = argc.split()
-    #         self.assertEqual(
-    #             self.xcdo._get_input_files(argsv),
-    #             {file1.name, file2.name},
-    #         )
-    #     self.assertEqual(
-    #         self.xcdo._get_input_files(argsv),
-    #         set(),
-    #     )
-
-    # def test__get_output_files(self):
-    #     argsv = "-f nc -subc,9.0 -timmean i1 o1".split()
-    #     self.assertEqual(
-    #         self.xcdo._get_output_files(argsv),
-    #         (argsv[-1],),
-    #         "Should work for operators with one output",
-    #     )
-
-    #     argsv = "-f nc -trend i1 o1 o2".split()
-    #     self.assertEqual(
-    #         self.xcdo._get_output_files(argsv),
-    #         (argsv[-2], argsv[-1]),
-    #         "Should work for operators with 2 outputs",
-    #     )
-
-    #     self.assertEqual(
-    #         self.xcdo._get_output_files(argsv),
-    #         (tuple(argsv[-2:])),
-    #         "Should return in same order",
-    #     )
-
-    #     argsv = "-f nc -output -timmean i1".split()
-    #     self.assertEqual(
-    #         self.xcdo._get_output_files(argsv),
-    #         (),
-    #         "Should work for operators with no outputs",
-    #     )
-
-    #     argsv = "-f nc output -timmean i1".split()
-    #     self.assertEqual(
-    #         self.xcdo._get_output_files(argsv),
-    #         (),
-    #         "Should work for non-dashed-no-output-operators",
-    #     )
-
-    #     for opt in [
-    #         "--dryrun",
-    #         "-A",
-    #         "--help",
-    #         "-h",
-    #         "--apply",
-    #         "--argument_groups",
-    #     ]:
-    #         argsv = f"{opt} -f nc -output -timmean i1".split()
-    #         self.assertEqual(
-    #             self.xcdo._get_output_files(argsv),
-    #             (),
-    #             f"Should return empty if input contains '{opt}'",
-    #         )
-
-    # def test__generate_hash(self):
-    #     argsv1 = "-subc,9.0 -remapbil,grid.nc input.nc output.nc".split()
-    #     argsv2 = "-subc,9.0 -remapbil ,grid.nc input .nc output.nc".split()
-    #     self.assertEqual(
-    #         self.xcdo._generate_hash(argsv1),
-    #         self.xcdo._generate_hash(argsv1),
-    #         "Hashes should be consistent for the same input",
-    #     )
-    #     self.assertNotEqual(
-    #         self.xcdo._generate_hash(argsv1),
-    #         self.xcdo._generate_hash(argsv2),
-    #         "Hashes should be different for different input",
-    #     )
-
-    # def test_generate_cache_file_paths(self):
-    #     expected = {
-    #         "/home/user/projects/file1.txt": f"/home/user/projects/{self.cachedir_name}/0_abcdef123456",
-    #         "/home/user/projects/file2.txt": f"/home/user/projects/{self.cachedir_name}/1_abcdef123456",
-    #     }
-
-    #     result = self.xcdo._generate_cache_file_paths(self.hash_code, self.output_files)
-    #     self.assertEqual(result, expected, "Should work for multiple files")
-
-    #     expected = {}
-    #     result = self.xcdo._generate_cache_file_paths(self.hash_code, [])
-    #     self.assertEqual(result, expected, "Should work for no files")
-
-    #     single_output_file = ["/home/user/projects/file1.txt"]
-    #     expected = {
-    #         "/home/user/projects/file1.txt": f"/home/user/projects/{self.cachedir_name}/0_abcdef123456"
-    #     }
-    #     result = self.xcdo._generate_cache_file_paths(
-    #         self.hash_code, single_output_file
-    #     )
-    #     self.assertEqual(result, expected, "Should work for single file")
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert cdo_mock.mock_calls == cdo_calls
+        assert utils_mock.mock_calls == utils_calls

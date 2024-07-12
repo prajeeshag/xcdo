@@ -7,11 +7,6 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 
 
-def _is_symlink_to(file_path: str, target_path: str) -> bool:
-    file_path = Path(file_path)
-    return file_path.is_symlink() and file_path.readlink() == Path(target_path)
-
-
 class CdoWarning(Warning):
     pass
 
@@ -124,22 +119,28 @@ class ICdoHandler(ABC):
         """
 
 
-def _files_exist(paths: t.List[str]) -> bool:
-    for f in paths:
-        if not Path(f).is_file():
-            return False
-    return True
+class _Utils:
+    def is_symlink_to(self, file_path: str, target_path: str) -> bool:
+        file_path = Path(file_path)
+        return file_path.is_symlink() and file_path.readlink() == Path(target_path)
 
+    def symlink_to(self, file_path: str, target_path: str) -> None:
+        pass
 
-def _generate_hash(strings: t.List[str]) -> str:
-    combined_string = " ".join(strings)
-    hash_object = hashlib.sha256(combined_string.encode())
-    hash_code = hash_object.hexdigest()
-    return hash_code
+    def generate_hash(self, strings: t.List[str]) -> str:
+        combined_string = " ".join(strings)
+        hash_object = hashlib.sha256(combined_string.encode())
+        hash_code = hash_object.hexdigest()
+        return hash_code
 
+    def move(self, file1: str, file2: str) -> None:
+        pass
 
-def _mv_and_link_back(file1: str, file2: str):
-    pass
+    def file_exists(self, file: str) -> bool:
+        pass
+
+    def are_older_than(self, files1: t.List[str], files2: t.List[str]) -> bool:
+        pass
 
 
 class XCdo:
@@ -153,6 +154,9 @@ class XCdo:
         self._cdo: ICdoHandler = cdo
 
     def __call__(self, argv: t.List[str]) -> int:
+        return self._run(argv=argv)
+
+    def _run(self, argv: t.List[str]) -> int:
         """
         1. Should produce the same terminal outputs as calling a bare cdo
         2. Should return the same return code of cdo
@@ -161,6 +165,8 @@ class XCdo:
             self._cdo.run(argv)
             return
 
+        utils = _Utils()
+
         output_files = self._cdo.get_output_files(argv)
         if not output_files:
             self._cdo.run(argv)
@@ -168,58 +174,25 @@ class XCdo:
 
         cdo_version = self._cdo.version()
         first_output_index = argv.index(output_files[0])
-        hash_code = _generate_hash([*argv[:first_output_index], cdo_version])
+        hash_code = utils.generate_hash([*argv[:first_output_index], cdo_version])
         cache_files = self._generate_cache_file_paths(hash_code, output_files)
-        if all([_is_symlink_to(f, c) for f, c in cache_files.items()]):
+
+        if not utils.file_exists(cache_files[output_files[0]]):
+            self._cdo.run(argv)
+            utils.move(output_files[0], cache_files[output_files[0]])
+            utils.symlink_to(output_files[0], cache_files[output_files[0]])
             return
-        self._cdo.run(argv)
-        for f, c in cache_files.items():
-            _mv_and_link_back(f, c)
 
-        # self._futil.files_exist(output_files)
-        # self._cdo.get_input_files(argv, exclude_files=output_files)
-        # try:
-        #    output_files = self._cdo.get_output_files(argv)
-        #    processed_call = self._cdo.get_processed_call(argv)
-        #    first_operator = processed_call[2]
-        #    input_files = self._get_input_files((first_operator,))
+        input_files = self._cdo.get_input_files(argv, exclude_files=output_files)
 
-        #    if first_operator in argv:
-        #        first_operator_index = argv.index(first_operator)
-        #    else:
-        #        first_operator_index = argv.index("-" + first_operator)
+        if not utils.are_older_than(input_files, output_files):
+            self._cdo.run(argv)
+            utils.move(output_files[0], cache_files[output_files[0]])
+            utils.symlink_to(output_files[0], cache_files[output_files[0]])
+            return
 
-        #    argv_without_output = argv[:first_output_index]
-
-        #    input_files.update(
-        #        self._get_input_files(argv_without_output[first_operator_index + 1 :])
-        #    )
-        #    hash_code = self._generate_hash([*argv_without_output, cdo_version])
-
-        #    all_cache_files_exists = all(
-        #        [Path(c).is_file() for f, c in cache_files.items()]
-        #    )
-
-        #    is_all_cache_linked = all(
-        #        [_is_symlink_to(f, c) for f, c in cache_files.items()]
-        #    )
-
-        #    if is_all_cache_linked:
-        #        return 0
-
-        #    if all_cache_files_exists:
-        #        try:
-        #            for f, c in cache_files.items():
-        #                Path(f).symlink_to(c)
-        #            return 0
-        #        except OSError:
-        #            raise (CdoError(f"Could not symlink {f} -> {c}"))
-
-        #    output_files_exists = all([Path(f) for f in output_files])
-
-        # except CdoError as e:
-        #    print(f"Warning: {str(e)}")
-        #    return self._cdo.run(argv)
+        if not utils.is_symlink_to(output_files[0], cache_files[output_files[0]]):
+            utils.symlink_to(output_files[0], cache_files[output_files[0]])
 
     def _generate_cache_file_paths(
         self,
