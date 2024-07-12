@@ -40,7 +40,7 @@ def test_no_output(mocker, cdo_mock, xcdo):
     ]
 
 
-class TestSingleOutput:
+class SingleOutput:
     out_file = "o1.nc"
     input_files = "i1.nc i2.nc i3.nc".split()
     cache_file = "xxxxxxxxxxx1"
@@ -48,8 +48,7 @@ class TestSingleOutput:
     hash_code = "xxxxxxxx"
     iargv = "-some -operators ".split()
 
-    def test_cache_does_not_exist(self, mocker, cdo_mock, utils_mock, xcdo):
-        # Arrange
+    def _arrange(self, mocker, cdo_mock, utils_mock, xcdo):
         argv = self.iargv + [self.out_file]
         cdo_mock.get_output_files.return_value = [self.out_file]
         cdo_mock.version.return_value = self.cdo_version
@@ -62,10 +61,9 @@ class TestSingleOutput:
             return_value={self.out_file: self.cache_file},
         )
 
-        # Act
-        xcdo(argv)
+        return argv
 
-        # Assert
+    def _assert(self, mocker, cdo_mock, utils_mock, argv):
         cdo_calls = []
         utils_calls = []
 
@@ -79,6 +77,18 @@ class TestSingleOutput:
 
         assert cdo_mock.mock_calls == cdo_calls
         assert utils_mock.mock_calls == utils_calls
+
+
+class TestSingleOutput_Cache(SingleOutput):
+    def test_does_not_exist(self, mocker, cdo_mock, utils_mock, xcdo):
+        # Arrange
+        argv = self._arrange(mocker, cdo_mock, utils_mock, xcdo)
+
+        # Act
+        xcdo(argv)
+
+        # Assert
+        self._assert(mocker, cdo_mock, utils_mock, argv)
 
     def test_cache_exist_but_input_files_younger(
         self, mocker, cdo_mock, utils_mock, xcdo
