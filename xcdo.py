@@ -165,10 +165,10 @@ class _Utils:
         hash_code = hash_object.hexdigest()
         return hash_code
 
-    def move(self, file1: str, file2: str) -> None:
+    def move(self, file: str, target: str) -> None:
         """
-        Symlink file_path to target_path
-            - Silently returns if file_path is already a symlink to target_path
+            - Delete the file if file is symlink to target
+            - Else, move the file to target
         Args:
             - file_path
             - target_path
@@ -181,6 +181,9 @@ class _Utils:
             self.move(*p)
 
     def all_files_exist(self, files: t.Sequence[str]) -> bool:
+        """
+        Return False if any of the files in `files` does not exist, else return True
+        """
         return False
 
     def is_any_file_new(
@@ -188,6 +191,9 @@ class _Utils:
         files1: t.Sequence[str],
         files2: t.Sequence[str],
     ) -> bool:
+        """
+        Return True if any of the files in `files1` is newer than any of the files of `files2`, else return False
+        """
         return False
 
 
