@@ -1,24 +1,31 @@
-from xcdo import XCdo, ICdoHandler, _Utils
+from xcdo import XCdo, ICdoHandler, _Utils  # type: ignore
 import pytest
+from pytest_mock import MockerFixture, MockType
+import typing as t
 
 
 @pytest.fixture
-def cdo_mock(mocker):
+def cdo_mock(mocker: MockerFixture):
     return mocker.MagicMock(spec=ICdoHandler)
 
 
 @pytest.fixture
-def utils_mock(mocker):
+def utils_mock(mocker: MockerFixture):
     return mocker.MagicMock(spec=_Utils)
 
 
 @pytest.fixture
-def xcdo(cdo_mock):
+def xcdo(cdo_mock: MockType):
     return XCdo(cdo_mock)
 
 
 @pytest.fixture
-def setup_env(mocker, cdo_mock, utils_mock, xcdo):
+def setup_env(
+    mocker: MockerFixture,
+    cdo_mock: MockType,
+    utils_mock: MockType,
+    xcdo: XCdo,
+) -> object:
 
     class Setup:
         def __init__(self):
@@ -27,12 +34,12 @@ def setup_env(mocker, cdo_mock, utils_mock, xcdo):
 
         def prepare_mocks(
             self,
-            input_files=[],
-            output_files=[],
-            commands=[],
-            all_cache_files_exist=False,
-            input_younger=False,
-            cache_linked=False,
+            input_files: t.List[str] = [],
+            output_files: t.List[str] = [],
+            commands: t.List[str] = [],
+            all_cache_files_exist: bool = False,
+            input_younger: bool = False,
+            cache_linked: bool = False,
         ):
             self.input_files = input_files
             self.output_files = output_files
@@ -72,15 +79,15 @@ def setup_env(mocker, cdo_mock, utils_mock, xcdo):
             )
 
             self.move_output_to_cache_call = mocker.call.move_all(
-                self.output_files, self.cache_files
+                list(zip(self.output_files, self.cache_files))
             )
 
             self.link_output_to_cache_call = mocker.call.link_all(
-                self.output_files, self.cache_files
+                list(zip(self.output_files, self.cache_files))
             )
 
             self.are_output_cache_linked_call = mocker.call.are_all_linked_to(
-                self.output_files, self.cache_files
+                list(zip(self.output_files, self.cache_files))
             )
 
             self.are_inputs_new_call = mocker.call.is_any_file_new(
@@ -90,7 +97,11 @@ def setup_env(mocker, cdo_mock, utils_mock, xcdo):
     return Setup()
 
 
-def test_empty_argv(mocker, cdo_mock, xcdo):
+def test_empty_argv(
+    mocker: MockerFixture,
+    cdo_mock: MockType,
+    xcdo: XCdo,
+):
     # Act
     xcdo([])
 
@@ -98,7 +109,11 @@ def test_empty_argv(mocker, cdo_mock, xcdo):
     assert cdo_mock.mock_calls == [mocker.call.run([])]
 
 
-def test_no_output(mocker, cdo_mock, xcdo):
+def test_no_output(
+    mocker: MockerFixture,
+    cdo_mock: MockType,
+    xcdo: XCdo,
+):
     # Arrange
     argv = "-some -arguments -without -output".split()
     cdo_mock.get_output_files.return_value = []
@@ -118,7 +133,13 @@ class TestSingleOutputSingleInput:
     output_files = ["out.nc"]
     commands = "-some -commands".split()
 
-    def test_cache_does_not_exist(self, mocker, setup_env, cdo_mock, utils_mock, xcdo):
+    def test_cache_does_not_exist(
+        self,
+        setup_env: MockType,
+        cdo_mock: MockType,
+        utils_mock: MockType,
+        xcdo: XCdo,
+    ):
         # Arrange
         env = setup_env
         env.prepare_mocks(
@@ -131,8 +152,8 @@ class TestSingleOutputSingleInput:
         xcdo(env.argv)
 
         # Assert
-        cdo_calls = []
-        utils_calls = []
+        cdo_calls: t.List[t.Any] = []
+        utils_calls: t.List[t.Any] = []
         cdo_calls.append(env.cdo_get_output_files_call)
         cdo_calls.append(env.cdo_version_call)
         utils_calls.append(env.generate_hash_call)
@@ -145,7 +166,11 @@ class TestSingleOutputSingleInput:
         assert utils_mock.mock_calls == utils_calls
 
     def test_cache_exist_but_input_file_younger(
-        self, mocker, setup_env, cdo_mock, utils_mock, xcdo
+        self,
+        setup_env: MockType,
+        cdo_mock: MockType,
+        utils_mock: MockType,
+        xcdo: XCdo,
     ):
         # Arrange
         env = setup_env
@@ -161,8 +186,8 @@ class TestSingleOutputSingleInput:
         xcdo(env.argv)
 
         # Assert
-        cdo_calls = []
-        utils_calls = []
+        cdo_calls: t.List[t.Any] = []
+        utils_calls: t.List[t.Any] = []
         cdo_calls.append(env.cdo_get_output_files_call)
         cdo_calls.append(env.cdo_version_call)
         utils_calls.append(env.generate_hash_call)
@@ -177,7 +202,11 @@ class TestSingleOutputSingleInput:
         assert utils_mock.mock_calls == utils_calls
 
     def test_cache_exist_and_input_file_older_and_cache_linked(
-        self, mocker, setup_env, cdo_mock, utils_mock, xcdo
+        self,
+        setup_env: MockType,
+        cdo_mock: MockType,
+        utils_mock: MockType,
+        xcdo: XCdo,
     ):
         # Arrange
         env = setup_env
@@ -194,8 +223,8 @@ class TestSingleOutputSingleInput:
         xcdo(env.argv)
 
         # Assert
-        cdo_calls = []
-        utils_calls = []
+        cdo_calls: t.List[t.Any] = []
+        utils_calls: t.List[t.Any] = []
         cdo_calls.append(env.cdo_get_output_files_call)
         cdo_calls.append(env.cdo_version_call)
         utils_calls.append(env.generate_hash_call)
@@ -208,7 +237,11 @@ class TestSingleOutputSingleInput:
         assert utils_mock.mock_calls == utils_calls
 
     def test_cache_exist_and_input_files_older_and_cache_not_linked(
-        self, mocker, setup_env, cdo_mock, utils_mock, xcdo
+        self,
+        setup_env: MockType,
+        cdo_mock: MockType,
+        utils_mock: MockType,
+        xcdo: XCdo,
     ):
         # Arrange
         env = setup_env
@@ -225,8 +258,8 @@ class TestSingleOutputSingleInput:
         xcdo(env.argv)
 
         # Assert
-        cdo_calls = []
-        utils_calls = []
+        cdo_calls: t.List[t.Any] = []
+        utils_calls: t.Any = []
         cdo_calls.append(env.cdo_get_output_files_call)
         cdo_calls.append(env.cdo_version_call)
         utils_calls.append(env.generate_hash_call)
@@ -251,3 +284,7 @@ class TestMulitpleOutputSingleInput(TestSingleOutputSingleInput):
 class TestMulitpleOutputMultipleInput(TestSingleOutputSingleInput):
     input_files = ["in1.nc", "in2.nc", "in3.nc"]
     output_files = ["o1.nc", "o2.nc", "o3.nc"]
+
+
+class TestSingleOutputNoInput(TestSingleOutputMultipleInput):
+    input_files = []

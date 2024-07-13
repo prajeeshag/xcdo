@@ -2,7 +2,6 @@ import hashlib
 import typing as t
 import subprocess
 import re
-import sys
 from pathlib import Path
 from abc import ABC, abstractmethod
 
@@ -30,7 +29,7 @@ class CdoError(Exception):
 
 
 class Cdo:
-    def __init__(self, cdo="cdo") -> None:
+    def __init__(self, cdo: str = "cdo") -> None:
         self.CDO = cdo
         pass
 
@@ -74,7 +73,7 @@ class ICdoHandler(ABC):
     """
 
     @abstractmethod
-    def get_output_files(argv: t.List[str]) -> t.List[str]:
+    def get_output_files(self, argv: t.Sequence[str]) -> t.List[str]:
         """
         : param argv: List of command line arguments to cdo
         : returns: list of input files from the argument list
@@ -83,7 +82,8 @@ class ICdoHandler(ABC):
 
     @abstractmethod
     def get_input_files(
-        argv: t.List[str],
+        self,
+        argv: t.Sequence[str],
         exclude_files: t.List[str] = [],
     ) -> t.List[str]:
         """
@@ -102,7 +102,7 @@ class ICdoHandler(ABC):
         pass
 
     @abstractmethod
-    def run(self, argv: t.List[str]) -> None:
+    def run(self, argv: t.Sequence[str]) -> None:
         """
         Run cdo with arguments
         : param argv: List of command line arguments to cdo
@@ -114,40 +114,81 @@ class ICdoHandler(ABC):
         """
         Run cdo with arguments
         : param argv: List of command line arguments to cdo
-        : returns: The capture output as string
+        : returns: The captured output as string
         : raises CdoError: If the execution fails
         """
 
 
 class _Utils:
-    def _is_symlink_to(self, file_path: str, target_path: str) -> bool:
-        file_path = Path(file_path)
-        return file_path.is_symlink() and file_path.readlink() == Path(target_path)
+    def is_linked_to(self, file: str, target: str) -> bool:
+        """
+        Checks if file_path is a symlink to target_path
 
-    def are_all_linked_to(
-        self,
-        file_paths: t.List[str],
-        target_paths: t.List[str],
-    ) -> bool:
+        Args:
+            - file
+            - target
+
+        Returns:
+            - False: if target_path or file_path does not exist
+            - True: if file_path is a symlink to target_path
+        """
+        file_path: Path = Path(file)
+        target_path: Path = Path(target)
+        return file_path.is_symlink() and file_path.readlink() == target_path
+
+    def are_all_linked_to(self, paths: t.Iterable[t.Tuple[str, str]]) -> bool:
+        for p in paths:
+            if not self.is_linked_to(*p):
+                return False
+        return True
+
+    def link(self, file_path: str, target_path: str) -> None:
+        """
+        Symlink file_path to target_path
+            - Silently returns if file_path is already a symlink to target_path
+        Args:
+            - file_path
+            - target_path
+        """
         pass
 
-    def link_all(self, file_path: t.List[str], target_path: t.List[str]) -> None:
-        pass
+    def link_all(self, paths: t.Sequence[t.Tuple[str, str]]) -> None:
+        for p in paths:
+            self.link(*p)
 
-    def generate_hash(self, strings: t.List[str]) -> str:
+    def generate_hash(self, strings: t.Sequence[str]) -> str:
+        """
+        Generate hash from a list of string
+        """
         combined_string = " ".join(strings)
         hash_object = hashlib.sha256(combined_string.encode())
         hash_code = hash_object.hexdigest()
         return hash_code
 
-    def move_all(self, files1: t.List[str], files2: t.List[str]) -> None:
+    def move(self, file1: str, file2: str) -> None:
+        """
+        Symlink file_path to target_path
+            - Silently returns if file_path is already a symlink to target_path
+        Args:
+            - file_path
+            - target_path
+        Returns: None
+        """
         pass
 
-    def all_files_exist(self, files: t.List[str]) -> bool:
-        pass
+    def move_all(self, paths: t.Sequence[t.Tuple[str, str]]) -> None:
+        for p in paths:
+            self.move(*p)
 
-    def is_any_file_new(self, files1: t.List[str], files2: t.List[str]) -> bool:
-        pass
+    def all_files_exist(self, files: t.Sequence[str]) -> bool:
+        return False
+
+    def is_any_file_new(
+        self,
+        files1: t.Sequence[str],
+        files2: t.Sequence[str],
+    ) -> bool:
+        return False
 
 
 class XCdo:
@@ -160,10 +201,10 @@ class XCdo:
     def __init__(self, cdo: ICdoHandler) -> None:
         self._cdo: ICdoHandler = cdo
 
-    def __call__(self, argv: t.List[str]) -> int:
+    def __call__(self, argv: t.Sequence[str]):
         return self._run(argv=argv)
 
-    def _run(self, argv: t.List[str]) -> int:
+    def _run(self, argv: t.Sequence[str]):
         """
         1. Should produce the same terminal outputs as calling a bare cdo
         2. Should return the same return code of cdo
@@ -172,9 +213,9 @@ class XCdo:
             self._cdo.run(argv)
             return
 
-        utils = _Utils()
+        utils: _Utils = _Utils()
 
-        output_files = self._cdo.get_output_files(argv)
+        output_files: t.List[str] = self._cdo.get_output_files(argv)
         if not output_files:
             self._cdo.run(argv)
             return
@@ -192,19 +233,19 @@ class XCdo:
         if not utils.is_any_file_new(input_files, cache_files):
             return self._run_and_cache(argv, output_files, cache_files)
 
-        if not utils.are_all_linked_to(output_files, cache_files):
-            utils.link_all(output_files, cache_files)
+        if not utils.are_all_linked_to(list(zip(output_files, cache_files))):
+            utils.link_all(list(zip(output_files, cache_files)))
 
     def _run_and_cache(
         self,
-        argv,
-        output_files,
-        cache_files,
+        argv: t.Sequence[str],
+        output_files: t.List[str],
+        cache_files: t.List[str],
     ) -> None:
         utils = _Utils()
         self._cdo.run(argv)
-        utils.move_all(output_files, cache_files)
-        utils.link_all(output_files, cache_files)
+        utils.move_all(list(zip(output_files, cache_files)))
+        utils.link_all(list(zip(output_files, cache_files)))
 
     def _generate_cache_file_paths(
         self,
@@ -219,13 +260,3 @@ class XCdo:
             res.append(str(cpath))
 
         return res
-
-
-def main():
-    print(sys.argv[0])
-    cdo = Cdo()
-    sys.exit(cdo(sys.argv[1:]))
-
-
-if __name__ == "__main__":
-    main()
