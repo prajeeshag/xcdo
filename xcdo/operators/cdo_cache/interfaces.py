@@ -31,7 +31,7 @@ class ICdoHandler(ABC):
         """
 
     @abstractmethod
-    def version() -> str:
+    def version(self) -> str:
         """
         Returns: cdo version string
 
