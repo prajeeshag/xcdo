@@ -1,4 +1,6 @@
-from xcdo.cdo_cache import CdoCache, ICdoHandler, Utils
+from xcdo.operators.cdo_cache.interfaces import ICdoHandler, ICacheHandler
+from xcdo.operators.cdo_cache import CdoCache
+
 import pytest
 from pytest_mock import MockerFixture, MockType
 import typing as t
@@ -10,20 +12,20 @@ def cdo_mock(mocker: MockerFixture):
 
 
 @pytest.fixture
-def utils_mock(mocker: MockerFixture):
-    return mocker.MagicMock(spec=Utils)
+def cache_mock(mocker: MockerFixture):
+    return mocker.MagicMock(spec=ICacheHandler)
 
 
 @pytest.fixture
-def cdo_cache(cdo_mock: MockType, utils_mock: MockType):
-    return CdoCache(cdo_mock, utils_mock)
+def cdo_cache(cdo_mock: MockType, cache_mock: MockType):
+    return CdoCache(cdo_mock, cache_mock)
 
 
 @pytest.fixture
 def env(
     mocker: MockerFixture,
     cdo_mock: MockType,
-    utils_mock: MockType,
+    cache_mock: MockType,
     cdo_cache: CdoCache,
 ) -> t.Any:
 
@@ -32,7 +34,7 @@ def env(
             self.cdo_version = "x.x.x"
             self.hash_code = "xxxxxxxx"
             self.cdo_cache = cdo_cache
-            self.utils_mock = utils_mock
+            self.utils_mock = cache_mock
             self.cdo_mock = cdo_mock
             self.input_files = ["some", "input", "files"]
 
