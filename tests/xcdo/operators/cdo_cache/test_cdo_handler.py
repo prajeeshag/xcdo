@@ -1,5 +1,4 @@
 import pytest
-import typing as t
 
 from xcdo.operators.cdo_cache.exceptions import CdoError
 from xcdo.operators.cdo_cache.interfaces import ICdoHandler
