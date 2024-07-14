@@ -1,15 +1,12 @@
+from dataclasses import dataclass
 import typing as t
 from .interfaces import ICacheHandler, ICdoHandler
 
 
+@dataclass
 class CdoCache:
-    """
-    A simple cdo wrapper class to enable cacheing.
-    """
-
-    def __init__(self, cdo: ICdoHandler, cache: ICacheHandler) -> None:
-        self._cdo: ICdoHandler = cdo
-        self._cache: ICacheHandler = cache
+    _cdo: ICdoHandler
+    _cache: ICacheHandler
 
     def execute(
         self, commands: t.Tuple[str, ...], noutputs: int = 1
@@ -19,7 +16,8 @@ class CdoCache:
         if noutputs < 1:
             raise ValueError("noutputs should be a positive integer")
 
-        hash_code = self._cache.generate_hash(commands)
+        cdo_version = self._cdo.version()
+        hash_code = self._cache.generate_hash((*commands, cdo_version))
 
         cache_files = self._cache.generate_cache_paths(noutputs, hash_code)
 

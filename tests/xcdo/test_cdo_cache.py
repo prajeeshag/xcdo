@@ -34,7 +34,7 @@ def env(
             self.cdo_version = "x.x.x"
             self.hash_code = "xxxxxxxx"
             self.cdo_cache = cdo_cache
-            self.utils_mock = cache_mock
+            self.cache_mock = cache_mock
             self.cdo_mock = cdo_mock
             self.input_files = ["some", "input", "files"]
 
@@ -52,12 +52,13 @@ def env(
             self.cache_files = [
                 f"{self.hash_code}{n}" for n in range(noutputs if noutputs else 1)
             ]
-            self.utils_mock.generate_hash.return_value = self.hash_code
-            self.utils_mock.generate_cache_paths.return_value = self.cache_files
-            self.utils_mock.cache_exists.return_value = cache_exist
+            self.cache_mock.generate_hash.return_value = self.hash_code
+            self.cache_mock.generate_cache_paths.return_value = self.cache_files
+            self.cache_mock.cache_exists.return_value = cache_exist
             self.cdo_mock.get_input_files.return_value = input_files
-            self.utils_mock.is_cache_valid.return_value = cache_valid
-            self.utils_calls = []
+            self.cdo_mock.version.return_value = self.cdo_version
+            self.cache_mock.is_cache_valid.return_value = cache_valid
+            self.cache_calls = []
             self.cdo_calls = []
 
         def act(self):
@@ -93,7 +94,7 @@ class MixinTestReturn:
         self.arrange(env)  # type: ignore
         result = env.act()
         self.add_assert_calls(env, mocker)  # type: ignore
-        assert env.utils_mock.method_calls == env.utils_calls
+        assert env.cache_mock.method_calls == env.cache_calls
         assert env.cdo_mock.method_calls == env.cdo_calls
         assert result == env.cache_files
 
@@ -102,11 +103,12 @@ class CaseValidInputs:
     commands = ["-somecommand"]
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
-        env.utils_calls += [
-            mocker.call.generate_hash(self.commands),
+        env.cache_calls += [
+            mocker.call.generate_hash((*self.commands, env.cdo_version)),
             mocker.call.generate_cache_paths(1, env.hash_code),
             mocker.call.cache_exists(env.cache_files),
         ]
+        env.cdo_calls += [mocker.call.version()]
 
 
 class TestCacheDoesNotExists(CaseValidInputs, MixinTestReturn):
@@ -135,7 +137,7 @@ class CaseWithInputFiles(CaseCacheExists):
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
-        env.utils_calls.append(
+        env.cache_calls.append(
             mocker.call.is_cache_valid(env.cache_files, self.input_files)
         )
 
