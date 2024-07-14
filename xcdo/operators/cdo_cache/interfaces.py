@@ -43,31 +43,14 @@ class ICdoHandler(ABC):
 class ICacheHandler(ABC):
 
     @abstractmethod
-    def ensure_directories_exist(self, paths: t.Tuple[str, ...]) -> None:
-        """
-        Ensures that the directory trees for the given paths are created.
-
-        Args:
-            paths (Tuple[str, ...]): A tuple of paths for which to create directory trees.
-
-        Raises CacheError:
-            - If any error occurs during directory creation, re-raises it with additional context.
-        """
-        pass
-
-    @abstractmethod
     def generate_cache_paths(self, noutputs: int, hash_code: str) -> t.Tuple[str, ...]:
         """
         Generates valid cache paths
 
-        Ensures that if the generated path contains directories, the directory tree is created.
+        Ensures that the directory trees for the paths are created.
 
         Returns:
             - path strings: Tuple[str,...]
-
-        Raises CacheError:
-            - if noutputs is not a positive integer
-            - if any other Exception occurs, re-raise it with additional context
         """
         pass
 
@@ -80,7 +63,6 @@ class ICacheHandler(ABC):
         Raises:
             CacheError:
                 - if cache_files is empty
-                - if any other Exception occurs, re-raise it with additional context
         """
 
     @abstractmethod
@@ -97,7 +79,6 @@ class ICacheHandler(ABC):
         Raises:
             CacheError:
                 - if cache_files empty
-                - if any other Exception occurs, re-raise it with additional context
         """
 
     @abstractmethod
@@ -108,5 +89,4 @@ class ICacheHandler(ABC):
             - hash string: str
         Raises CacheError:
             - if commands empty
-            - if any other Exception occurs, re-raise it with additional context
         """

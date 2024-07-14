@@ -90,8 +90,16 @@ def test_noutputs_not_positive_integer(env: t.Any, noutputs: int):
 
 
 class MixinTestReturn:
-    def test_return(self, env: t.Any, mocker: MockerFixture):
-        self.arrange(env)  # type: ignore
+    @pytest.mark.parametrize("commands", [("-somecommand",), ("-some", "-command")])
+    @pytest.mark.parametrize("noutputs", [None, 1, 2, 3])
+    def test_return(
+        self,
+        env: t.Any,
+        mocker: MockerFixture,
+        noutputs: int,
+        commands: t.Tuple[str, ...],
+    ):
+        self.arrange(env, noutputs=noutputs, commands=commands)  # type: ignore
         result = env.act()
         self.add_assert_calls(env, mocker)  # type: ignore
         assert env.cache_mock.method_calls == env.cache_calls
@@ -100,68 +108,106 @@ class MixinTestReturn:
 
 
 class CaseValidInputs:
-    commands = ["-somecommand"]
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         env.cache_calls += [
-            mocker.call.generate_hash((*self.commands, env.cdo_version)),
-            mocker.call.generate_cache_paths(1, env.hash_code),
+            mocker.call.generate_hash(
+                (*env.commands, env.cdo_version, *env.input_files)
+            ),
+            mocker.call.generate_cache_paths(
+                env.noutputs if env.noutputs is not None else 1, env.hash_code
+            ),
             mocker.call.cache_exists(env.cache_files),
         ]
-        env.cdo_calls += [mocker.call.version()]
+        env.cdo_calls += [
+            mocker.call.version(),
+            mocker.call.get_input_files(env.commands),
+        ]
 
 
 class TestCacheDoesNotExists(CaseValidInputs, MixinTestReturn):
-    def arrange(self, env: t.Any):
-        env.arrange(commands=["-somecommand"], cache_exist=False)
+    def arrange(self, env: t.Any, **kwargs: t.Dict[str, t.Any]):
+        env.arrange(cache_exist=False, **kwargs)
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
-        env.cdo_calls.append(mocker.call.run((*self.commands, *env.cache_files)))
+        env.cdo_calls.append(mocker.call.run((*env.commands, *env.cache_files)))
 
 
 class CaseCacheExists(CaseValidInputs):
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
-        env.cdo_calls.append(mocker.call.get_input_files(self.commands))
 
 
 class TestNoInputFiles(CaseCacheExists, MixinTestReturn):
 
-    def arrange(self, env: t.Any):
-        env.arrange(commands=self.commands, cache_exist=True)
+    def arrange(self, env: t.Any, **kwargs: t.Any):
+        env.arrange(cache_exist=True, **kwargs)
 
 
 class CaseWithInputFiles(CaseCacheExists):
-    input_files = ["some", "input", "files"]
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
         env.cache_calls.append(
-            mocker.call.is_cache_valid(env.cache_files, self.input_files)
+            mocker.call.is_cache_valid(
+                env.cache_files,
+                self.input_files,  # type: ignore
+            )
         )
 
 
-class TestCacheValid(CaseWithInputFiles, MixinTestReturn):
+class TestCacheValidSingleInputFile(CaseWithInputFiles, MixinTestReturn):
+    input_files = ["someinputfiles"]
 
-    def arrange(self, env: t.Any):
+    def arrange(self, env: t.Any, **kwargs: t.Any):
         env.arrange(
-            commands=self.commands,
             cache_exist=True,
             input_files=self.input_files,
             cache_valid=True,
+            **kwargs,
         )
 
 
-class TestCacheNotValid(CaseWithInputFiles, MixinTestReturn):
-    def arrange(self, env: t.Any):
+class TestCacheNotValidSingleInputFile(CaseWithInputFiles, MixinTestReturn):
+    input_files = ["someinputfiles"]
+
+    def arrange(self, env: t.Any, **kwargs: t.Any):
         env.arrange(
-            commands=self.commands,
             cache_exist=True,
             input_files=self.input_files,
             cache_valid=False,
+            **kwargs,
         )
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
-        env.cdo_calls.append(mocker.call.run((*self.commands, *env.cache_files)))
+        env.cdo_calls.append(mocker.call.run((*env.commands, *env.cache_files)))
+
+
+class TestCacheValidMultipleInputFile(CaseWithInputFiles, MixinTestReturn):
+    input_files = ["some", "input", "files"]
+
+    def arrange(self, env: t.Any, **kwargs: t.Any):
+        env.arrange(
+            cache_exist=True,
+            input_files=self.input_files,
+            cache_valid=True,
+            **kwargs,
+        )
+
+
+class TestCacheNotValidMultpleInputFile(CaseWithInputFiles, MixinTestReturn):
+    input_files = ["some", "input", "files"]
+
+    def arrange(self, env: t.Any, **kwargs: t.Any):
+        env.arrange(
+            cache_exist=True,
+            input_files=self.input_files,
+            cache_valid=False,
+            **kwargs,
+        )
+
+    def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
+        super().add_assert_calls(env, mocker)
+        env.cdo_calls.append(mocker.call.run((*env.commands, *env.cache_files)))

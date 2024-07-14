@@ -17,7 +17,8 @@ class CdoCache:
             raise ValueError("noutputs should be a positive integer")
 
         cdo_version = self._cdo.version()
-        hash_code = self._cache.generate_hash((*commands, cdo_version))
+        input_files = self._cdo.get_input_files(commands)
+        hash_code = self._cache.generate_hash((*commands, cdo_version, *input_files))
 
         cache_files = self._cache.generate_cache_paths(noutputs, hash_code)
 
@@ -25,7 +26,6 @@ class CdoCache:
             self._cdo.run((*commands, *cache_files))
             return cache_files
 
-        input_files = self._cdo.get_input_files(commands)
         if input_files and not self._cache.is_cache_valid(cache_files, input_files):
             self._cdo.run((*commands, *cache_files))
         return cache_files

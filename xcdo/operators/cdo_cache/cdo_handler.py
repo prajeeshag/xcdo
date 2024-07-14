@@ -1,29 +1,29 @@
-from dataclasses import dataclass
-import subprocess
-from .interfaces import ICdoHandler
-import typing as t
-from .exceptions import CdoError
+# from dataclasses import dataclass
+# import subprocess
+# from .interfaces import ICdoHandler
+# import typing as t
+# from .exceptions import CdoError
 
 
-@dataclass
-class CdoHandler(ICdoHandler):
-    _cdo: str
+# @dataclass
+# class CdoHandler(ICdoHandler):
+#     _cdo: str
 
-    def captured_run(self, argv: t.List[str]) -> t.Tuple[str, str]:
-        ret = subprocess.run(
-            [self._cdo, *argv],
-            capture_output=True,
-        )
-        if ret.returncode != 0:
-            raise CdoError(
-                stdout=ret.stdout.decode(),
-                stderr=ret.stderr.decode(),
-                returncode=ret.returncode,
-            )
-        return (
-            ret.stdout.decode(),
-            ret.stderr.decode(),
-        )
+#     def captured_run(self, argv: t.List[str]) -> t.Tuple[str, str]:
+#         ret = subprocess.run(
+#             [self._cdo, *argv],
+#             capture_output=True,
+#         )
+#         if ret.returncode != 0:
+#             raise CdoError(
+#                 stdout=ret.stdout.decode(),
+#                 stderr=ret.stderr.decode(),
+#                 returncode=ret.returncode,
+#             )
+#         return (
+#             ret.stdout.decode(),
+#             ret.stderr.decode(),
+#         )
 
 
 #
