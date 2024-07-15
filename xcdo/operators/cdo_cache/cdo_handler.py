@@ -38,7 +38,7 @@ class CdoHandler(ICdoHandler):
         return input_files
 
     def version(self) -> str:
-        output, _ = self.captured_run(("-V",))
+        output, _ = self._captured_run(("-V",))
         pattern = r"Climate Data Operators version (\d+\.\d+\.\d+)"
 
         match = re.search(pattern, output)
@@ -47,7 +47,7 @@ class CdoHandler(ICdoHandler):
         else:
             raise CdoError("Could not find cdo version")
 
-    def captured_run(self, commands: commandsType) -> t.Tuple[str, str]:
+    def _captured_run(self, commands: commandsType) -> t.Tuple[str, str]:
         ret = subprocess.run(
             [self._cdo, *commands],
             capture_output=True,
@@ -62,41 +62,3 @@ class CdoHandler(ICdoHandler):
             ret.stdout.decode(),
             ret.stderr.decode(),
         )
-
-
-#
-#    def run(self, cdo: str, argv: t.Tuple[str, ...]) -> None:
-#        """
-#        Run cdo with arguments
-#        : param argv: List of command line arguments to cdo
-#        : raises CdoError: If the execution fails
-#        """
-#
-#    @abstractmethod
-#    def get_output_files(self, argv: t.Tuple[str, ...]) -> t.List[str]:
-#        """
-#        : param argv: List of command line arguments to cdo
-#        : returns: list of input files from the argument list
-#        """
-#        pass
-#
-#    @abstractmethod
-#    def get_input_files(
-#        self,
-#        argv: t.Tuple[str, ...],
-#        exclude_files: t.List[str] = [],
-#    ) -> t.Tuple[str, ...]:
-#        """
-#        : param argv: List of command line arguments to cdo
-#        : param exclude_files: List of files to be excluded
-#        : returns: list of input files from the argument list
-#        """
-#        pass
-#
-#    @abstractmethod
-#    def version() -> str:
-#        """
-#        : returns: cdo version string
-#        : raises CdoError: If can't find the version string
-#        """
-#        pass
