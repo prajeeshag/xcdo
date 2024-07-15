@@ -1,7 +1,9 @@
+import os
 import re
 import subprocess
 from .interfaces import ICdoHandler
 import typing as t
+from .types import commandsType
 from .exceptions import CdoError
 
 
@@ -13,15 +15,24 @@ class CdoHandler(ICdoHandler):
         except FileNotFoundError:
             raise CdoError("Command 'cdo' not found")
 
-    def run(self, argv: t.Tuple[str, ...]) -> None:
+    def run(self, commands: commandsType) -> None:
         ret = subprocess.run(
-            [self._cdo, *argv],
+            [self._cdo, *commands],
         ).returncode
         if ret != 0:
             raise CdoError(returncode=ret)
 
-    def get_input_files(self, commands: t.Tuple[str, ...]) -> t.Tuple[str]:
-        raise NotImplementedError
+    def get_input_files(self, commands: commandsType) -> t.Tuple[str, ...]:
+        input_files: t.List[str] = []
+        for command in commands:
+            if command.startswith("-"):
+
+                input_files.extend(self.get_input_files(command.split(",")[1:]))
+                continue
+            if os.path.isfile(command):
+                input_files.append(command)
+
+        return tuple(input_files)
 
     def version(self) -> str:
         output, _ = self.captured_run(("-V",))
@@ -33,9 +44,9 @@ class CdoHandler(ICdoHandler):
         else:
             raise CdoError("Could not find cdo version")
 
-    def captured_run(self, argv: t.Tuple[str, ...]) -> t.Tuple[str, str]:
+    def captured_run(self, commands: commandsType) -> t.Tuple[str, str]:
         ret = subprocess.run(
-            [self._cdo, *argv],
+            [self._cdo, *commands],
             capture_output=True,
         )
         if ret.returncode != 0:

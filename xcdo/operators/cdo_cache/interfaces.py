@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import typing as t
+from .types import commandsType
 
 
 class ICdoHandler(ABC):
@@ -8,7 +9,7 @@ class ICdoHandler(ABC):
     """
 
     @abstractmethod
-    def run(self, argv: t.Tuple[str, ...]) -> None:
+    def run(self, commands: commandsType) -> None:
         """
         Run cdo with arguments
 
@@ -19,7 +20,7 @@ class ICdoHandler(ABC):
     @abstractmethod
     def get_input_files(
         self,
-        commands: t.Tuple[str, ...],
+        commands: commandsType,
     ) -> t.Tuple[str, ...]:
         """
         Get the input files from cdo commands
