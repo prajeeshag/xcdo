@@ -1,5 +1,4 @@
 from pathlib import Path
 
 
-print(Path("random.nc").is_symlink())
-print(Path("random.nc").readlink())
+print(tuple(sorted([str(f) for f in [Path("sdjfjakd"), Path("ljsd12134")]])))

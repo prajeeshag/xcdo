@@ -1,5 +1,8 @@
+import random
+import string
 import pytest
 import typing as t
+from pathlib import Path
 
 from xcdo.operators.cdo_cache.exceptions import CdoError
 from xcdo.operators.cdo_cache.interfaces import ICdoHandler
@@ -11,13 +14,30 @@ def cdo_handler():
     return CdoHandler()
 
 
+def randomword(
+    n: int = 10,
+    prefix: str = "",
+    suffix: str = "",
+):
+    letters = string.ascii_lowercase
+    return prefix + "".join(random.choice(letters) for _ in range(n)) + suffix
+
+
+def randomcmd():
+    return randomword(prefix="-")
+
+
+def randomfile(tmp_path: Path):
+    return tmp_path / randomword()
+
+
 def test_correct_instance(cdo_handler: ICdoHandler):
     assert isinstance(cdo_handler, ICdoHandler)
 
 
 class TestRun:
     def test_invalid_commands(self, cdo_handler: ICdoHandler):
-        commands = ("-some", "-command")
+        commands = (randomcmd(), randomcmd())
         with pytest.raises(CdoError):
             cdo_handler.run(commands)
 
@@ -25,7 +45,7 @@ class TestRun:
         commands = ("--help",)
         cdo_handler.run(commands)
 
-        temp_file = tmp_path / "out.nc"
+        temp_file = randomfile(tmp_path)
         commands = f"-const,0,r90x45 {temp_file}".split()
         cdo_handler.run(commands)
 
@@ -38,7 +58,7 @@ class TestInputFiles:
 
     class TestValidCommand:
         def test_no_file_like(self, cdo_handler: ICdoHandler):
-            command = tuple("-somecommand -anothercommand".split())
+            command = [randomcmd(), randomcmd()]
 
             result = cdo_handler.get_input_files(command)
 
@@ -48,10 +68,16 @@ class TestInputFiles:
             def arrange(self, tmp_path: t.Any) -> t.Any:
                 class Env:
                     def __init__(self) -> None:
-                        self.input_file = tmp_path / "input.nc"
-                        self.command = (
-                            f"-somecommand,1 -anothercommand {self.input_file}".split()
+                        self.input_files = tuple(
+                            [
+                                randomfile(tmp_path),
+                            ]
                         )
+                        self.command = [
+                            f"{randomcmd()},{randomword(n=4)}",
+                            randomcmd(),
+                            str(self.input_files[0]),
+                        ]
 
                 return Env()
 
@@ -66,18 +92,127 @@ class TestInputFiles:
 
             def test_file_exist(self, cdo_handler: ICdoHandler, tmp_path: t.Any):
                 env = self.arrange(tmp_path=tmp_path)
-                env.input_file.write_text("")
+                [f.write_text(" ") for f in env.input_files]
                 result = cdo_handler.get_input_files(env.command)
-                assert result == (str(env.input_file),)
+                expected = tuple(sorted([str(f) for f in env.input_files]))
+                assert result == expected, env.input_files
 
         class TestFileAsParameter(TestFileAsInput):
             def arrange(self, tmp_path: t.Any) -> t.Any:
                 class Env:
                     def __init__(self) -> None:
-                        self.input_file = tmp_path / "input.nc"
-                        self.command = (
-                            f"-somecommand,1 -anothercommand,{self.input_file}".split()
+                        self.input_files = tuple((randomfile(tmp_path),))
+                        self.command = [
+                            f"{randomcmd()},{randomword(n=4)}",
+                            f"{randomcmd()},{self.input_files[0]}",
+                        ]
+
+                return Env()
+
+        class TestFileAsKwargnt(TestFileAsInput):
+            def arrange(self, tmp_path: t.Any) -> t.Any:
+                class Env:
+                    def __init__(self) -> None:
+                        self.input_files = (randomfile(tmp_path),)
+                        fi = self.input_files
+                        self.command = [
+                            f"{randomcmd()},{randomword(n=4)}={fi[0]}",
+                        ]
+
+                return Env()
+
+        class TestFileAsParameterAndInput(TestFileAsInput):
+            def arrange(self, tmp_path: t.Any) -> t.Any:
+                class Env:
+                    def __init__(self) -> None:
+                        self.input_files = tuple(
+                            [randomfile(tmp_path) for _ in range(2)]
                         )
+                        fi = self.input_files
+                        self.command = [
+                            f"{randomcmd()},{fi[0]}",
+                            randomcmd(),
+                            str(fi[1]),
+                        ]
+
+                return Env()
+
+        class TestMultipleInputFile(TestFileAsInput):
+            def arrange(self, tmp_path: t.Any) -> t.Any:
+                class Env:
+                    def __init__(self) -> None:
+                        self.input_files = (
+                            randomfile(tmp_path),
+                            randomfile(tmp_path),
+                        )
+                        self.command = [
+                            randomcmd(),
+                            str(self.input_files[0]),
+                            randomcmd(),
+                            str(self.input_files[1]),
+                        ]
+
+                return Env()
+
+        class TestMultipleParameterFile(TestFileAsInput):
+            def arrange(self, tmp_path: t.Any) -> t.Any:
+                class Env:
+                    def __init__(self) -> None:
+                        self.input_files = (
+                            randomfile(tmp_path),
+                            randomfile(tmp_path),
+                        )
+                        fi = self.input_files
+                        self.command = [
+                            f"{randomcmd()},{fi[0]},{fi[1]}",
+                            randomcmd(),
+                        ]
+
+                return Env()
+
+        class TestMultipleKwargFile(TestFileAsInput):
+            def arrange(self, tmp_path: t.Any) -> t.Any:
+                class Env:
+                    def __init__(self) -> None:
+                        self.input_files = (
+                            randomfile(tmp_path),
+                            randomfile(tmp_path),
+                        )
+                        fi = self.input_files
+                        self.command = [
+                            f"{randomcmd()},{randomword(n=4)}={fi[0]},{randomword(n=4)}={fi[1]}",
+                            randomcmd(),
+                        ]
+
+                return Env()
+
+        class TestMultipleParameterAndInputFile(TestFileAsInput):
+            def arrange(self, tmp_path: t.Any) -> t.Any:
+                class Env:
+                    def __init__(self) -> None:
+                        self.input_files = tuple(randomfile(tmp_path) for _ in range(4))
+                        fi = self.input_files
+                        self.command = [
+                            f"{randomcmd()},{fi[0]},{fi[1]}",
+                            f"{fi[3]}",
+                            f"{randomcmd()}",
+                            f"{fi[2]}",
+                        ]
+
+                return Env()
+
+        class TestReturnUniqueFiles(TestFileAsInput):
+            def arrange(self, tmp_path: t.Any) -> t.Any:
+                class Env:
+                    def __init__(self) -> None:
+                        self.input_files = tuple(randomfile(tmp_path) for _ in range(2))
+                        fi = self.input_files
+                        self.command = [
+                            f"{randomcmd()},{fi[0]},{fi[1]}",
+                            f"{fi[0]}",
+                            f"{randomcmd()}",
+                            f"{fi[1]}",
+                        ]
 
                 return Env()
 

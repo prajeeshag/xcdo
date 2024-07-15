@@ -23,16 +23,19 @@ class CdoHandler(ICdoHandler):
             raise CdoError(returncode=ret)
 
     def get_input_files(self, commands: commandsType) -> t.Tuple[str, ...]:
+        input_files = self._get_input_files(commands)
+        return tuple(sorted(set(input_files)))
+
+    def _get_input_files(self, commands: commandsType) -> t.List[str]:
         input_files: t.List[str] = []
         for command in commands:
             if command.startswith("-"):
-
-                input_files.extend(self.get_input_files(command.split(",")[1:]))
-                continue
-            if os.path.isfile(command):
+                input_files.extend(self._get_input_files(command.split(",")[1:]))
+            elif "=" in command:
+                input_files.extend(self._get_input_files(command.split("=")[1:]))
+            elif os.path.isfile(command):
                 input_files.append(command)
-
-        return tuple(input_files)
+        return input_files
 
     def version(self) -> str:
         output, _ = self.captured_run(("-V",))

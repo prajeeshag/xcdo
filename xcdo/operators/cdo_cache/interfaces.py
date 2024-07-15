@@ -21,7 +21,7 @@ class ICdoHandler(ABC):
     def get_input_files(
         self,
         commands: commandsType,
-    ) -> t.Tuple[str, ...]:
+    ) -> commandsType:
         """
         Get the input files from cdo commands
         Returns:
