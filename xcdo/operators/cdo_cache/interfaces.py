@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import typing as t
-from .types import commandsType
+from .types import argvType
 
 
 class ICdoHandler(ABC):
@@ -9,7 +9,7 @@ class ICdoHandler(ABC):
     """
 
     @abstractmethod
-    def run(self, commands: commandsType) -> None:
+    def run(self, argv: argvType) -> None:
         """
         Run cdo with arguments
 
@@ -20,10 +20,12 @@ class ICdoHandler(ABC):
     @abstractmethod
     def get_input_files(
         self,
-        commands: commandsType,
-    ) -> commandsType:
+        argv: argvType,
+    ) -> t.Tuple[str, ...]:
         """
         Get the input files from cdo commands
+        Params:
+            argv: cdo commands
         Returns:
             - tuple of input files if input files found
             - empty tuple if not input files found
@@ -56,7 +58,7 @@ class ICacheHandler(ABC):
         pass
 
     @abstractmethod
-    def cache_exists(self, cache_files: t.Tuple[str, ...]) -> bool:
+    def cache_exists(self, cache_files: argvType) -> bool:
         """
         Returns:
             - True: if all cache_files exist
@@ -69,8 +71,8 @@ class ICacheHandler(ABC):
     @abstractmethod
     def is_cache_valid(
         self,
-        cache_files: t.Tuple[str, ...],
-        input_files: t.Tuple[str, ...],
+        cache_files: argvType,
+        input_files: argvType,
     ) -> bool:
         """
         Returns:
@@ -83,7 +85,7 @@ class ICacheHandler(ABC):
         """
 
     @abstractmethod
-    def generate_hash(self, commands: t.Tuple[str, ...]) -> str:
+    def generate_hash(self, argv: argvType) -> str:
         """
         Generate hash from a list of string
         Returns:

@@ -1,34 +1,16 @@
-import random
-import string
 import pytest
 import typing as t
-from pathlib import Path
 
 from xcdo.operators.cdo_cache.exceptions import CdoError
 from xcdo.operators.cdo_cache.interfaces import ICdoHandler
 from xcdo.operators.cdo_cache.cdo_handler import CdoHandler
 
+from ._utils import randomcmd, randomfile, randomword
+
 
 @pytest.fixture
 def cdo_handler():
     return CdoHandler()
-
-
-def randomword(
-    n: int = 10,
-    prefix: str = "",
-    suffix: str = "",
-):
-    letters = string.ascii_lowercase
-    return prefix + "".join(random.choice(letters) for _ in range(n)) + suffix
-
-
-def randomcmd():
-    return randomword(prefix="-")
-
-
-def randomfile(tmp_path: Path):
-    return tmp_path / randomword()
 
 
 def test_correct_instance(cdo_handler: ICdoHandler):

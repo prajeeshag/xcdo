@@ -3,7 +3,7 @@ import re
 import subprocess
 from .interfaces import ICdoHandler
 import typing as t
-from .types import commandsType
+from .types import argvType
 from .exceptions import CdoError
 
 
@@ -15,18 +15,18 @@ class CdoHandler(ICdoHandler):
         except FileNotFoundError:
             raise CdoError("Command 'cdo' not found")
 
-    def run(self, commands: commandsType) -> None:
+    def run(self, commands: argvType) -> None:
         ret = subprocess.run(
             [self._cdo, *commands],
         ).returncode
         if ret != 0:
             raise CdoError(returncode=ret)
 
-    def get_input_files(self, commands: commandsType) -> t.Tuple[str, ...]:
+    def get_input_files(self, commands: argvType) -> t.Tuple[str, ...]:
         input_files = self._get_input_files(commands)
         return tuple(sorted(set(input_files)))
 
-    def _get_input_files(self, commands: commandsType) -> t.List[str]:
+    def _get_input_files(self, commands: argvType) -> t.List[str]:
         input_files: t.List[str] = []
         for command in commands:
             if command.startswith("-"):
@@ -47,7 +47,7 @@ class CdoHandler(ICdoHandler):
         else:
             raise CdoError("Could not find cdo version")
 
-    def _captured_run(self, commands: commandsType) -> t.Tuple[str, str]:
+    def _captured_run(self, commands: argvType) -> t.Tuple[str, str]:
         ret = subprocess.run(
             [self._cdo, *commands],
             capture_output=True,

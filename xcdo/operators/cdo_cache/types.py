@@ -1,3 +1,3 @@
-from typing import Tuple, List
+from typing import Tuple, List, TypeAlias
 
-type commandsType = Tuple[str, ...] | List[str]
+argvType: TypeAlias = Tuple[str, ...] | List[str]
