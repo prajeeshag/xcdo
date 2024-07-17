@@ -1,10 +1,11 @@
 import os
 import re
 import subprocess
-from .interfaces import ICdoHandler
 import typing as t
-from .types import argvType
+
 from .exceptions import CdoError
+from .interfaces import ICdoHandler
+from .types import argvType
 
 
 class CdoHandler(ICdoHandler):
@@ -15,26 +16,26 @@ class CdoHandler(ICdoHandler):
         except FileNotFoundError:
             raise CdoError("Command 'cdo' not found")
 
-    def run(self, commands: argvType) -> None:
+    def run(self, argv: argvType) -> None:
         ret = subprocess.run(
-            [self._cdo, *commands],
+            [self._cdo, *argv],
         ).returncode
         if ret != 0:
             raise CdoError(returncode=ret)
 
-    def get_input_files(self, commands: argvType) -> t.Tuple[str, ...]:
-        input_files = self._get_input_files(commands)
+    def get_input_files(self, argv: argvType) -> t.Tuple[str, ...]:
+        input_files = self._get_input_files(argv)
         return tuple(sorted(set(input_files)))
 
-    def _get_input_files(self, commands: argvType) -> t.List[str]:
+    def _get_input_files(self, argv: argvType) -> t.List[str]:
         input_files: t.List[str] = []
-        for command in commands:
-            if command.startswith("-"):
-                input_files.extend(self._get_input_files(command.split(",")[1:]))
-            elif "=" in command:
-                input_files.extend(self._get_input_files(command.split("=")[1:]))
-            elif os.path.isfile(command):
-                input_files.append(command)
+        for arg in argv:
+            if arg.startswith("-"):
+                input_files.extend(self._get_input_files(arg.split(",")[1:]))
+            elif "=" in arg:
+                input_files.extend(self._get_input_files(arg.split("=")[1:]))
+            elif os.path.isfile(arg):
+                input_files.append(arg)
         return input_files
 
     def version(self) -> str:
