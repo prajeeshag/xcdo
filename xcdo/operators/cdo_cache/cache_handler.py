@@ -30,7 +30,11 @@ class CacheHandler(ICacheHandler):
 
     def is_cache_valid(self, cache_files: argvType, input_files: argvType) -> bool:
         if not cache_files:
-            raise CacheError("no cache files provided")
+            return False
+
+        for c in cache_files:
+            if not os.path.isfile(c):
+                return False
 
         if not input_files:
             return True

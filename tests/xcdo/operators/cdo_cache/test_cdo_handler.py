@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 import typing as t
 
@@ -73,9 +74,9 @@ class Test_get_input_files:
 
         def test_file_exist(self, cdo_handler: ICdoHandler, tmp_path: t.Any):
             env = self.arrange(tmp_path=tmp_path)
-            [f.write_text(" ") for f in env.input_files]
+            [Path(f).write_text(" ") for f in env.input_files]
             result = cdo_handler.get_input_files(env.command)
-            expected = tuple(sorted([str(f) for f in env.input_files]))
+            expected = tuple(sorted(env.input_files))
             assert result == expected, env.input_files
 
     class Test_file_as_parameter(Test_with_input_files):

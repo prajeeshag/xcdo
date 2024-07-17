@@ -16,5 +16,11 @@ def randomcmd():
     return randomword(prefix="-")
 
 
-def randomfile(tmp_path: Path) -> Path:
-    return tmp_path / randomword()
+def randomfile(tmp_path: Path) -> str:
+    return str(tmp_path / randomword())
+
+
+def create_randomfile(tmp_path: Path) -> str:
+    file_path = tmp_path / randomword()
+    file_path.write_text(" ")
+    return str(file_path)
