@@ -1,9 +1,10 @@
-from xcdo.operators.cdo_cache.interfaces import ICdoHandler, ICacheHandler
-from xcdo.operators.cdo_cache import CdoCache
+import typing as t
 
 import pytest
 from pytest_mock import MockerFixture, MockType
-import typing as t
+
+from xcdo.operators.cdo_cache import CdoCache
+from xcdo.operators.cdo_cache.interfaces import ICacheHandler, ICdoHandler
 
 
 @pytest.fixture
@@ -28,7 +29,6 @@ def env(
     cache_mock: MockType,
     cdo_cache: CdoCache,
 ) -> t.Any:
-
     class Setup:
         def __init__(self):
             self.cdo_version = "x.x.x"
@@ -40,14 +40,14 @@ def env(
 
         def arrange(
             self,
-            commands: t.Tuple[str, ...] = (),
-            noutputs: int | None = None,
+            argv: t.Tuple[str, ...] = (),
+            noutputs: int = 1,
             input_files: t.List[str] = [],
             cache_exist: bool = False,
             cache_valid: bool = False,
         ):
             self.input_files = input_files
-            self.commands = commands
+            self.argv = argv
             self.noutputs = noutputs
             self.cache_files = [
                 f"{self.hash_code}{n}" for n in range(noutputs if noutputs else 1)
@@ -62,10 +62,7 @@ def env(
             self.cdo_calls = []
 
         def act(self):
-            if self.noutputs is None:
-                return self.cdo_cache.execute(self.commands)
-
-            return self.cdo_cache.execute(self.commands, self.noutputs)
+            return self.cdo_cache.get_cache(self.argv, self.noutputs)
 
     return Setup()
 
@@ -81,7 +78,7 @@ def test_no_command(env: t.Any):
 
 @pytest.mark.parametrize("noutputs", [0, -1, -3])
 def test_noutputs_not_positive_integer(env: t.Any, noutputs: int):
-    env.arrange(commands=["-somecommand"], noutputs=noutputs)
+    env.arrange(argv=["-somecommand"], noutputs=noutputs)
 
     with pytest.raises(ValueError) as result:
         env.act()
@@ -90,16 +87,16 @@ def test_noutputs_not_positive_integer(env: t.Any, noutputs: int):
 
 
 class MixinTestReturn:
-    @pytest.mark.parametrize("commands", [("-somecommand",), ("-some", "-command")])
-    @pytest.mark.parametrize("noutputs", [None, 1, 2, 3])
+    @pytest.mark.parametrize("argv", [("-somecommand",), ("-some", "-command")])
+    @pytest.mark.parametrize("noutputs", [1, 2, 3])
     def test_return(
         self,
         env: t.Any,
         mocker: MockerFixture,
         noutputs: int,
-        commands: t.Tuple[str, ...],
+        argv: t.Tuple[str, ...],
     ):
-        self.arrange(env, noutputs=noutputs, commands=commands)  # type: ignore
+        self.arrange(env, noutputs=noutputs, argv=argv)  # type: ignore
         result = env.act()
         self.add_assert_calls(env, mocker)  # type: ignore
         assert env.cache_mock.method_calls == env.cache_calls
@@ -108,12 +105,9 @@ class MixinTestReturn:
 
 
 class CaseValidInputs:
-
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         env.cache_calls += [
-            mocker.call.generate_hash(
-                (*env.commands, env.cdo_version, *env.input_files)
-            ),
+            mocker.call.generate_hash((*env.argv, env.cdo_version, *env.input_files)),
             mocker.call.generate_cache_paths(
                 env.noutputs if env.noutputs is not None else 1, env.hash_code
             ),
@@ -121,7 +115,7 @@ class CaseValidInputs:
         ]
         env.cdo_calls += [
             mocker.call.version(),
-            mocker.call.get_input_files(env.commands),
+            mocker.call.get_input_files(env.argv),
         ]
 
 
@@ -131,7 +125,7 @@ class TestCacheDoesNotExists(CaseValidInputs, MixinTestReturn):
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
-        env.cdo_calls.append(mocker.call.run((*env.commands, *env.cache_files)))
+        env.cdo_calls.append(mocker.call.run((*env.argv, *env.cache_files)))
 
 
 class CaseCacheExists(CaseValidInputs):
@@ -140,13 +134,11 @@ class CaseCacheExists(CaseValidInputs):
 
 
 class TestNoInputFiles(CaseCacheExists, MixinTestReturn):
-
     def arrange(self, env: t.Any, **kwargs: t.Any):
         env.arrange(cache_exist=True, **kwargs)
 
 
 class CaseWithInputFiles(CaseCacheExists):
-
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
         env.cache_calls.append(
@@ -182,7 +174,7 @@ class TestCacheNotValidSingleInputFile(CaseWithInputFiles, MixinTestReturn):
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
-        env.cdo_calls.append(mocker.call.run((*env.commands, *env.cache_files)))
+        env.cdo_calls.append(mocker.call.run((*env.argv, *env.cache_files)))
 
 
 class TestCacheValidMultipleInputFile(CaseWithInputFiles, MixinTestReturn):
@@ -197,7 +189,7 @@ class TestCacheValidMultipleInputFile(CaseWithInputFiles, MixinTestReturn):
         )
 
 
-class TestCacheNotValidMultpleInputFile(CaseWithInputFiles, MixinTestReturn):
+class Test_invalid_cache_multiple_input_files(CaseWithInputFiles, MixinTestReturn):
     input_files = ["some", "input", "files"]
 
     def arrange(self, env: t.Any, **kwargs: t.Any):
@@ -210,4 +202,4 @@ class TestCacheNotValidMultpleInputFile(CaseWithInputFiles, MixinTestReturn):
 
     def add_assert_calls(self, env: t.Any, mocker: MockerFixture):
         super().add_assert_calls(env, mocker)
-        env.cdo_calls.append(mocker.call.run((*env.commands, *env.cache_files)))
+        env.cdo_calls.append(mocker.call.run((*env.argv, *env.cache_files)))
