@@ -14,7 +14,7 @@ class CdoCache:
         if not argv:
             raise ValueError("no commands provided")
         if n_outputs < 1:
-            raise ValueError("noutputs should be a positive integer")
+            raise ValueError("n_outputs should be a positive integer")
         cdo_version = self._cdo.version()
         input_files = self._cdo.get_input_files(argv)
         hash_code = self._cache.generate_hash((*argv, cdo_version, *input_files))

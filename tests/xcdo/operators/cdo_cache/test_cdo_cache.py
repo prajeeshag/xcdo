@@ -41,16 +41,16 @@ def env(
         def arrange(
             self,
             argv: t.Tuple[str, ...] = (),
-            noutputs: int = 1,
+            n_outputs: int = 1,
             input_files: t.List[str] = [],
             cache_exist: bool = False,
             cache_valid: bool = False,
         ):
             self.input_files = input_files
             self.argv = argv
-            self.noutputs = noutputs
+            self.n_outputs = n_outputs
             self.cache_files = [
-                f"{self.hash_code}{n}" for n in range(noutputs if noutputs else 1)
+                f"{self.hash_code}{n}" for n in range(n_outputs if n_outputs else 1)
             ]
             self.cache_mock.generate_hash.return_value = self.hash_code
             self.cache_mock.generate_cache_paths.return_value = self.cache_files
@@ -62,7 +62,7 @@ def env(
             self.cdo_calls = []
 
         def act(self):
-            return self.cdo_cache.get_cache(self.argv, self.noutputs)
+            return self.cdo_cache.get_cache(self.argv, self.n_outputs)
 
     return Setup()
 
@@ -76,27 +76,27 @@ def test_no_command(env: t.Any):
     assert str(result.value) == "no commands provided"
 
 
-@pytest.mark.parametrize("noutputs", [0, -1, -3])
-def test_noutputs_not_positive_integer(env: t.Any, noutputs: int):
-    env.arrange(argv=["-somecommand"], noutputs=noutputs)
+@pytest.mark.parametrize("n_outputs", [0, -1, -3])
+def test_n_outputs_not_positive_integer(env: t.Any, n_outputs: int):
+    env.arrange(argv=["-somecommand"], n_outputs=n_outputs)
 
     with pytest.raises(ValueError) as result:
         env.act()
 
-    assert str(result.value) == "noutputs should be a positive integer"
+    assert str(result.value) == "n_outputs should be a positive integer"
 
 
 class MixinTestReturn:
     @pytest.mark.parametrize("argv", [("-somecommand",), ("-some", "-command")])
-    @pytest.mark.parametrize("noutputs", [1, 2, 3])
+    @pytest.mark.parametrize("n_outputs", [1, 2, 3])
     def test_return(
         self,
         env: t.Any,
         mocker: MockerFixture,
-        noutputs: int,
+        n_outputs: int,
         argv: t.Tuple[str, ...],
     ):
-        self.arrange(env, noutputs=noutputs, argv=argv)  # type: ignore
+        self.arrange(env, n_outputs=n_outputs, argv=argv)  # type: ignore
         result = env.act()
         self.add_assert_calls(env, mocker)  # type: ignore
         assert env.cache_mock.method_calls == env.cache_calls
@@ -109,7 +109,7 @@ class CaseValidInputs:
         env.cache_calls += [
             mocker.call.generate_hash((*env.argv, env.cdo_version, *env.input_files)),
             mocker.call.generate_cache_paths(
-                env.noutputs if env.noutputs is not None else 1, env.hash_code
+                env.n_outputs if env.n_outputs is not None else 1, env.hash_code
             ),
             mocker.call.cache_exists(env.cache_files),
         ]
