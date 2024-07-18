@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any, TypeVar, final
 
 from xarray import Dataset
 
@@ -8,34 +8,71 @@ class DataSet(Dataset):
     pass
 
 
-class BaseOperator(ABC):
+class BaseOperator[I, O](ABC):
+    def get_output_type(self) -> TypeVar:
+        return O
+
+    def get_input_type(self) -> TypeVar:
+        return I
+
     @abstractmethod
-    def n_outputs(self) -> int:
+    def fn(self, inputs: I) -> O:
         pass
 
     @abstractmethod
-    def n_inputs(self) -> int:
-        pass
-
-    @abstractmethod
-    def execute(self) -> DataSet | List[DataSet]:
+    def execute(self) -> O:
         pass
 
 
-class Operator(BaseOperator):
-    def __init__(
-        self,
-        parent: BaseOperator,
-        children: List[BaseOperator],
-    ) -> None:
+DataSetTuple = tuple[DataSet, ...]
+
+
+class ChainableDataOperator(BaseOperator[DataSetTuple, DataSet]):
+    def __init__(self, children: tuple[BaseOperator[Any, DataSet]]) -> None:
         self._children = children
-        self._parent = parent
 
-    @abstractmethod
-    def operator_function(self, inputs: List[DataSet]):
-        """
-        It cannot be ze
-        """
-
+    @final
     def execute(self) -> DataSet:
-        inputs = [child.execute() for child in self._children]
+        inputs = tuple(x.execute() for x in self._children)
+        return self.fn(inputs)
+
+
+class RootDataOperator(BaseOperator[DataSetTuple, None]):
+    def __init__(self, children: tuple[BaseOperator[Any, DataSet]]) -> None:
+        self._children = children
+
+    @final
+    def execute(self) -> None:
+        inputs = tuple(x.execute() for x in self._children)
+        return self.fn(inputs)
+
+
+class LeafDataOperator(BaseOperator[None, DataSet]):
+    def __init__(self, children: tuple[BaseOperator[Any, DataSet]]) -> None:
+        self._children = children
+
+    @final
+    def execute(self) -> DataSet:
+        return self.fn(None)
+
+
+class SelectOutputOperator(BaseOperator[DataSetTuple, DataSet]):
+    def __init__(self, child: BaseOperator[Any, DataSetTuple], n: int = 0) -> None:
+        """
+        Should check value of n, for negative index as well
+        """
+        self._child = child
+        self._n = n
+        raise NotImplementedError
+
+    def fn(self, inputs: tuple[DataSet, ...]) -> DataSet:
+        return inputs[self._n]
+
+    @final
+    def execute(self) -> DataSet:
+        return super().execute()
+
+
+class SomeOperator(ChainableDataOperator):
+    def fn(self, inputs: tuple[DataSet, ...]) -> DataSet:
+        return super().fn(inputs)
