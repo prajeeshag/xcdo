@@ -1,7 +1,6 @@
 # import hashlib
 import hashlib
 import os
-import typing as t
 
 from .exceptions import CacheError
 from .interfaces import ICacheHandler
@@ -14,8 +13,8 @@ class CacheHandler(ICacheHandler):
     def ensure_directories_exist(self, paths: argvType) -> None:
         raise NotImplementedError
 
-    def generate_cache_paths(self, noutputs: int, hash_code: str) -> t.Tuple[str, ...]:
-        cache_paths: t.List[str] = []
+    def generate_cache_paths(self, noutputs: int, hash_code: str) -> tuple[str, ...]:
+        cache_paths: list[str] = []
         for i in range(noutputs):
             cache_paths.append(f"{self._file_prefix}{i}_{hash_code}")
         return tuple(cache_paths)

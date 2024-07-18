@@ -23,12 +23,12 @@ class CdoHandler(ICdoHandler):
         if ret != 0:
             raise CdoError(returncode=ret)
 
-    def get_input_files(self, argv: argvType) -> t.Tuple[str, ...]:
+    def get_input_files(self, argv: argvType) -> tuple[str, ...]:
         input_files = self._get_input_files(argv)
         return tuple(sorted(set(input_files)))
 
-    def _get_input_files(self, argv: argvType) -> t.List[str]:
-        input_files: t.List[str] = []
+    def _get_input_files(self, argv: argvType) -> list[str]:
+        input_files: list[str] = []
         for arg in argv:
             if arg.startswith("-"):
                 input_files.extend(self._get_input_files(arg.split(",")[1:]))
@@ -48,7 +48,7 @@ class CdoHandler(ICdoHandler):
         else:
             raise CdoError("Could not find cdo version")
 
-    def _captured_run(self, commands: argvType) -> t.Tuple[str, str]:
+    def _captured_run(self, commands: argvType) -> tuple[str, str]:
         ret = subprocess.run(
             [self._cdo, *commands],
             capture_output=True,

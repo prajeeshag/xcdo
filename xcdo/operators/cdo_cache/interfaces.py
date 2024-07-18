@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import typing as t
+
 from .types import argvType
 
 
@@ -21,7 +21,7 @@ class ICdoHandler(ABC):
     def get_input_files(
         self,
         argv: argvType,
-    ) -> t.Tuple[str, ...]:
+    ) -> tuple[str, ...]:
         """
         Get the input files from cdo commands
         Params:
@@ -44,16 +44,15 @@ class ICdoHandler(ABC):
 
 
 class ICacheHandler(ABC):
-
     @abstractmethod
-    def generate_cache_paths(self, noutputs: int, hash_code: str) -> t.Tuple[str, ...]:
+    def generate_cache_paths(self, noutputs: int, hash_code: str) -> tuple[str, ...]:
         """
         Generates valid cache paths
 
         Ensures that the directory trees for the paths are created.
 
         Returns:
-            - path strings: Tuple[str,...]
+            - path strings: tuple[str,...]
         """
         pass
 

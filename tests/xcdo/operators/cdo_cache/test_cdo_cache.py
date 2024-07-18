@@ -40,9 +40,9 @@ def env(
 
         def arrange(
             self,
-            argv: t.Tuple[str, ...] = (),
+            argv: tuple[str, ...] = (),
             n_outputs: int = 1,
-            input_files: t.List[str] = [],
+            input_files: list[str] = [],
             cache_exist: bool = False,
             cache_valid: bool = False,
         ):
@@ -94,7 +94,7 @@ class MixinTestReturn:
         env: t.Any,
         mocker: MockerFixture,
         n_outputs: int,
-        argv: t.Tuple[str, ...],
+        argv: tuple[str, ...],
     ):
         self.arrange(env, n_outputs=n_outputs, argv=argv)  # type: ignore
         result = env.act()

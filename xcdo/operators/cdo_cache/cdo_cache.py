@@ -1,4 +1,3 @@
-import typing as t
 from dataclasses import dataclass
 
 from .interfaces import ICacheHandler, ICdoHandler
@@ -10,7 +9,7 @@ class CdoCache:
     _cdo: ICdoHandler
     _cache: ICacheHandler
 
-    def get_cache(self, argv: argvType, n_outputs: int) -> t.Tuple[str, ...]:
+    def get_cache(self, argv: argvType, n_outputs: int) -> tuple[str, ...]:
         if not argv:
             raise ValueError("no commands provided")
         if n_outputs < 1:
