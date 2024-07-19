@@ -1,25 +1,106 @@
+from typing import Any
+
+import pytest
 from xcdo.core.cli import Arg
+from xcdo.core.cli.exceptions import ArgError
+
+
+def test_is_instance_of_arg():
+    value = "   -simple   "
+    arg = Arg(value)
+    assert isinstance(arg, Arg)
 
 
 def test_arg_strips_leading_spaces():
-    value = "   leading spaces"
+    value = "   -simple"
     arg = Arg(value)
-    assert str(arg) == "leading spaces"
+    assert str(arg) == "-simple"
 
 
 def test_arg_strips_trailing_spaces():
-    value = "trailing spaces   "
+    value = "-simple   "
     arg = Arg(value)
-    assert str(arg) == "trailing spaces"
+    assert str(arg) == "-simple"
 
 
 def test_arg_strips_leading_and_trailing_spaces():
-    value = "   both leading and trailing   "
+    value = "   -simple   "
     arg = Arg(value)
-    assert str(arg) == "both leading and trailing"
+    assert str(arg) == "-simple"
 
 
-def test_arg_with_no_spaces():
-    value = "no spaces"
-    arg = Arg(value)
-    assert str(arg) == "no spaces"
+class Test_invalid:
+    parameters: Any = (
+        ("-simple,k1=v1=v2", (8, "Invalid parameter")),
+        ("-simple,k1=v1,k1=v2", (14, "Parameter 'k1' is already assigned")),
+        ("-simple,k2=v1,k1=v2,k2=v2", (20, "Parameter 'k2' is already assigned")),
+    )
+
+    @pytest.mark.parametrize("string,expected", parameters)
+    def test_name(self, string: str, expected: Any):
+        with pytest.raises(ArgError) as result:
+            Arg(string)
+
+        assert result.value.pos == expected[0]
+        assert result.value.string == string
+        assert str(result.value) == expected[1]
+
+
+class Test_valid:
+    parameters: Any = (
+        (
+            "-simple",
+            ("simple", (), {}),
+        ),
+        (
+            "-singleParam,p1",
+            ("singleParam", ("p1",), {}),
+        ),
+        (
+            "-multiParam,p1,p2,p3",
+            ("multiParam", ("p1", "p2", "p3"), {}),
+        ),
+        (
+            "-singleOptionalParam,p1,,p3",
+            ("singleOptionalParam", ("p1", "", "p3"), {}),
+        ),
+        (
+            "-multiOptionalParam,,,p3",
+            ("multiOptionalParam", ("", "", "p3"), {}),
+        ),
+        (
+            "-endComma1,",
+            ("endComma1", ("",), {}),
+        ),
+        (
+            "-endComma2,,p3,",
+            ("endComma2", ("", "p3", ""), {}),
+        ),
+        (
+            "-singleKwParam,k1=v1",
+            ("singleKwParam", (), dict(k1="v1")),
+        ),
+        (
+            "-multiKwParam,k1=v1,k2=v2,k3=v3",
+            ("multiKwParam", (), dict(k1="v1", k2="v2", k3="v3")),
+        ),
+        (
+            "-mixed,p1,,,p3,k1=v1,k2=v2,k3=v3",
+            ("mixed", ("p1", "", "", "p3"), dict(k1="v1", k2="v2", k3="v3")),
+        ),
+    )
+
+    @pytest.mark.parametrize("string,expected", parameters)
+    def test_name(self, string: str, expected: Any):
+        opArg = Arg(string)
+        assert opArg.name == expected[0]
+
+    @pytest.mark.parametrize("string,expected", parameters)
+    def test_params(self, string: str, expected: Any):
+        opArg = Arg(string)
+        assert opArg.params == list(expected[1])
+
+    @pytest.mark.parametrize("string,expected", parameters)
+    def test_kwparams(self, string: str, expected: Any):
+        opArg = Arg(string)
+        assert opArg.kwparams == expected[2]
