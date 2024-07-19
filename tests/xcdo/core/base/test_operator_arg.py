@@ -1,10 +1,10 @@
 from typing import Any
-from xcdo.core.base.cli import OperatorArg
-from xcdo.core.base.cli.arg import Arg
 
 import pytest
 
-from xcdo.core.base.cli.exceptions import ArgError
+from xcdo.core.cli import OperatorArg
+from xcdo.core.cli.arg import Arg
+from xcdo.core.cli.exceptions import ArgError
 
 
 def test_is_instance_of_arg():
