@@ -1,4 +1,5 @@
-from xcdo.core.base.cli.exceptions import ArgError
+from xcdo.core.cli.exceptions import ArgError
+
 from .arg import Arg
 
 

@@ -17,7 +17,7 @@ class Test_invalid:
     parameters: Any = (
         ("-simple,k1=v1=v2", (8, "Invalid parameter type")),
         ("-simple,k1=v1,k1=v2", (14, "Parameter 'k1' is already assigned")),
-        ("-simple,k2=v1,k2=v2", (14, "Parameter 'k2' is already assigned")),
+        ("-simple,k2=v1,k1=v2,k2=v2", (20, "Parameter 'k2' is already assigned")),
     )
 
     @pytest.mark.parametrize("string,expected", parameters)

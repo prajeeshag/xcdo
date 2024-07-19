@@ -1,4 +1,4 @@
-from xcdo.core.base.cli import Arg
+from xcdo.core.cli import Arg
 
 
 def test_arg_strips_leading_spaces():
