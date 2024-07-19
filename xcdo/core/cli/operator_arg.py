@@ -1,6 +1,5 @@
-from xcdo.core.cli.exceptions import ArgError
-
 from .arg import Arg
+from .exceptions import ArgError
 
 
 class OperatorArg(Arg):
