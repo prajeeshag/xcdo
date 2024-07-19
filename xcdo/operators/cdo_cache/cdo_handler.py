@@ -1,7 +1,6 @@
 import os
 import re
 import subprocess
-import typing as t
 
 from .exceptions import CdoError
 from .interfaces import ICdoHandler
