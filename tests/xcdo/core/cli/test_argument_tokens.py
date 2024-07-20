@@ -1,5 +1,6 @@
 import pytest
 from xcdo.core.cli.argument_tokens import (
+    Colon,
     LeftSquareBracket,
     RightSquareBracket,
 )
@@ -31,3 +32,16 @@ def test_LeftSquareBracket(input: str, expected: bool):
 )
 def test_RightSquareBracket(input: str, expected: bool):
     assert RightSquareBracket.match(input) == expected
+
+
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        [":", True],
+        ["]", False],
+        ["[:", False],
+        ["[s", False],
+    ],
+)
+def test_Colon(input: str, expected: bool):
+    assert Colon.match(input) == expected

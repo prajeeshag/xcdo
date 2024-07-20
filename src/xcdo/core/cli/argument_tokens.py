@@ -9,3 +9,7 @@ class LeftSquareBracket(ArgumentToken):
 
 class RightSquareBracket(ArgumentToken):
     pattern = re.compile(r"\]")
+
+
+class Colon(ArgumentToken):
+    pattern = re.compile(r"\:")
