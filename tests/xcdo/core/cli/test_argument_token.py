@@ -19,5 +19,6 @@ def test_pattern_type():
             pass
 
     assert (
-        str(e.value) == "TestArgument class attribute 'pattern' should be a <str> type"
+        str(e.value)
+        == "TestArgument class attribute 'pattern' should be a re.Pattern object"
     )

@@ -1,13 +1,13 @@
 from typing import TypeGuard
 
-from .exceptions import ArgError
+from xcdo.core.cli.exceptions import ArgError
 
 
-def is_arg(val: object) -> TypeGuard["Arg"]:
-    return isinstance(val, Arg)
+def is_arg(val: object) -> TypeGuard["OperatorArgument"]:
+    return isinstance(val, OperatorArgument)
 
 
-class Arg:
+class OperatorArgument:
     def __init__(self, string: str) -> None:
         self._str = string.strip()
         self._parse()
@@ -23,7 +23,7 @@ class Arg:
             return False
         return value._str == self._str
 
-    def get_pos(self, subarg: str) -> int:
+    def _get_pos(self, subarg: str) -> int:
         return self._str.index(subarg)
 
     def _parse(self):
@@ -37,13 +37,13 @@ class Arg:
                     k, v = arg.split("=")  # Should split to 2 items
                 except ValueError:
                     raise ArgError(
-                        self.get_pos(arg),
+                        self._get_pos(arg),
                         self._str,
                         "Invalid parameter",
                     )
                 if k in self._kwparams:
                     raise ArgError(
-                        self.get_pos(arg),
+                        self._get_pos(arg),
                         self._str,
                         f"Parameter '{k}' is already assigned",
                     )

@@ -1,31 +1,31 @@
 from typing import Any
 
 import pytest
-from xcdo.core.cli import Arg
 from xcdo.core.cli.exceptions import ArgError
+from xcdo.core.cli.operator_argument import OperatorArgument
 
 
 def test_is_instance_of_arg():
     value = "   -simple   "
-    arg = Arg(value)
-    assert isinstance(arg, Arg)
+    arg = OperatorArgument(value)
+    assert isinstance(arg, OperatorArgument)
 
 
 def test_arg_strips_leading_spaces():
     value = "   -simple"
-    arg = Arg(value)
+    arg = OperatorArgument(value)
     assert str(arg) == "-simple"
 
 
 def test_arg_strips_trailing_spaces():
     value = "-simple   "
-    arg = Arg(value)
+    arg = OperatorArgument(value)
     assert str(arg) == "-simple"
 
 
 def test_arg_strips_leading_and_trailing_spaces():
     value = "   -simple   "
-    arg = Arg(value)
+    arg = OperatorArgument(value)
     assert str(arg) == "-simple"
 
 
@@ -39,7 +39,7 @@ class Test_invalid:
     @pytest.mark.parametrize("string,expected", parameters)
     def test_name(self, string: str, expected: Any):
         with pytest.raises(ArgError) as result:
-            Arg(string)
+            OperatorArgument(string)
 
         assert result.value.pos == expected[0]
         assert result.value.string == string
@@ -92,15 +92,15 @@ class Test_valid:
 
     @pytest.mark.parametrize("string,expected", parameters)
     def test_name(self, string: str, expected: Any):
-        opArg = Arg(string)
+        opArg = OperatorArgument(string)
         assert opArg.name == expected[0]
 
     @pytest.mark.parametrize("string,expected", parameters)
     def test_params(self, string: str, expected: Any):
-        opArg = Arg(string)
+        opArg = OperatorArgument(string)
         assert opArg.params == list(expected[1])
 
     @pytest.mark.parametrize("string,expected", parameters)
     def test_kwparams(self, string: str, expected: Any):
-        opArg = Arg(string)
+        opArg = OperatorArgument(string)
         assert opArg.kwparams == expected[2]
