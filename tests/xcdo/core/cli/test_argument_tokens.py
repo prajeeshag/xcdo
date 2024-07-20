@@ -1,5 +1,8 @@
 import pytest
-from xcdo.core.cli.argument_tokens import LeftSquareBracket
+from xcdo.core.cli.argument_tokens import (
+    LeftSquareBracket,
+    RightSquareBracket,
+)
 
 
 @pytest.mark.parametrize(
@@ -14,3 +17,17 @@ from xcdo.core.cli.argument_tokens import LeftSquareBracket
 )
 def test_LeftSquareBracket(input: str, expected: bool):
     assert LeftSquareBracket.match(input) == expected
+
+
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        ["[", False],
+        ["]", True],
+        ["[]", False],
+        ["[s]", False],
+        ["s", False],
+    ],
+)
+def test_RightSquareBracket(input: str, expected: bool):
+    assert RightSquareBracket.match(input) == expected
