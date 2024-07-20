@@ -7,6 +7,10 @@ class ArgumentMeta(type):
         if cls.__name__ != "ArgumentToken":
             if "pattern" not in dct:
                 raise TypeError(f"{name} class must have attribute 'pattern'")
+            if not isinstance(dct["pattern"], str):
+                raise TypeError(
+                    f"{name} class attribute 'pattern' should be a <str> type"
+                )
         super().__init__(name, bases, dct)
 
 
