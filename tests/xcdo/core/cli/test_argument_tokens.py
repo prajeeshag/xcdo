@@ -1,6 +1,7 @@
 import pytest
 from xcdo.core.cli.argument_tokens import (
     Colon,
+    FilePathToken,
     LeftSquareBracket,
     OperatorToken,
     RightSquareBracket,
@@ -74,3 +75,20 @@ def test_Colon(input: str, expected: bool):
 )
 def test_OperatorToken(input: str, expected: bool):
     assert OperatorToken.match(input) == expected
+
+
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        ["/some/path/out.nc", True],
+        ["some/path/out.nc", True],
+        ["so-me/path/out.nc", True],
+        ["-some/path/out.nc", False],
+        ["some path out.nc", True],
+        ['"-some path out.nc"', True],
+        ["'-some path out.nc'", True],
+        ["'-some/path/out.nc'", True],
+    ],
+)
+def test_FilePathToken(input: str, expected: bool):
+    assert FilePathToken.match(input) == expected

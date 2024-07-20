@@ -17,3 +17,7 @@ class Colon(ArgumentToken):
 
 class OperatorToken(ArgumentToken):
     pattern = re.compile(r"^-(\w\w+)(\,(((\w|/|\-|\.)+)|(\w+)=((\w|/|\-|\.)+)))*\,?")
+
+
+class FilePathToken(ArgumentToken):
+    pattern = re.compile(r"([^\-]\S(\S|\s)+)|(\"\S(\s\S)+\")")
