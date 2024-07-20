@@ -13,3 +13,7 @@ class RightSquareBracket(ArgumentToken):
 
 class Colon(ArgumentToken):
     pattern = re.compile(r"\:")
+
+
+class OperatorToken(ArgumentToken):
+    pattern = re.compile(r"^-(\w\w+)(\,(((\w|/|\-|\.)+)|(\w+)=((\w|/|\-|\.)+)))*\,?")
