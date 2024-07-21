@@ -1,6 +1,6 @@
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Type, final
+from typing import Any, Type
 
 
 class ArgumentMeta(type):
@@ -8,33 +8,28 @@ class ArgumentMeta(type):
         if cls.__name__ != "ArgumentToken":
             if "pattern" not in dct:
                 raise TypeError(f"{name} class must have attribute 'pattern'")
-            if not isinstance(dct["pattern"], re.Pattern):
+            if not isinstance(dct["pattern"], (re.Pattern, str)):
                 raise TypeError(
-                    f"{name} class attribute 'pattern' should be a re.Pattern object"
+                    f"{name} class attribute 'pattern' should be a <str> or re.Pattern object"
                 )
         super().__init__(name, bases, dct)
 
 
-class ArgumentToken(metaclass=ArgumentMeta):
-    pattern: re.Pattern[str]
-
-    def __init__(self, value: str) -> None:
-        self._value = value
-
-    @property
-    @final
-    def value(self) -> str:
-        return self._value
+class ArgumentToken[S: (re.Pattern[str], str)](metaclass=ArgumentMeta):
+    pattern: S
 
     @classmethod
-    def match(cls, string: str):
-        return bool(cls.pattern.fullmatch(string))
+    def is_match(cls, string: str):
+        if isinstance(cls.pattern, re.Pattern):
+            return bool(cls.pattern.fullmatch(string))
+        else:
+            return string == cls.pattern
 
 
 class AbstractTokenFactory(ABC):
-    def __init__(self, token_classes: list[Type[ArgumentToken]]) -> None:
+    def __init__(self, token_classes: list[Type[ArgumentToken[Any]]]) -> None:
         self._token_classes = token_classes
 
     @abstractmethod
-    def create(self, string: str) -> ArgumentToken:
+    def create(self, string: str) -> ArgumentToken[Any]:
         pass
