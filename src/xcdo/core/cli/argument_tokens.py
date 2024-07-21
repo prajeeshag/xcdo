@@ -23,7 +23,8 @@ def is_operator_token(val: object) -> TypeGuard["OperatorToken"]:
 
 
 class OperatorToken(ArgumentToken[re.Pattern[str]]):
-    pattern = re.compile(r"^-(\w\w+)((\,([^=\s\,]*))|(\,(([^=\s\,]+)=([^\s\,]*))))*\,?")
+    # pattern = re.compile(r"^-(\w\w+)((\,([^=\s\,]*))|(\,(([^=\s\,]+)=([^\s\,]*))))*\,?")
+    pattern = re.compile(r"^-(\w\w+)(\,(\S)*)*\,?")
 
     def __init__(self, string: str) -> None:
         self.string = string
