@@ -25,6 +25,26 @@ class ArgumentToken[S: (re.Pattern[str], str)](metaclass=ArgumentMeta):
         else:
             return string == cls.pattern
 
+    def __init__(self, string: str) -> None:
+        self.string = string
+        if not self.is_match(string):
+            raise ValueError(f"The string '{string}' does not a match a OperatorToken")
+        self._parse()
+
+    def _parse(self):
+        pass
+
+    def _string__(self) -> str:
+        return self.string
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.string})"
+
+    def __eq__(self, value: object) -> bool:
+        if type(value) is type(self) and self.string == value.string:
+            return True
+        return False
+
 
 class AbstractTokenFactory(ABC):
     def __init__(self, token_classes: list[Type[ArgumentToken[Any]]]) -> None:

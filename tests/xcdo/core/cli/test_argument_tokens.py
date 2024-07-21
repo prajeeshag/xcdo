@@ -9,7 +9,7 @@ from xcdo.core.cli.argument_tokens import (
     OperatorToken,
     RightSquareBracket,
 )
-from xcdo.core.cli.exceptions import ArgTokenError
+from xcdo.core.cli.exceptions import ArgSyntaxError
 
 
 @pytest.mark.parametrize(
@@ -103,7 +103,7 @@ class Test_OperatorToken:
 
     @pytest.mark.parametrize("string,expected", parameters)
     def test_invalid(self, string: str, expected: Any):
-        with pytest.raises(ArgTokenError) as result:
+        with pytest.raises(ArgSyntaxError) as result:
             OperatorToken(string)
 
         assert result.value.pos == expected[0]

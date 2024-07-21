@@ -1,4 +1,4 @@
-class ArgTokenError(Exception):
+class ArgSyntaxError(Exception):
     def __init__(self, pos: int, string: str, *args: object) -> None:
         self.pos = pos
         self.string = string
