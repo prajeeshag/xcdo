@@ -1,6 +1,5 @@
 import pytest
-
-from xcdo.core.cli.argument_token import ArgumentToken
+from xcdo.core.cli.argument.token import ArgumentToken
 
 
 def test_pattern():

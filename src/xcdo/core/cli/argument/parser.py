@@ -1,15 +1,12 @@
 from typing import Any, Type
 
-from .argument_token import ArgumentToken
-from .exceptions import ArgSyntaxError
+from ..exceptions import ArgSyntaxError
+from .token import ArgumentToken
 
 
 class ArgumentParser:
     def __init__(self, available_tokens: list[Type[ArgumentToken[Any]]]) -> None:
         self._available_tokens = available_tokens
-
-    def parse(self, tokens: list[ArgumentToken[Any]]):
-        raise NotImplementedError
 
     def tokenize(self, argv: list[str]) -> list[ArgumentToken[Any]]:
         res: list[ArgumentToken[Any]] = []

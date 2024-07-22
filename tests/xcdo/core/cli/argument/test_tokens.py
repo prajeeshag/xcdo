@@ -1,8 +1,7 @@
 from typing import Any
 
 import pytest
-
-from xcdo.core.cli.argument_tokens import (
+from xcdo.core.cli.argument.tokens import (
     Colon,
     FilePathToken,
     LeftSquareBracket,

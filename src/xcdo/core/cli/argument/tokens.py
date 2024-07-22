@@ -3,7 +3,7 @@ from typing import TypeGuard
 
 from xcdo.core.cli.exceptions import ArgSyntaxError
 
-from .argument_token import ArgumentToken
+from .token import ArgumentToken
 
 
 class LeftSquareBracket(ArgumentToken[str]):
