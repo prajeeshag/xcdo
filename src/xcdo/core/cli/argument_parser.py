@@ -8,7 +8,10 @@ class ArgumentParser:
     def __init__(self, available_tokens: list[Type[ArgumentToken[Any]]]) -> None:
         self._available_tokens = available_tokens
 
-    def parse(self, argv: list[str]) -> list[ArgumentToken[Any]]:
+    def parse(self, tokens: list[ArgumentToken[Any]]):
+        raise NotImplementedError
+
+    def tokenize(self, argv: list[str]) -> list[ArgumentToken[Any]]:
         res: list[ArgumentToken[Any]] = []
         for arg in argv:
             argToken = self._get_valid_token(arg)

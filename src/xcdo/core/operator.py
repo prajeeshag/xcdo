@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, final
 
-from .cli.operator_argument import OperatorArgument
-
 UNLIMITED_SIZE = -1
 
 
@@ -15,10 +13,6 @@ class Operator[I, O](ABC):
 
     @abstractmethod
     def fn(self, inputs: tuple[I, ...]) -> O:
-        pass
-
-    @abstractmethod
-    def parse_input_operators(self, args: list[OperatorArgument]):
         pass
 
     @final

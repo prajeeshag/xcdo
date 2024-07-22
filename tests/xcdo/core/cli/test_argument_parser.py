@@ -1,7 +1,6 @@
 from typing import Any
 
 import pytest
-
 from xcdo.core.cli.argument_parser import ArgumentParser
 from xcdo.core.cli.argument_tokens import (
     FilePathToken,
@@ -28,7 +27,7 @@ def argParser():
     )
 
 
-class Test_parse:
+class Test_tokenize:
     @pytest.mark.parametrize(
         "input,expected",
         [
@@ -38,7 +37,5 @@ class Test_parse:
             ["-operator file.nc", [opToken, fileToken]],
         ],
     )
-    def test_closing_brackets(
-        self, input: str, expected: Any, argParser: ArgumentParser
-    ):
-        assert argParser.parse(input.split()) == expected
+    def test_valid(self, input: str, expected: Any, argParser: ArgumentParser):
+        assert argParser.tokenize(input.split()) == expected
