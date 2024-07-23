@@ -3,3 +3,7 @@ class ArgSyntaxError(Exception):
         self.pos = pos
         self.string = string
         super().__init__(*args)
+
+
+class OperatorDefError(Exception):
+    pass
