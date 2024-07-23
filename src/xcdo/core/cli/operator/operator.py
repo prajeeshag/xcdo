@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Protocol
 
 
-class OperatorFn(Protocol):
+class _OperatorFn(Protocol):
     def __call__(
         self,
         input: tuple[Any, ...] | Any,
@@ -12,7 +12,7 @@ class OperatorFn(Protocol):
 
 
 class Operator(ABC):
-    def __init__(self, fn: OperatorFn) -> None:
+    def __init__(self, fn: _OperatorFn) -> None:
         self._fn = fn
         self._args: list[Any] = []
         self._kwargs: dict[str, Any] = {}

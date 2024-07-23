@@ -23,20 +23,14 @@ def inspect_function(
 
     for name, param in signature.parameters.items():
         param_type = type_hints.get(name, None)
-        if param.kind in (
-            inspect.Parameter.VAR_POSITIONAL,
-            inspect.Parameter.VAR_KEYWORD,
-        ):
-            if param.kind == inspect.Parameter.VAR_POSITIONAL:
-                # *args are allowed
-                args_types.append((f"*{name}", param_type))
-            elif param.kind == inspect.Parameter.VAR_KEYWORD:
-                kwargs_types.append((f"**{name}", param_type, None))
+        if param.kind == inspect.Parameter.VAR_POSITIONAL:
+            args_types.append((f"*{name}", param_type))
+        elif param.kind == inspect.Parameter.VAR_KEYWORD:
+            kwargs_types.append((f"**{name}", param_type, None))
+        elif param.default == inspect.Parameter.empty:
+            args_types.append((name, param_type))
         else:
-            if param.default == inspect.Parameter.empty:
-                args_types.append((name, param_type))
-            else:
-                kwargs_types.append((name, param_type, param.default))
+            kwargs_types.append((name, param_type, param.default))
 
     return_type = type_hints.get("return", None)
 
