@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 from ._utils import inspect_function
@@ -8,14 +7,12 @@ class Operator:
     def __init__(
         self,
         fn: Callable[..., Any],
-        valid_arg_types=[],
-        valid_input_types=[],
     ) -> None:
         self._fn = fn
         self._parse()
 
     def _parse(self) -> None:
-        _, args, kwargs, out_type = inspect_function(self._fn)
+        _, args, kwargs, self._output_type = inspect_function(self._fn)
         arg_names: list[str] = [x[0] for x in args]
         arg_types: list[Any] = [x[1] for x in args]
         kwarg_names = [x[0] for x in kwargs]
@@ -45,35 +42,45 @@ class Operator:
     def get_input_type(self, n: int) -> type:
         return self._input_types[n]
 
+    @property
     def num_args(self) -> int:
-        pass
+        return 0
 
     def get_arg_type(self, n: int) -> type:
-        pass
+        raise NotImplementedError
 
     def get_arg_name(self, n: int) -> str:
-        pass
+        raise NotImplementedError
 
+    @property
     def variadic_arg_present(self) -> bool:
-        pass
+        return False
 
+    @property
     def variadic_arg_type(self) -> type:
         pass
 
+    @property
     def kwarg_keys(self) -> tuple[str, ...]:
-        pass
+        return ()
 
     def get_kwarg_type(self, key: str) -> type:
-        pass
+        raise NotImplementedError
 
+    def get_kwarg_default_value(self, key: str) -> Any:
+        raise NotImplementedError
+
+    @property
     def variadic_kwarg_present(self) -> bool:
-        pass
+        return False
 
+    @property
     def variadic_kwarg_type(self) -> type:
         pass
 
-    def output_type(self) -> None:
-        pass
+    @property
+    def output_type(self) -> type | None:
+        return self._output_type
 
     def execute(self, input: tuple[Any, ...]) -> Any:
         pass

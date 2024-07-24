@@ -1,22 +1,33 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
 @dataclass
 class Input:
     fn: Any
-    num_inputs: int
-    input_types: list[Any]
-    num_args: int
-    arg_types: list[Any]
-    arg_names: list[str]
-    variadic_arg_present: bool
-    variadic_arg_type: Any
-    kwarg_keys: tuple[str, ...]
-    kwarg_types: list[Any]
-    variadic_kwarg_present: bool
-    variadic_kwarg_type: Any
-    output_type: Any
+    num_inputs: int = 0
+    input_types: list[Any] = field(default_factory=list)
+    num_args: int = 0
+    arg_types: list[Any] = field(default_factory=list)
+    arg_names: list[str] = field(default_factory=list)
+    variadic_arg_present: bool = False
+    variadic_arg_type: Any = None
+    kwarg_keys: tuple[str, ...] = field(default_factory=tuple)
+    kwarg_types: list[Any] = field(default_factory=list)
+    kwarg_default_values: list[Any] = field(default_factory=list)
+    variadic_kwarg_present: bool = False
+    variadic_kwarg_type: Any = None
+    output_type: Any = None
+
+
+def fp00(): ...
+def fp01() -> None: ...
+
+
+passing = [
+    Input(fp00, output_type=None),
+    Input(fp01, output_type=type(None)),
+]
 
 
 def fp1(
@@ -46,6 +57,7 @@ fp1_param = Input(
     float,
     ("ik", "fk", "sk", "bk"),
     [int, float, str, bool],
+    [],
     True,
     int,
     type(None),
