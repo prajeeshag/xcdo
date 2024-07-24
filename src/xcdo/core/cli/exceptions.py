@@ -7,3 +7,7 @@ class ArgSyntaxError(Exception):
 
 class OperatorDefError(Exception):
     pass
+
+
+class DataConverterError(Exception):
+    pass

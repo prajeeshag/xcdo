@@ -1,6 +1,10 @@
+from collections import OrderedDict
 from typing import Any, Callable
 
 from ._utils import inspect_function
+
+# type casting from string is trivial, others should use DataConverter
+_BASE_DATA_TYPES = [str, int, float]
 
 
 class Operator:
@@ -9,6 +13,8 @@ class Operator:
         fn: Callable[..., Any],
     ) -> None:
         self._fn = fn
+        self._input_types: list[type] = []
+        self._num_inputs: int = 0
         self._parse()
 
     def _parse(self) -> None:
@@ -19,6 +25,40 @@ class Operator:
         kwarg_types = [x[1] for x in kwargs]
         kwarg_defaults = [x[2] for x in kwargs]
 
+        self._parse_input(arg_names, arg_types)
+
+        self._parge_var_arg(arg_names, arg_types)
+        self._args = list(zip(arg_names, arg_types))
+        self._parge_var_kwarg(kwarg_names, kwarg_types, kwarg_defaults)
+        self._kwargs = OrderedDict(
+            list(zip(kwarg_names, tuple(zip(kwarg_types, kwarg_defaults))))
+        )
+
+    def _parge_var_kwarg(
+        self,
+        kwarg_names: list[str],
+        kwarg_types: list[Any],
+        kwarg_defaults: list[Any],
+    ) -> None:
+        self._var_kwarg_name: str = ""
+        self._var_kwarg_type: type | None = None
+        for i in range(len(kwarg_names)):
+            if kwarg_names[i].startswith("**"):
+                self._var_kwarg_name = kwarg_names.pop(i).lstrip("**")
+                self._var_kwarg_type = kwarg_types.pop(i)
+                kwarg_defaults.pop(i)
+                return
+
+    def _parge_var_arg(self, arg_names: list[str], arg_types: list[Any]) -> None:
+        self._var_arg_name: str = ""
+        self._var_arg_type: type | None = None
+        for i in range(len(arg_names)):
+            if arg_names[i].startswith("*"):
+                self._var_arg_name = arg_names.pop(i).lstrip("*")
+                self._var_arg_type = arg_types.pop(i)
+                return
+
+    def _parse_input(self, arg_names: list[str], arg_types: list[Any]):
         try:
             index = arg_names.index("input")
             arg_names.pop(index)
@@ -32,8 +72,7 @@ class Operator:
             elif input_type.__origin__ is tuple:
                 pass
         except ValueError:
-            self._input_types = []
-            self._num_inputs = 0
+            pass
 
     @property
     def num_inputs(self) -> int:
@@ -44,43 +83,49 @@ class Operator:
 
     @property
     def num_args(self) -> int:
-        return 0
+        return len(self._args)
 
     def get_arg_type(self, n: int) -> type:
-        raise NotImplementedError
+        return self._args[n][1]
 
     def get_arg_name(self, n: int) -> str:
-        raise NotImplementedError
+        return self._args[n][0]
 
     @property
-    def variadic_arg_present(self) -> bool:
-        return False
+    def var_arg(self) -> str:
+        return self._var_arg_name
 
     @property
-    def variadic_arg_type(self) -> type:
-        pass
+    def var_arg_type(self) -> type | None:
+        return self._var_arg_type
 
     @property
     def kwarg_keys(self) -> tuple[str, ...]:
-        return ()
+        return tuple(self._kwargs.keys())
 
     def get_kwarg_type(self, key: str) -> type:
-        raise NotImplementedError
+        return self._kwargs[key][0]
 
     def get_kwarg_default_value(self, key: str) -> Any:
-        raise NotImplementedError
+        return self._kwargs[key][1]
 
     @property
-    def variadic_kwarg_present(self) -> bool:
-        return False
+    def var_kwarg(self) -> str:
+        return self._var_kwarg_name
 
     @property
-    def variadic_kwarg_type(self) -> type:
-        pass
+    def var_kwarg_type(self) -> type | None:
+        return self._var_kwarg_type
 
     @property
     def output_type(self) -> type | None:
         return self._output_type
+
+    def is_reader(self) -> bool:
+        raise NotImplementedError
+
+    def is_writer(self) -> bool:
+        raise NotImplementedError
 
     def execute(self, input: tuple[Any, ...]) -> Any:
         pass
