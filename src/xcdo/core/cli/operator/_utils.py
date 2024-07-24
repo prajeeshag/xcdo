@@ -35,3 +35,9 @@ def inspect_function(
     return_type = type_hints.get("return", None)
 
     return func_name, args_types, kwargs_types, return_type
+
+
+def type2str(t: type) -> str:
+    string = str(t).replace("<class '", "")
+    string = string.replace("'>", "")
+    return string

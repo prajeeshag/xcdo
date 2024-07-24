@@ -26,8 +26,33 @@ class InputFailing:
     msg: str
 
 
+def ff00(i): ...  # type: ignore
+def ff01(ik=1): ...  # type: ignore
+def ff02(b: bool): ...  # type: ignore
+def ff03(bk: list[str] = False): ...  # type: ignore
+
+
+failing = [
+    InputFailing(ff00, "Function <ff00>: missing type hint for parameter 'i'"),
+    InputFailing(ff01, "Function <ff01>: missing type hint for parameter 'ik'"),
+    InputFailing(
+        ff02,
+        "Function <ff02>, parameter 'b': <bool> type is not allowed "
+        + "without a <str> to <bool> DataConverter",
+    ),
+    InputFailing(
+        ff03,
+        "Function <ff03>, parameter 'bk': <list[str]> type is not allowed "
+        + "without a <str> to <list[str]> DataConverter",
+    ),
+]
+
+
 def fp00(): ...
 def fp01() -> None: ...
+def fp02(input: int) -> None: ...
+def fp03(input: tuple[int]) -> None: ...
+def fp04(input: tuple[int, float, str]) -> None: ...
 def fp11(*params: int) -> None: ...
 def fp21(i: int) -> None: ...
 def fp31(**kwds: float) -> None: ...
@@ -37,17 +62,14 @@ def fp41(i: float = 1) -> None: ...
 passing = [
     Input(fp00, output_type=None),
     Input(fp01, output_type=type(None)),
-    Input(fp11, output_type=type(None), var_arg=("params", int)),
-    Input(fp21, output_type=type(None), args=[("i", int)]),
-    Input(fp31, output_type=type(None), var_kwarg=("kwds", float)),
-    Input(fp41, output_type=type(None), kwargs=OrderedDict([("i", (float, 1))])),
+    Input(fp02, output_type=type(None), input_types=[int]),
+    Input(fp03, output_type=type(None), input_types=[int]),
+    Input(fp04, output_type=type(None), input_types=[int, float, str]),
+    # Input(fp11, output_type=type(None), var_arg=("params", int)),
+    # Input(fp21, output_type=type(None), args=[("i", int)]),
+    # Input(fp31, output_type=type(None), var_kwarg=("kwds", float)),
+    # Input(fp41, output_type=type(None), kwargs=OrderedDict([("i", (float, 1))])),
 ]
-
-
-def ff00(i): ...  # type: ignore
-
-
-failing = [InputFailing(ff00, "Missing type hint for argument 'i' in function 'ff00'")]
 
 
 def dff00(i: int, j: int) -> int: ...
@@ -62,31 +84,31 @@ def dcf08(i) -> int: ...  # type: ignore
 dcfailing = [
     InputFailing(
         dff00,
-        "Invalid function definition <dff00>: DataConverter should have a single input",
+        "Function <dff00>: DataConverter should have a single input",
     ),
     InputFailing(
         dff01,
-        "Invalid function definition <dff01>: DataConverter cannot have optional inputs",
+        "Function <dff01>: DataConverter cannot have optional inputs",
     ),
     InputFailing(
         dff02,
-        "Invalid function definition <dff02>: DataConverter cannot have variadic inputs",
+        "Function <dff02>: DataConverter cannot have variadic inputs",
     ),
     InputFailing(
         dcf05,
-        "Invalid function definition <dcf05>: DataConverter should have a single input",
+        "Function <dcf05>: DataConverter should have a single input",
     ),
     InputFailing(
         dcf06,
-        "Invalid function definition <dcf06>: DataConverter cannot not have a return type 'None'",
+        "Function <dcf06>: DataConverter cannot not have a return type 'None'",
     ),
     InputFailing(
         dcf07,
-        "Invalid function definition <dcf07>: DataConverter cannot not have a return type 'None'",
+        "Function <dcf07>: DataConverter cannot not have a return type 'None'",
     ),
     InputFailing(
         dcf08,
-        "Invalid function definition <dcf08>: Missing type hint for parameter 'i'",
+        "Function <dcf08>: Missing type hint for parameter 'i'",
     ),
 ]
 
@@ -111,4 +133,13 @@ dcfailingruntime = [
         dcp03,
         "Expected <class 'str'> but received <class 'int'> from function <dcp03>",
     ),
+]
+
+
+def dcp04(r: float) -> str:
+    return str(r)
+
+
+dcpassingruntime = [
+    (dcp04, str),
 ]

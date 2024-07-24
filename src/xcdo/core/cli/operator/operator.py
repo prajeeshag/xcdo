@@ -1,10 +1,11 @@
 from collections import OrderedDict
 from typing import Any, Callable
 
-from ._utils import inspect_function
+from ..exceptions import InvalidDefinition
+from ._utils import inspect_function, type2str
 
 # type casting from string is trivial, others should use DataConverter
-_BASE_DATA_TYPES = [str, int, float]
+_BASE_PARAM_DATA_TYPES = [str, int, float]
 
 
 class Operator:
@@ -18,21 +19,48 @@ class Operator:
         self._parse()
 
     def _parse(self) -> None:
-        _, args, kwargs, self._output_type = inspect_function(self._fn)
-        arg_names: list[str] = [x[0] for x in args]
-        arg_types: list[Any] = [x[1] for x in args]
-        kwarg_names = [x[0] for x in kwargs]
-        kwarg_types = [x[1] for x in kwargs]
-        kwarg_defaults = [x[2] for x in kwargs]
+        (
+            self._name,
+            self._params,
+            self._kwparams,
+            self._output_type,
+        ) = inspect_function(self._fn)
+        # this is needed because `input` will be removed from _params, so to maintain the orginal order of arguments
+        self._arg_keys = [x[0] for x in self._params]
 
-        self._parse_input(arg_names, arg_types)
+        for pname, ptype in self._params:
+            if ptype is None:
+                raise InvalidDefinition(
+                    f"Function <{self._name}>: missing type hint for parameter '{pname}'"
+                )
+            if pname != "input" and ptype not in _BASE_PARAM_DATA_TYPES:
+                raise InvalidDefinition(
+                    f"Function <{self._name}>, parameter '{pname}': "
+                    + f"<{type2str(ptype)}> type is not allowed without a <str> to "
+                    + f"<{type2str(ptype)}> DataConverter"
+                )
+        for pname, ptype, _ in self._kwparams:
+            if ptype is None:
+                raise InvalidDefinition(
+                    f"Function <{self._name}>: missing type hint for parameter '{pname}'"
+                )
+            if ptype not in _BASE_PARAM_DATA_TYPES:
+                raise InvalidDefinition(
+                    f"Function <{self._name}>, parameter '{pname}': "
+                    + f"<{type2str(ptype)}> type is not allowed without a <str> to "
+                    + f"<{type2str(ptype)}> DataConverter"
+                )
 
-        self._parge_var_arg(arg_names, arg_types)
-        self._args = list(zip(arg_names, arg_types))
-        self._parge_var_kwarg(kwarg_names, kwarg_types, kwarg_defaults)
-        self._kwargs = OrderedDict(
-            list(zip(kwarg_names, tuple(zip(kwarg_types, kwarg_defaults))))
-        )
+        # self._parse_input()
+
+        # self._parse_var_arg()
+
+        # self._parge_var_arg(arg_names, arg_types)
+        # self._args = list(zip(arg_names, arg_types))
+        # self._parge_var_kwarg(kwarg_names, kwarg_types, kwarg_defaults)
+        # self._kwargs = OrderedDict(
+        #    list(zip(kwarg_names, tuple(zip(kwarg_types, kwarg_defaults))))
+        # )
 
     def _parge_var_kwarg(
         self,
@@ -49,30 +77,35 @@ class Operator:
                 kwarg_defaults.pop(i)
                 return
 
-    def _parge_var_arg(self, arg_names: list[str], arg_types: list[Any]) -> None:
+    def _parse_var_arg(self):
         self._var_arg_name: str = ""
         self._var_arg_type: type | None = None
-        for i in range(len(arg_names)):
-            if arg_names[i].startswith("*"):
-                self._var_arg_name = arg_names.pop(i).lstrip("*")
-                self._var_arg_type = arg_types.pop(i)
-                return
+        var_arg = None
+        for i in range(len(self._params)):
+            if self._params[i][0].startswith("*"):
+                var_arg = self._params.pop(i)
+                break
+        if var_arg:
+            self._var_arg_name = var_arg[0]
+            self._var_arg_type = var_arg[1]
 
-    def _parse_input(self, arg_names: list[str], arg_types: list[Any]):
-        try:
-            index = arg_names.index("input")
-            arg_names.pop(index)
-            input_type = arg_types.pop(index)
-
+    def _parse_input(self):
+        self._input_types = []
+        self._num_inputs = 0
+        input = None
+        for i in range(len(self._params)):
+            if self._params[i][0] == "input":
+                input = self._params.pop(i)
+                break
+        if input:
+            input_type = input[1]
             if not hasattr(input_type, "__origin__"):
                 self._input_types = [input_type]
                 self._num_inputs = 1
             elif input_type.__origin__ is list:
-                pass
+                raise NotImplementedError
             elif input_type.__origin__ is tuple:
-                pass
-        except ValueError:
-            pass
+                raise NotImplementedError
 
     @property
     def num_inputs(self) -> int:
@@ -83,13 +116,13 @@ class Operator:
 
     @property
     def num_args(self) -> int:
-        return len(self._args)
+        return len(self._params)
 
     def get_arg_type(self, n: int) -> type:
-        return self._args[n][1]
+        return self._params[n][1]
 
     def get_arg_name(self, n: int) -> str:
-        return self._args[n][0]
+        return self._params[n][0]
 
     @property
     def var_arg(self) -> str:
@@ -101,13 +134,13 @@ class Operator:
 
     @property
     def kwarg_keys(self) -> tuple[str, ...]:
-        return tuple(self._kwargs.keys())
+        return tuple(self._kwparams.keys())
 
     def get_kwarg_type(self, key: str) -> type:
-        return self._kwargs[key][0]
+        return self._kwparams[key][0]
 
     def get_kwarg_default_value(self, key: str) -> Any:
-        return self._kwargs[key][1]
+        return self._kwparams[key][1]
 
     @property
     def var_kwarg(self) -> str:

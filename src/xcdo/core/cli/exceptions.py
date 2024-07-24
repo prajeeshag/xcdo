@@ -5,9 +5,5 @@ class ArgSyntaxError(Exception):
         super().__init__(*args)
 
 
-class OperatorDefError(Exception):
-    pass
-
-
-class DataConverterError(Exception):
+class InvalidDefinition(Exception):
     pass
