@@ -109,6 +109,6 @@ dcpassing = [
 dcfailingruntime = [
     InputFailing(
         dcp03,
-        "Expected <str> but received <int> from function <dcp03>",
+        "Expected <class 'str'> but received <class 'int'> from function <dcp03>",
     ),
 ]

@@ -26,3 +26,4 @@ def test_runtimefail(input: Any):
     dc = DataConverter(input.fn)
     with pytest.raises(DataConverterError) as e:
         dc("s")
+    assert str(e.value) == input.msg
