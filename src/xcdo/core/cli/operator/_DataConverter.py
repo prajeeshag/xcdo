@@ -1,6 +1,6 @@
 from typing import Any, Callable
 
-from ..exceptions import InvalidDefinition
+from ..exceptions import InvalidFunction
 from ._utils import inspect_function
 
 
@@ -12,26 +12,26 @@ class DataConverter:
         self._name = name
 
         if self._output_type is None or self.output_type is type(None):
-            raise InvalidDefinition(
+            raise InvalidFunction(
                 f"Function <{name}>: DataConverter cannot not have a return type 'None'"
             )
 
         if kwargs:
-            raise InvalidDefinition(
+            raise InvalidFunction(
                 f"Function <{name}>: DataConverter cannot have optional inputs"
             )
 
         if len(args) != 1:
-            raise InvalidDefinition(
+            raise InvalidFunction(
                 f"Function <{name}>: " + "DataConverter should have a single input"
             )
 
         if args[0][0].startswith("*"):
-            raise InvalidDefinition(
+            raise InvalidFunction(
                 f"Function <{name}>: DataConverter cannot have variadic inputs"
             )
         elif args[0][1] is None:
-            raise InvalidDefinition(
+            raise InvalidFunction(
                 f"Function <{name}>: Missing type hint for parameter 'i'"
             )
         self._input_type = args[0][1]

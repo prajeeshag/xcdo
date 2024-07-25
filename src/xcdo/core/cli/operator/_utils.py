@@ -15,7 +15,7 @@ def inspect_function(
     signature = inspect.signature(func)
 
     # Get the type hints of the function
-    type_hints = get_type_hints(func)
+    type_hints = get_type_hints(func, include_extras=True)
 
     # Initialize the lists for args and kwargs
     args_types: list[tuple[str, Any]] = []

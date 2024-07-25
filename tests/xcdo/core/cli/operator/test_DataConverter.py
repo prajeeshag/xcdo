@@ -1,15 +1,20 @@
 from typing import Any
 
 import pytest
-from xcdo.core.cli.exceptions import InvalidDefinition
+from xcdo.core.cli.exceptions import InvalidFunction
 from xcdo.core.cli.operator import DataConverter
 
-from .fn_samples import dcfailing, dcfailingruntime, dcpassing, dcpassingruntime
+from .testdata.DataConverter_testdata import (
+    dcfailing,
+    dcfailingruntime,
+    dcpassing,
+    dcpassingruntime,
+)
 
 
 @pytest.mark.parametrize("input", dcfailing)
 def test_failing(input: Any):
-    with pytest.raises(InvalidDefinition) as e:
+    with pytest.raises(InvalidFunction) as e:
         DataConverter(input.fn)
     assert str(e.value) == input.msg
 
@@ -30,6 +35,6 @@ def test_runtimefail(input: Any):
 
 
 @pytest.mark.parametrize("input", dcpassingruntime)
-def test_runtimepass(input: Any):
+def test_runtimesuccess(input: Any):
     dc = DataConverter(input[0])
     assert isinstance(dc(10.5), input[1])

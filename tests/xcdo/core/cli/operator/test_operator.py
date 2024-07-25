@@ -1,22 +1,25 @@
 # type: ignore
 import pytest
-from xcdo.core.cli.exceptions import InvalidDefinition
-from xcdo.core.cli.operator.operator import Operator
+from xcdo.core.cli.exceptions import InvalidFunction
+from xcdo.core.cli.operator import Operator
 
-from .fn_samples import Input, failing, passing
+from .testdata.operator_testdata import Input, failing, passing
 
 
 @pytest.mark.parametrize("input", failing)
 def test_failing(input):
-    with pytest.raises(InvalidDefinition) as e:
+    with pytest.raises(InvalidFunction) as e:
         Operator(input.fn)
-    assert str(e.value) == input.msg
+    assert str(e.value) == str(input.e)
+    assert e.value.fn == input.e.fn
+    assert e.value.pname == input.e.pname
 
 
 @pytest.mark.parametrize("input", passing)
 def test_passing(input: Input):
     op = Operator(input.fn)
     assert op.num_inputs == input.num_inputs
+    assert op.is_variadic_input == input.variadic_input
     for n in range(op.num_inputs):
         assert op.get_input_type(n) == input.input_types[n]
     # assert op.num_args == input.num_args

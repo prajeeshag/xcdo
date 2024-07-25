@@ -1,7 +1,6 @@
-from collections import OrderedDict
-from typing import Any, Callable
+from typing import Any, Callable, get_args, get_origin
 
-from ..exceptions import InvalidDefinition
+from ..exceptions import InvalidFunction
 from ._utils import inspect_function, type2str
 
 # type casting from string is trivial, others should use DataConverter
@@ -15,43 +14,56 @@ class Operator:
     ) -> None:
         self._fn = fn
         self._input_types: list[type] = []
-        self._num_inputs: int = 0
+        self._is_variadic_input = False
         self._parse()
 
     def _parse(self) -> None:
-        (
-            self._name,
-            self._params,
-            self._kwparams,
-            self._output_type,
-        ) = inspect_function(self._fn)
-        # this is needed because `input` will be removed from _params, so to maintain the orginal order of arguments
+        _, self._params, self._kwparams, self._output_type = inspect_function(self._fn)
+        # Needed To maintain the original order of arguments because `input` will be removed from _params
         self._arg_keys = [x[0] for x in self._params]
+        if self._output_type is None:
+            self._output_type = type(None)
 
+        # TODO refactor to rules and rule checking, which is enable self documentation of rules
         for pname, ptype in self._params:
-            if ptype is None:
-                raise InvalidDefinition(
-                    f"Function <{self._name}>: missing type hint for parameter '{pname}'"
-                )
-            if pname != "input" and ptype not in _BASE_PARAM_DATA_TYPES:
-                raise InvalidDefinition(
-                    f"Function <{self._name}>, parameter '{pname}': "
-                    + f"<{type2str(ptype)}> type is not allowed without a <str> to "
-                    + f"<{type2str(ptype)}> DataConverter"
-                )
+            self._check_type(pname, ptype)
         for pname, ptype, _ in self._kwparams:
-            if ptype is None:
-                raise InvalidDefinition(
-                    f"Function <{self._name}>: missing type hint for parameter '{pname}'"
+            if pname == "input":
+                raise InvalidFunction(
+                    "The name 'input' is reserved for the `input` parameter and cannot used as an optional parameter",
+                    self._fn,
                 )
-            if ptype not in _BASE_PARAM_DATA_TYPES:
-                raise InvalidDefinition(
-                    f"Function <{self._name}>, parameter '{pname}': "
-                    + f"<{type2str(ptype)}> type is not allowed without a <str> to "
-                    + f"<{type2str(ptype)}> DataConverter"
-                )
+            self._check_type(pname, ptype)
 
-        # self._parse_input()
+        self._parse_input()
+
+    def _check_type(self, pname: str, ptype: type | None):
+        if ptype is None:
+            raise InvalidFunction("Parameters should have type hints", self._fn, pname)
+
+        if get_origin(ptype) is tuple:
+            targs = get_args(ptype)
+            if Ellipsis in targs:
+                if len(targs) != 2 or targs[0] is Ellipsis:
+                    raise InvalidFunction(
+                        "Should be a valid type hint",
+                        self._fn,
+                        pname,
+                    )
+        if get_origin(ptype) is list and len(get_args(ptype)) != 1:
+            raise InvalidFunction(
+                "Should be a valid type hint",
+                self._fn,
+                pname,
+            )
+
+        if ptype not in _BASE_PARAM_DATA_TYPES:
+            _base_types = "(" + ",".join(map(type2str, _BASE_PARAM_DATA_TYPES)) + ")"
+            raise InvalidFunction(
+                f"Non-{_base_types} types should use a DataReader annotation",
+                self._fn,
+                pname,
+            )
 
         # self._parse_var_arg()
 
@@ -91,7 +103,6 @@ class Operator:
 
     def _parse_input(self):
         self._input_types = []
-        self._num_inputs = 0
         input = None
         for i in range(len(self._params)):
             if self._params[i][0] == "input":
@@ -101,15 +112,25 @@ class Operator:
             input_type = input[1]
             if not hasattr(input_type, "__origin__"):
                 self._input_types = [input_type]
-                self._num_inputs = 1
             elif input_type.__origin__ is list:
-                raise NotImplementedError
+                self._is_variadic_input = True
+                self._input_types = input_type.__args__
             elif input_type.__origin__ is tuple:
-                raise NotImplementedError
+                if input_type.__args__[-1] is Ellipsis:
+                    self._is_variadic_input = True
+                    self._input_types = [input_type.__args__[0]]
+                else:
+                    self._input_types = input_type.__args__
 
     @property
     def num_inputs(self) -> int:
-        return self._num_inputs
+        if self._is_variadic_input:
+            return -1
+        return len(self._input_types)
+
+    @property
+    def is_variadic_input(self) -> bool:
+        return self._is_variadic_input
 
     def get_input_type(self, n: int) -> type:
         return self._input_types[n]
