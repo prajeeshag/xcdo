@@ -3,7 +3,7 @@ import pytest
 from xcdo.core.cli.exceptions import InvalidFunction
 from xcdo.core.cli.operator import Operator
 
-from .testdata.operator_testdata import Input, failing, passing
+from .testdata.operator import Input, failing, passing
 
 
 @pytest.mark.parametrize("input", failing)

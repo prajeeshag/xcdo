@@ -1,13 +1,7 @@
-import inspect
-from typing import Any, Callable
+from typing import Callable
 
 from ..exceptions import InvalidFunction
 from ._utils import inspect_function, type2str
-
-# type casting from string is trivial, others should use DataReaders
-_BASE_PARAM_DATA_TYPES = [str, int, float]
-
-_EMPTY = inspect.Parameter.empty
 
 
 class Reader:
@@ -26,13 +20,13 @@ class Reader:
         self._output_type = output
 
     @property
-    def output_type(self):
+    def data_type(self) -> type:
         return self._output_type
 
-    def __call__(self, input: str) -> Any:
+    def __call__(self, input: str) -> object:
         output = self._fn(input)
-        if not isinstance(output, self.output_type):
+        if not isinstance(output, self.data_type):
             raise TypeError(
-                f"Promised <{type2str(self.output_type)}> but recieved <{type2str(type(output))}> from function <{self._fname}>"
+                f"Promised <{type2str(self.data_type)}> but recieved <{type2str(type(output))}> from function <{self._fname}>"
             )
         return output

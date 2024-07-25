@@ -4,7 +4,7 @@ import pytest
 from xcdo.core.cli.exceptions import InvalidFunction
 from xcdo.core.cli.operator import Reader
 
-from .testdata.reader_testdata import failing, passing
+from .testdata.reader import failing, passing
 
 
 @pytest.mark.parametrize("input", failing)
@@ -19,7 +19,7 @@ def test_failing(input: Any):
 @pytest.mark.parametrize("input", passing)
 def test_passing(input: Any):
     reader = Reader(input.fn)
-    assert reader.output_type == input.out_type
+    assert reader.data_type == input.out_type
 
 
 def frf00(i: str) -> int:

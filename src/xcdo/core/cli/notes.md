@@ -7,5 +7,10 @@
 - In fact DataTransformers are just callables with single input
 - assert `output` type at runtime 
 
-
+## Error Messages
 - Error messages can be documented as rules if written affirmatively
+
+## Type checking and Type hints
+- If you are asking me something tell me the type (Ask for type hints)
+- If you are saying you will return a particular type (Ask for type hints). And I will cross-check your promise at runtime
+- If I am telling that I will give something I will make sure that I keep the promise (Don't ask for type hints)

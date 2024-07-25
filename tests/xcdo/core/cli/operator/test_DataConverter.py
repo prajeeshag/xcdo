@@ -4,7 +4,7 @@ import pytest
 from xcdo.core.cli.exceptions import InvalidFunction
 from xcdo.core.cli.operator import DataConverter
 
-from .testdata.DataConverter_testdata import (
+from .testdata.data_converter import (
     dcfailing,
     dcfailingruntime,
     dcpassing,
