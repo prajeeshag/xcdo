@@ -5,7 +5,7 @@ from typing import Any, Callable, get_args, get_origin
 from ..exceptions import InvalidFunction
 from ._utils import inspect_function, type2str
 
-# type casting from string is trivial, others should use DataConverter
+# type casting from string is trivial, others should use DataReaders
 _BASE_PARAM_DATA_TYPES = [str, int, float]
 
 _EMPTY = inspect.Parameter.empty
@@ -98,19 +98,10 @@ class Operator:
 
         if get_origin(ptype) is tuple:
             targs = get_args(ptype)
-            if Ellipsis in targs:
-                if len(targs) != 2 or targs[0] is Ellipsis:
-                    raise InvalidFunction(
-                        "Should be a valid type hint",
-                        self._fn,
-                        pname,
-                    )
+            if Ellipsis in targs and (len(targs) != 2 or targs[0] is Ellipsis):
+                raise InvalidFunction("Should be a valid type hint", self._fn, pname)
         if get_origin(ptype) is list and len(get_args(ptype)) != 1:
-            raise InvalidFunction(
-                "Should be a valid type hint",
-                self._fn,
-                pname,
-            )
+            raise InvalidFunction("Should be a valid type hint", self._fn, pname)
 
         if pname != "input":
             self._check_datareader(pname, ptype)
@@ -182,6 +173,3 @@ class Operator:
 
     def is_writer(self) -> bool:
         raise NotImplementedError
-
-    def execute(self, input: tuple[Any, ...]) -> Any:
-        pass
