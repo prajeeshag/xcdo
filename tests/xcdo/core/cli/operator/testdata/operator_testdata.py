@@ -7,35 +7,6 @@ from xcdo.core.cli.exceptions import InvalidFunction
 
 
 @dataclass
-class Input:
-    fn: Any
-    input_types: Any = None
-    args: list[tuple[str, type]] = field(default_factory=list)
-    var_arg: tuple[str, type | None] = ("", None)
-    kwargs: OrderedDict[str, tuple[type, Any]] = field(default_factory=OrderedDict)
-    var_kwarg: tuple[str, type | None] = ("", None)
-    output_type: type = type(None)
-
-    def __post_init__(self):
-        self.num_args: int = len(self.args)
-        self.variadic_input = True
-
-        if self.input_types is None:
-            self.num_inputs = 0
-            self.variadic_input = False
-        elif isinstance(self.input_types, list):
-            self.variadic_input = True
-            self.num_inputs = -1
-        elif isinstance(self.input_types, tuple):
-            self.num_inputs = len(self.input_types)  # type: ignore
-            self.variadic_input = False
-        else:
-            self.input_types = [self.input_types]
-            self.variadic_input = False
-            self.num_inputs = 1
-
-
-@dataclass
 class InputFailing:
     fn: Any
     e: InvalidFunction
@@ -52,10 +23,49 @@ def ff07(input: tuple[int, ..., str]) -> None: ...
 def ff08(input: tuple[..., str]) -> None: ...
 def ff09(input: tuple[...]) -> None: ...
 def ff10(input: list[int, ...]) -> None: ...
+def ff11(input: list[bool]) -> None: ...
+def ff12(input: tuple[bool, ...]) -> None: ...
+def ff13(*b: list[str]): ...
+def ff14(
+    ik: int = 10,
+    *params: str,
+) -> int: ...
 
 
 # type: ignore
 failing = [
+    InputFailing(
+        ff14,
+        InvalidFunction(
+            "Variadic positional arguments should be before keyword-arguments",
+            ff14,
+            "*params",
+        ),
+    ),
+    InputFailing(
+        ff13,
+        InvalidFunction(
+            "Non-(str,int,float) types should use a DataReader annotation",
+            ff13,
+            "*b",
+        ),
+    ),
+    InputFailing(
+        ff12,
+        InvalidFunction(
+            "Non-(str,int,float) types should use a DataReader annotation",
+            ff12,
+            "input",
+        ),
+    ),
+    InputFailing(
+        ff11,
+        InvalidFunction(
+            "Non-(str,int,float) types should use a DataReader annotation",
+            ff11,
+            "input",
+        ),
+    ),
     InputFailing(
         ff10,
         InvalidFunction(
@@ -146,6 +156,35 @@ failing = [
 ]
 
 
+@dataclass
+class Input:
+    fn: Any
+    input_types: Any = None
+    args: list[tuple[str, type]] = field(default_factory=list)
+    var_arg: tuple[str, type] = ("", type(None))
+    kwargs: OrderedDict[str, tuple[type, Any]] = field(default_factory=OrderedDict)
+    var_kwarg: tuple[str, type] = ("", type(None))
+    output_type: type = type(None)
+
+    def __post_init__(self):
+        self.num_args: int = len(self.args)
+        self.variadic_input = True
+
+        if self.input_types is None:
+            self.num_inputs = 0
+            self.variadic_input = False
+        elif isinstance(self.input_types, list):
+            self.variadic_input = True
+            self.num_inputs = -1
+        elif isinstance(self.input_types, tuple):
+            self.num_inputs = len(self.input_types)  # type: ignore
+            self.variadic_input = False
+        else:
+            self.input_types = [self.input_types]
+            self.variadic_input = False
+            self.num_inputs = 1
+
+
 def fp00(): ...
 def fp01() -> None: ...
 def fp02(input: int) -> None: ...
@@ -153,22 +192,54 @@ def fp03(input: tuple[int]) -> None: ...
 def fp04(input: tuple[int, float, str]) -> None: ...
 def fp05(input: list[int]) -> None: ...
 def fp06(input: tuple[int, ...]) -> None: ...
-def fp11(*params: int) -> None: ...
-def fp21(i: int) -> None: ...
-def fp31(**kwds: float) -> None: ...
-def fp41(i: float = 1) -> None: ...
+def fp07(*params: int) -> None: ...
+def fp08(i: int) -> None: ...
+def fp09(input: tuple[int, str], i: int, j: str, *params: str) -> None: ...
+def fp10(ik: int = 1) -> None: ...
+def fp11(ik: int = 1, **kwds: str) -> None: ...
+def fp12(
+    input: tuple[int, str],
+    i: int,
+    j: str,
+    *params: str,
+    ik: int = 10,
+    sk: str = "hi",
+    **kwargs: int,
+) -> int: ...
 
 
 passing = [
-    Input(fp00),
-    Input(fp01),
-    Input(fp02, input_types=int),
-    Input(fp03, input_types=int),
-    Input(fp04, input_types=(int, float, str)),
-    Input(fp05, input_types=[int]),
+    Input(
+        fp12,
+        kwargs=OrderedDict([("ik", (int, 10)), ("sk", (str, "hi"))]),
+        var_kwarg=("**kwargs", int),
+        var_arg=("*params", str),
+        args=[("i", int), ("j", str)],
+        input_types=(int, str),
+        output_type=int,
+    ),
+    Input(
+        fp11,
+        kwargs=OrderedDict([("ik", (int, 1))]),
+        var_kwarg=("**kwds", str),
+    ),
+    Input(
+        fp10,
+        kwargs=OrderedDict([("ik", (int, 1))]),
+    ),
+    Input(
+        fp09,
+        args=[("i", int), ("j", str)],
+        var_arg=("*params", str),
+        input_types=(int, str),
+    ),
+    Input(fp08, args=[("i", int)]),
+    Input(fp07, var_arg=("*params", int)),
     Input(fp06, input_types=[int]),
-    # Input(fp11, output_type=type(None), var_arg=("params", int)),
-    # Input(fp21, output_type=type(None), args=[("i", int)]),
-    # Input(fp31, output_type=type(None), var_kwarg=("kwds", float)),
-    # Input(fp41, output_type=type(None), kwargs=OrderedDict([("i", (float, 1))])),
+    Input(fp05, input_types=[int]),
+    Input(fp04, input_types=(int, float, str)),
+    Input(fp03, input_types=int),
+    Input(fp02, input_types=int),
+    Input(fp01),
+    Input(fp00),
 ]
