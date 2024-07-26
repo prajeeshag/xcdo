@@ -31,8 +31,6 @@ class Operator:
     def _parse(self) -> None:
         _, params, self._output_type = inspect_function(self._fn)
         # Needed To maintain the original order of arguments because `input` will be removed from _params
-        for x in params:
-            self._params[x[0]] = x[1:]
         if self._output_type is None:
             self._output_type = type(None)
 
@@ -44,6 +42,9 @@ class Operator:
                     "The name 'input' is reserved for the `input` parameter and cannot used as an optional parameter",
                     self._fn,
                 )
+
+        for x in params:
+            self._params[x[0]] = x[1:]
 
         var_arg = None
         var_kwarg = None

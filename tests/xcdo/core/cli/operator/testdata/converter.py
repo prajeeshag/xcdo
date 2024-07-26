@@ -1,11 +1,14 @@
+# type: ignore
 from dataclasses import dataclass
 from typing import Any
+
+from xcdo.core.cli.exceptions import InvalidFunction
 
 
 @dataclass
 class InputFailing:
     fn: Any
-    msg: str
+    e: Exception
 
 
 @dataclass
@@ -27,37 +30,51 @@ def dcf08(i) -> int: ...  # type: ignore
 dcfailing = [
     InputFailing(
         dff00,
-        "Function <dff00>: DataConverter should have a single input",
-    ),
-    InputFailing(
-        dff01,
-        "Function <dff01>: DataConverter cannot have optional inputs",
+        InvalidFunction(
+            "Should take a single input",
+            dff00,
+        ),
     ),
     InputFailing(
         dff02,
-        "Function <dff02>: DataConverter cannot have variadic inputs",
+        InvalidFunction(
+            "Cannot have variadic inputs",
+            dff02,
+        ),
     ),
     InputFailing(
         dcf05,
-        "Function <dcf05>: DataConverter should have a single input",
+        InvalidFunction(
+            "Should take a single input",
+            dcf05,
+        ),
     ),
     InputFailing(
         dcf06,
-        "Function <dcf06>: DataConverter cannot not have a return type 'None'",
+        InvalidFunction(
+            "Cannot not have a return type 'None'",
+            dcf06,
+        ),
     ),
     InputFailing(
         dcf07,
-        "Function <dcf07>: DataConverter cannot not have a return type 'None'",
+        InvalidFunction(
+            "Cannot not have a return type 'None'",
+            dcf07,
+        ),
     ),
     InputFailing(
         dcf08,
-        "Function <dcf08>: Missing type hint for parameter 'i'",
+        InvalidFunction(
+            "Parameters should have valid type hint",
+            dcf08,
+        ),
     ),
 ]
 
 
 def dcp03(r: float) -> str:
-    return 1  # type: ignore
+    return 1
 
 
 dcpassing = [
@@ -67,7 +84,9 @@ dcpassing = [
 dcfailingruntime = [
     InputFailing(
         dcp03,
-        "Expected <class 'str'> but received <class 'int'> from function <dcp03>",
+        TypeError(
+            "Expected <str> but received <int> from function <dcp03>",
+        ),
     ),
 ]
 

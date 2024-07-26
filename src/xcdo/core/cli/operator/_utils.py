@@ -4,7 +4,7 @@ from typing import Any, Callable, get_type_hints
 
 def inspect_function(
     func: Callable[..., Any],
-) -> tuple[str, list[tuple[str, type | None, Any]], Any]:
+) -> tuple[str, list[tuple[str, Any, Any]], Any]:
     func_name = func.__name__
     # Get the signature of the function
     signature = inspect.signature(func)
@@ -13,7 +13,7 @@ def inspect_function(
     type_hints = get_type_hints(func, include_extras=True)
 
     # Initialize the lists for args and kwargs
-    args_types: list[tuple[str, type, Any]] = []
+    args_types: list[tuple[str, Any, Any]] = []
 
     for name, param in signature.parameters.items():
         param_type = type_hints.get(name, None)
