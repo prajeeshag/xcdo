@@ -11,7 +11,7 @@ class Converter:
         self._name = name
 
         if self._output_type is None or self.output_type is type(None):
-            raise InvalidFunction("Cannot not have a return type 'None'", self._fn)
+            raise InvalidFunction("Cannot have a return type 'None'", self._fn)
 
         if len(args) != 1:
             raise InvalidFunction("Should take a single input", self._fn)

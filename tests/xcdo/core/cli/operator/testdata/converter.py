@@ -52,14 +52,14 @@ dcfailing = [
     InputFailing(
         dcf06,
         InvalidFunction(
-            "Cannot not have a return type 'None'",
+            "Cannot have a return type 'None'",
             dcf06,
         ),
     ),
     InputFailing(
         dcf07,
         InvalidFunction(
-            "Cannot not have a return type 'None'",
+            "Cannot have a return type 'None'",
             dcf07,
         ),
     ),

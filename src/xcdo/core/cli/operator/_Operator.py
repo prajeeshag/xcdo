@@ -17,6 +17,7 @@ class Operator:
         fn: Callable[..., Any],
     ) -> None:
         self._fn = fn
+        self._fname: str = ""
         self._params: OrderedDict["str", tuple[type, Any]] = OrderedDict()
         self._input_types: list[type] = []
         self._is_variadic_input = False
@@ -29,7 +30,7 @@ class Operator:
         self._parse()
 
     def _parse(self) -> None:
-        _, params, self._output_type = inspect_function(self._fn)
+        self._fname, params, self._output_type = inspect_function(self._fn)
         # Needed To maintain the original order of arguments because `input` will be removed from _params
         if self._output_type is None:
             self._output_type = type(None)
@@ -51,6 +52,11 @@ class Operator:
         input = None
         for i in range(len(params)):
             if params[i][0] == "input":
+                if self._args or self._kwargs or var_kwarg or var_arg:
+                    raise InvalidFunction(
+                        "If present, the 'input' parameter should be the first parameter",
+                        self._fn,
+                    )
                 input = params[i]
             elif params[i][0].startswith("**"):
                 var_kwarg = params[i]
@@ -162,15 +168,18 @@ class Operator:
         return self._var_kwarg_name
 
     @property
-    def var_kwarg_type(self) -> type | None:
+    def var_kwarg_type(self) -> type:
         return self._var_kwarg_type
 
     @property
-    def output_type(self) -> type | None:
+    def output_type(self) -> type:
         return self._output_type
 
-    def is_reader(self) -> bool:
-        raise NotImplementedError
-
-    def is_writer(self) -> bool:
-        raise NotImplementedError
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        output: object = self._fn(*args, **kwds)
+        if not isinstance(output, self.output_type):
+            raise TypeError(
+                f"Expected <{type2str(self.output_type)}> but received"
+                + f" <{type2str(type(output))}> from function <{self._fname}>"
+            )
+        return output

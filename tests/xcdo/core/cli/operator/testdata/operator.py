@@ -5,6 +5,8 @@ from typing import Any
 
 from xcdo.core.cli.exceptions import InvalidFunction
 
+from .utils import e_args
+
 
 @dataclass
 class InputFailing:
@@ -24,40 +26,38 @@ def ff08(input: tuple[..., str]) -> None: ...
 def ff09(input: tuple[...]) -> None: ...
 def ff10(input: list[int, ...]) -> None: ...
 def ff11(input: list[bool]) -> None: ...
-def ff12(input: tuple[bool, ...]) -> None: ...
-def ff13(*b: list[str]): ...
-def ff14(
-    ik: int = 10,
-    *params: str,
-) -> int: ...
+def ff12(input: tuple[bool, ...]) -> None:
+    """
+    Non-(str,int,float) types should use a DataReader annotation
+    input
+    """
 
 
-# type: ignore
+def ff13(*b: list[str]):
+    """
+    Non-(str,int,float) types should use a DataReader annotation
+    *b
+    """
+
+
+def ff14(ik: int = 10, *params: str) -> int:
+    """
+    Variadic positional arguments should be before keyword-arguments
+    *params
+    """
+
+
+def ff15(ik: int, input: str, *params: str) -> int:
+    """
+    If present, the 'input' parameter should be the first parameter
+    """
+
+
 failing = [
-    InputFailing(
-        ff14,
-        InvalidFunction(
-            "Variadic positional arguments should be before keyword-arguments",
-            ff14,
-            "*params",
-        ),
-    ),
-    InputFailing(
-        ff13,
-        InvalidFunction(
-            "Non-(str,int,float) types should use a DataReader annotation",
-            ff13,
-            "*b",
-        ),
-    ),
-    InputFailing(
-        ff12,
-        InvalidFunction(
-            "Non-(str,int,float) types should use a DataReader annotation",
-            ff12,
-            "input",
-        ),
-    ),
+    InputFailing(ff15, InvalidFunction(*e_args(ff15))),
+    InputFailing(ff14, InvalidFunction(*e_args(ff14))),
+    InputFailing(ff13, InvalidFunction(*e_args(ff13))),
+    InputFailing(ff12, InvalidFunction(*e_args(ff12))),
     InputFailing(
         ff11,
         InvalidFunction(

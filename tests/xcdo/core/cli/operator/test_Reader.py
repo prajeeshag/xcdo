@@ -22,12 +22,20 @@ def test_passing(input: Any):
     assert reader.data_type == input.out_type
 
 
+def test_callable(mocker: Any):
+    fn = mocker.Mock()
+    inspect_function = mocker.patch("xcdo.core.cli.operator._Reader.inspect_function")
+    params = [("i", None, None)]
+    inspect_function.return_value = ("name", params[:], int)
+    reader = Reader(fn)
+    fn.return_value = 1
+    result = reader("s")
+    fn.assert_called_once_with("s")
+    assert result == 1
+
+
 def frf00(i: str) -> int:
     return "s"  # type: ignore
-
-
-def frp00(i: str) -> int:
-    return int(i)  # type: ignore
 
 
 def test_rterror():
@@ -35,8 +43,3 @@ def test_rterror():
     with pytest.raises(TypeError) as e:
         reader("s")
     assert str(e.value) == "Promised <int> but recieved <str> from function <frf00>"
-
-
-def test_rtsuccess():
-    reader = Reader(frp00)
-    assert reader("1") == 1

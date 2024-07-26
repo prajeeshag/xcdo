@@ -51,6 +51,7 @@ failing = [
 class InputPassing:
     fn: Any
     data_type: type
+    requires_file_path: bool
 
 
 def fp00(i: float) -> None: ...
@@ -59,7 +60,7 @@ def fp02(i: int, c: str) -> None: ...
 
 
 passing = [
-    InputPassing(fp00, float),
-    InputPassing(fp01, int),
-    InputPassing(fp02, int),
+    InputPassing(fp00, float, False),
+    InputPassing(fp01, int, True),
+    InputPassing(fp02, int, True),
 ]

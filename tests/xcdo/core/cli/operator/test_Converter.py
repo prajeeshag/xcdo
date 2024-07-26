@@ -8,7 +8,6 @@ from .testdata.converter import (
     dcfailing,
     dcfailingruntime,
     dcpassing,
-    dcpassingruntime,
 )
 
 
@@ -28,15 +27,23 @@ def test_passing(input: Any):
     assert dc.output_type == input.output_type
 
 
+def test_callable(mocker: Any):
+    fn = mocker.Mock()
+    inspect_function = mocker.patch(
+        "xcdo.core.cli.operator._Converter.inspect_function"
+    )
+    params = [("i", str, None)]
+    inspect_function.return_value = ("name", params[:], int)
+    converter = Converter(fn)
+    fn.return_value = 1
+    result = converter("s")
+    fn.assert_called_once_with("s")
+    assert result == 1
+
+
 @pytest.mark.parametrize("input", dcfailingruntime)
 def test_runtimefail(input: Any):
     dc = Converter(input.fn)
     with pytest.raises(TypeError) as e:
         dc("s")
     assert str(e.value) == str(input.e)
-
-
-@pytest.mark.parametrize("input", dcpassingruntime)
-def test_runtimesuccess(input: Any):
-    dc = Converter(input[0])
-    assert isinstance(dc(10.5), input[1])
