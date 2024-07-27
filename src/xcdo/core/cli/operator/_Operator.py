@@ -1,6 +1,7 @@
 import inspect
 from collections import OrderedDict
-from typing import Annotated, Any, Callable, get_args, get_origin
+from dataclasses import dataclass
+from typing import Annotated, Any, Callable, TypeGuard, cast, get_args, get_origin
 
 from ..exceptions import InvalidFunction
 from ._Reader import Reader
@@ -29,45 +30,114 @@ _BASE_DATA_READERS = {
 _EMPTY = inspect.Parameter.empty
 
 
-class _Param:
-    def __init__(
-        self,
-        fn: Callable[..., Any],
-        pname: str,
-        ptype: Any,
-        default: Any = _EMPTY,
-    ) -> None:
-        self.name = pname
-        self.default = default
-        self.data_reader: Any = None
-        if ptype is None:
-            raise InvalidFunction("Should have valid type annotation", fn, pname)
-        torigin = get_origin(ptype)
-        if torigin is Annotated:
-            targs = get_args(ptype)
-            self.dtype = targs[0]
-            for m in targs[1:]:
-                if isinstance(m, Reader):
-                    self.data_reader = m
-                    break
-        elif ptype in _BASE_DATA_READERS:
-            self.dtype = ptype
-            self.data_reader = _BASE_DATA_READERS[ptype]
+@dataclass(frozen=True)
+class _Input:
+    empty: bool
+    dtypes: tuple[type, ...]
+    is_variadic: bool
+    is_list_or_tuple: bool
 
-        if self.data_reader is None:
-            _base_types = "(" + ",".join(map(type2str, _BASE_DATA_READERS)) + ")"
+    @property
+    def len(self):
+        return len(self.dtypes)
+
+
+def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
+    _fn = fn
+    empty = True
+    dtypes: list[type] = []
+    is_variadic = False
+    is_list_or_tuple = False
+
+    if fn is None:
+        return _Input(empty, tuple(dtypes), is_variadic, is_list_or_tuple)
+
+    empty = False
+    pname = "input"
+
+    if ptype is None:
+        raise InvalidFunction("Should have valid type annotation", fn, pname)
+
+    if get_origin(ptype) is tuple:
+        targs = get_args(ptype)
+        if Ellipsis in targs and (len(targs) != 2 or targs[0] is Ellipsis):
+            raise InvalidFunction("Should have valid type annotation", fn, pname)
+    if get_origin(ptype) is list and len(get_args(ptype)) != 1:
+        raise InvalidFunction("Should have valid type annotation", fn, pname)
+    torigin = get_origin(ptype)
+    targs = get_args(ptype)
+    if torigin not in (list, tuple):
+        if torigin is not None:
             raise InvalidFunction(
-                f"Non-{_base_types} types should be annotated with a <Reader>",
-                fn,
-                pname,
+                "Unsupported parameterized generic type for 'input'",
+                _fn,
             )
+        dtypes = [ptype]
+    elif torigin is list or (torigin is tuple and targs[-1] is Ellipsis):
+        is_variadic = True
+        is_list_or_tuple = True
+        if get_origin(targs[0]) is not None:
+            raise InvalidFunction(
+                "Type of 'input' items cannot be a parameterized generic", _fn
+            )
+        dtypes = [targs[0]]
+    elif torigin is tuple:
+        is_list_or_tuple = True
+        for targ in targs:
+            if get_origin(targ) is not None:
+                raise InvalidFunction(
+                    "Type of 'input' items cannot be a parameterized generic",
+                    _fn,
+                )
+            dtypes.append(targ)
+    return _Input(empty, tuple(dtypes), is_variadic, is_list_or_tuple)
+
+
+@dataclass(frozen=True)
+class _Param:
+    name: str
+    dtype: type
+    default: object
+    data_reader: Reader
+
+
+def _param_factory(fn: Any, pname: str, ptype: Any, default: Any = _EMPTY) -> _Param:
+    name = pname
+    data_reader = None
+
+    if ptype is None:
+        raise InvalidFunction("Should have valid type annotation", fn, pname)
+
+    torigin = get_origin(ptype)
+    dtype = ptype
+    if torigin is Annotated:
+        targs = get_args(ptype)
+        dtype = targs[0]
+        for m in targs[1:]:
+            if isinstance(m, Reader):
+                data_reader = m
+                break
+    elif torigin is not None:
+        raise InvalidFunction(
+            "Parameter type cannot be a parameterized generic", fn, pname
+        )
+    elif ptype in _BASE_DATA_READERS:
+        dtype = ptype
+        data_reader = _BASE_DATA_READERS[ptype]
+    if data_reader is None:
+        _base_types = "(" + ",".join(map(type2str, _BASE_DATA_READERS)) + ")"
+        raise InvalidFunction(
+            f"Non-{_base_types} types should be annotated with a <Reader>", fn, pname
+        )
+    return _Param(name, dtype, default, data_reader)
+
+
+def _is_list_tuple(x: object) -> TypeGuard[list[object] | tuple[object, ...]]:
+    return isinstance(x, (list, tuple))
 
 
 class Operator:
-    def __init__(
-        self,
-        fn: Callable[..., Any],
-    ) -> None:
+    def __init__(self, fn: Callable[..., Any]) -> None:
         self._fn = fn
         self._parse()
 
@@ -77,16 +147,27 @@ class Operator:
         if self._output_type is None:
             self._output_type = type(None)
 
-        self._params: list[str] = [x[0] for x in params]
+        if self._output_type is Any:
+            raise InvalidFunction("Type 'Any' is not supported", self._fn)
+        elif get_origin(self._output_type) is not None:
+            raise InvalidFunction(
+                "Return type cannot be a parameterized generic type", self._fn
+            )
 
+        self._params: list[str] = [x[0] for x in params]
         self._args: list[_Param] = []
         self._optional_kwargs: dict[str, _Param] = OrderedDict()
         self._required_kwargs: dict[str, _Param] = OrderedDict()
-        self._is_variadic_input = False
-        self._input_types: list[type] = []
         self._var_arg: _Param | None = None
         self._var_kwarg: _Param | None = None
+        self._input = _input_factory()
+
         for i in range(len(params)):
+            if params[i][1] is Any:
+                raise InvalidFunction(
+                    "Type 'Any' is not supported", self._fn, params[i][0]
+                )
+
             if params[i][0] == "input":
                 if (
                     self._args
@@ -103,9 +184,9 @@ class Operator:
                         "The name 'input' is reserved for the `input` parameter and cannot used as an optional parameter",
                         self._fn,
                     )
-                self._parse_input(params[i])
+                self._input = _input_factory(self._fn, params[i][1])
             elif params[i][0].startswith("**"):
-                self._var_kwarg = _Param(self._fn, *params[i])
+                self._var_kwarg = _param_factory(self._fn, *params[i])
             elif params[i][0].startswith("*"):
                 if self._optional_kwargs:
                     raise InvalidFunction(
@@ -113,55 +194,21 @@ class Operator:
                         self._fn,
                         params[i][0],
                     )
-                self._var_arg = _Param(self._fn, *params[i])
+                self._var_arg = _param_factory(self._fn, *params[i])
             elif params[i][2] is _EMPTY and not self._var_arg:
-                self._args.append(_Param(self._fn, *params[i]))
+                self._args.append(_param_factory(self._fn, *params[i]))
             elif params[i][2] is _EMPTY and self._var_arg:
-                self._required_kwargs[params[i][0]] = _Param(self._fn, *params[i])
-            else:
-                self._optional_kwargs[params[i][0]] = _Param(self._fn, *params[i])
-
-    def _parse_input(self, input: Any):
-        self._check_type_hints(input[0], input[1])
-        input_type = input[1]
-        torigin = get_origin(input_type)
-        targs = get_args(input_type)
-        self._is_variadic_input = False
-        self._input_types: list[type] = []
-        if torigin not in (list, tuple):
-            self._input_types = [input_type]
-        elif torigin is list or (torigin is tuple and targs[-1] is Ellipsis):
-            self._is_variadic_input = True
-            self._input_types = [targs[0]]
-        elif torigin is tuple:
-            for subinput_type in targs:
-                self._input_types.append(subinput_type)
-
-    def _check_type_hints(self, pname: str, ptype: type | None):
-        if ptype is None:
-            raise InvalidFunction("Should have valid type annotation", self._fn, pname)
-
-        if get_origin(ptype) is tuple:
-            targs = get_args(ptype)
-            if Ellipsis in targs and (len(targs) != 2 or targs[0] is Ellipsis):
-                raise InvalidFunction(
-                    "Should have valid type annotation", self._fn, pname
+                self._required_kwargs[params[i][0]] = _param_factory(
+                    self._fn, *params[i]
                 )
-        if get_origin(ptype) is list and len(get_args(ptype)) != 1:
-            raise InvalidFunction("Should have valid type annotation", self._fn, pname)
+            else:
+                self._optional_kwargs[params[i][0]] = _param_factory(
+                    self._fn, *params[i]
+                )
 
     @property
-    def num_inputs(self) -> int:
-        if self._is_variadic_input:
-            return -1
-        return len(self._input_types)
-
-    @property
-    def is_variadic_input(self) -> bool:
-        return self._is_variadic_input
-
-    def get_input_type(self, n: int = 0) -> type:
-        return self._input_types[n]
+    def input(self) -> _Input:
+        return self._input
 
     @property
     def num_args(self) -> int:
@@ -196,7 +243,40 @@ class Operator:
     def output_type(self) -> type:
         return self._output_type
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+    def __call__(self, input: object, *args: Any, **kwds: Any) -> Any:
+        if self.input.len > 1:
+            if not _is_list_tuple(input):
+                raise TypeError(
+                    f"Expected a <list> or <tuple> for 'input', but got <{type2str(type(input))}>"
+                )
+            if self.input.len != len(input):
+                raise ValueError(
+                    f"'input' size mismatch: Expected ({self.input.len}), Recieved ({len(input)})"
+                )
+            for n in range(self.input.len):
+                etype = self.input.dtypes[n]
+                if not isinstance(input[n], etype):
+                    raise TypeError(
+                        f"Expected a <{type2str(etype)}>, but got <{type2str(type(input[n]))}> for 'input[{n}]'"
+                    )
+        elif self.input.len == 1:
+            if _is_list_tuple(input):
+                if len(input) != 1:
+                    raise ValueError(
+                        f"'input' size mismatch: Expected ({self.input.len}), Recieved ({len(input)})"
+                    )
+                etype = self.input.dtypes[0]
+                if not isinstance(input[0], etype):
+                    raise TypeError(
+                        f"Expected a <{type2str(etype)}>, but got <{type2str(type(input[0]))}> for 'input[0]'"
+                    )
+            else:
+                etype = self.input.dtypes[0]
+                if not isinstance(input, etype):
+                    raise TypeError(
+                        f"Expected a <{type2str(etype)}>, but got <{type2str(type(input))}> for 'input[0]'"
+                    )
+
         output: object = self._fn(*args, **kwds)
         if not isinstance(output, self.output_type):
             raise TypeError(

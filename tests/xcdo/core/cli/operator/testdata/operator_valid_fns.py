@@ -31,6 +31,18 @@ class _VParams(_KParams):
 
 
 @dataclass
+class _Input:
+    dtypes: tuple[type, ...] = field(default_factory=tuple)
+    empty: bool = True
+    is_list_or_tuple: bool = False
+    is_variadic: bool = False
+
+    def __post_init__(self):
+        self.len = len(self.dtypes)
+        self.empty = self.empty and not bool(self.dtypes)
+
+
+@dataclass
 class Input:
     fn: Any
     input_types: Any = None
@@ -46,18 +58,15 @@ class Input:
         self.variadic_input = True
 
         if self.input_types is None:
-            self.num_inputs = 0
-            self.variadic_input = False
+            self.input = _Input()
         elif isinstance(self.input_types, list):
-            self.variadic_input = True
-            self.num_inputs = -1
+            self.input = _Input(
+                dtypes=tuple(self.input_types), is_variadic=True, is_list_or_tuple=True
+            )
         elif isinstance(self.input_types, tuple):
-            self.num_inputs = len(self.input_types)  # type: ignore
-            self.variadic_input = False
+            self.input = _Input(dtypes=tuple(self.input_types), is_list_or_tuple=True)
         else:
-            self.input_types = [self.input_types]
-            self.variadic_input = False
-            self.num_inputs = 1
+            self.input = _Input(dtypes=tuple([self.input_types]))
 
 
 def _toBool(s: str) -> bool:
@@ -152,7 +161,7 @@ passing = [
     Input(fp06, input_types=[int]),
     Input(fp05, input_types=[int]),
     Input(fp04, input_types=(int, float, str)),
-    Input(fp03, input_types=int),
+    Input(fp03, input_types=(int,)),
     Input(fp02, input_types=int),
     Input(fp01),
     Input(fp00),

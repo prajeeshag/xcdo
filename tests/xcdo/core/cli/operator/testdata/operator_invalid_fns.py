@@ -1,7 +1,7 @@
 # type: ignore
 import sys
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 from xcdo.core.cli.exceptions import InvalidFunction
 
@@ -37,7 +37,7 @@ def ff02(b: bool):
     """
 
 
-def ff03(bk: list[str] = False):
+def ff03(bk: bool = False):
     """
     Non-(str,int,float) types should be annotated with a <Reader>
     bk
@@ -92,7 +92,7 @@ def ff10(input: list[int, ...]) -> None:
     """
 
 
-def ff13(*b: list[str]):
+def ff13(*b: bool):
     """
     Non-(str,int,float) types should be annotated with a <Reader>
     *b
@@ -109,6 +109,99 @@ def ff14(ik: int = 10, *params: str) -> int:
 def ff15(ik: int, input: str, *params: str) -> int:
     """
     If present, the 'input' parameter should be the first parameter
+    """
+
+
+def ff16(i: list[str]) -> int:
+    """
+    Parameter type cannot be a parameterized generic
+    i
+    """
+
+
+def ff17(j: int, k: dict[str, str] = {"k": "j"}) -> int:
+    """
+    Parameter type cannot be a parameterized generic
+    k
+    """
+
+
+def ff18(j: int, *k: dict[str, str]) -> int:
+    """
+    Parameter type cannot be a parameterized generic
+    *k
+    """
+
+
+def ff19(j: int, **k: dict[str, str]) -> int:
+    """
+    Parameter type cannot be a parameterized generic
+    **k
+    """
+
+
+def ff20(input: list[tuple[str, ...]]) -> int:
+    """
+    Type of 'input' items cannot be a parameterized generic
+    """
+
+
+def ff21(input: tuple[list[str]]) -> int:
+    """
+    Type of 'input' items cannot be a parameterized generic
+    """
+
+
+def ff22(input: Callable[str, str]) -> int:
+    """
+    Unsupported parameterized generic type for 'input'
+    """
+
+
+def ff23() -> list[int]:
+    """
+    Return type cannot be a parameterized generic type
+    """
+
+
+def ff24() -> Any:
+    """
+    Type 'Any' is not supported
+    """
+
+
+def ff25(i: Any):
+    """
+    Type 'Any' is not supported
+    i
+    """
+
+
+def ff26(ik: Any = 1):
+    """
+    Type 'Any' is not supported
+    ik
+    """
+
+
+def ff27(input: Any):
+    """
+    Type 'Any' is not supported
+    input
+    """
+
+
+def ff28(*i: Any):
+    """
+    Type 'Any' is not supported
+    *i
+    """
+
+
+def ff29(**i: Any):
+    """
+    Type 'Any' is not supported
+    **i
     """
 
 

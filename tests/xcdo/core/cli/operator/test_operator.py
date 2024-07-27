@@ -21,12 +21,10 @@ def test_failing(input):
 @pytest.mark.parametrize("input", passing)
 def test_passing(input: Any):
     op = Operator(input.fn)
-    assert op.num_inputs == input.num_inputs
-    assert op.is_variadic_input == input.variadic_input
-    if op.is_variadic_input:
-        assert op.get_input_type() == input.input_types[0]
-    for n in range(op.num_inputs):
-        assert op.get_input_type(n) == input.input_types[n]
+    assert op.input.len == input.input.len
+    assert op.input.is_variadic == input.input.is_variadic
+    assert op.input.is_list_or_tuple == input.input.is_list_or_tuple
+    assert op.input.dtypes == input.input.dtypes
 
     assert op.num_args == input.num_args
     for n in range(op.num_args):
@@ -60,6 +58,22 @@ def test_passing(input: Any):
         assert op.var_kwarg.data_reader == input.var_kwarg.data_reader
 
     assert op.output_type == input.output_type
+
+
+# @pytest.mark.parametrize(
+#     "params,input,res",
+#     [[], 1],
+# )
+# def test_callable_invalid(mocker: Any, params: Any, input: Any):
+#     fn = mocker.Mock()
+#     inspect_function = mocker.patch("xcdo.core.cli.operator._Operator.inspect_function")
+#     params = [("i", int, None)]
+#     inspect_function.return_value = ("name", params[:], type(res))
+#     operator = Operator(fn)
+#     fn.return_value = res
+#     result = operator(*args, **kwds)
+#     fn.assert_called_once_with(*args, **kwds)
+#     assert result == res
 
 
 @pytest.mark.parametrize(
