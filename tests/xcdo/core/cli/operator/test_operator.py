@@ -40,8 +40,15 @@ def test_passing(input: Any):
         assert op.var_arg.dtype == input.var_arg.dtype
         assert op.var_arg.data_reader == input.var_arg.data_reader
 
-    assert op.kwarg_keys == tuple(input.kwargs.keys())
-    for k in op.kwarg_keys:
+    assert op.required_kwarg_keys == tuple(input.required_kwargs.keys())
+    for k in op.required_kwarg_keys:
+        arg = op.get_kwarg(k)
+        assert arg.dtype == input.required_kwargs[k].dtype
+        assert arg.data_reader == input.required_kwargs[k].data_reader
+        assert arg.default == input.required_kwargs[k].default
+
+    assert op.optional_kwarg_keys == tuple(input.kwargs.keys())
+    for k in op.optional_kwarg_keys:
         arg = op.get_kwarg(k)
         assert arg.dtype == input.kwargs[k].dtype
         assert arg.data_reader == input.kwargs[k].data_reader

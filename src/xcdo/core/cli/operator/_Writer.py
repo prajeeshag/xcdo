@@ -21,7 +21,7 @@ class Writer(Operator):
         if self.output_type is not type(None):
             raise InvalidFunction("Should return 'None'", self._fn)
 
-        if self.kwarg_keys:
+        if self.required_kwarg_keys or self.optional_kwarg_keys:
             raise InvalidFunction("Cannot have keyword arguments", self._fn)
 
         if self.var_arg or self.var_kwarg:

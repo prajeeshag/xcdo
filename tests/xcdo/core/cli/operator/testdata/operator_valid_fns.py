@@ -20,9 +20,14 @@ class _KParams:
 
 
 class _Params(_KParams):
-    def __init__(self, name: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, name: str, dtype: type, data_reader: Any = None):
+        super().__init__(dtype=dtype, data_reader=data_reader)
         self.name = name
+
+
+class _VParams(_KParams):
+    def __init__(self, dtype: type):
+        super().__init__(dtype, default=None)
 
 
 @dataclass
@@ -30,9 +35,10 @@ class Input:
     fn: Any
     input_types: Any = None
     args: list[_Params] = field(default_factory=list)
-    var_arg: _KParams = None
+    var_arg: _VParams = None
     kwargs: OrderedDict[str, _KParams] = field(default_factory=OrderedDict)
-    var_kwarg: _KParams = None
+    required_kwargs: OrderedDict[str, _KParams] = field(default_factory=OrderedDict)
+    var_kwarg: _VParams = None
     output_type: type = type(None)
 
     def __post_init__(self):
@@ -52,6 +58,13 @@ class Input:
             self.input_types = [self.input_types]
             self.variadic_input = False
             self.num_inputs = 1
+
+
+def _toBool(s: str) -> bool:
+    return False
+
+
+_toBoolReader = Reader(_toBool)
 
 
 def fp00(): ...
@@ -78,22 +91,32 @@ def fp12(
 def fp13(input: list[bool]) -> None: ...
 def fp14(input: tuple[bool, ...]) -> None: ...
 def fp15(input: tuple[bool, int]) -> None: ...
-
-
-def _toBool(s: str) -> bool:
-    return False
-
-
-_toBoolReader = Reader(_toBool)
-
-
 def fp16(i: Annotated[bool, _toBoolReader]) -> None: ...
+def fp17(input: int, i: int, j: int, *args: int, k: int, m: int) -> None: ...
+def fp18(
+    input: int, i: int, j: int, *args: int, k: int, m: int, n: int = 1
+) -> None: ...
 
 
 passing = [
     Input(
+        fp18,
+        args=[_Params("i", int), _Params("j", int)],
+        required_kwargs=OrderedDict([("k", _KParams(int)), ("m", _KParams(int))]),
+        kwargs=OrderedDict([("n", _KParams(int, 1))]),
+        var_arg=_VParams(int),
+        input_types=int,
+    ),
+    Input(
+        fp17,
+        args=[_Params("i", int), _Params("j", int)],
+        required_kwargs=OrderedDict([("k", _KParams(int)), ("m", _KParams(int))]),
+        var_arg=_VParams(int),
+        input_types=int,
+    ),
+    Input(
         fp16,
-        args=[_Params("i", bool, data_reader=_toBoolReader)],
+        args=[_Params("i", bool, _toBoolReader)],
     ),
     Input(fp15, input_types=(bool, int)),
     Input(fp14, input_types=[bool]),
@@ -106,8 +129,8 @@ passing = [
                 ("sk", _KParams(str, "hi")),
             ]
         ),
-        var_kwarg=_KParams(int),
-        var_arg=_KParams(str),
+        var_kwarg=_VParams(int),
+        var_arg=_VParams(str),
         args=[_Params("i", int), _Params("j", str)],
         input_types=(int, str),
         output_type=int,
@@ -115,17 +138,17 @@ passing = [
     Input(
         fp11,
         kwargs=OrderedDict([("ik", _KParams(int, 1))]),
-        var_kwarg=_KParams(str),
+        var_kwarg=_VParams(str),
     ),
     Input(fp10, kwargs=OrderedDict([("ik", _KParams(int, 1))])),
     Input(
         fp09,
         args=[_Params("i", int), _Params("j", str)],
-        var_arg=_KParams(str),
+        var_arg=_VParams(str),
         input_types=(int, str),
     ),
     Input(fp08, args=[_Params("i", int)]),
-    Input(fp07, var_arg=_KParams(int)),
+    Input(fp07, var_arg=_VParams(int)),
     Input(fp06, input_types=[int]),
     Input(fp05, input_types=[int]),
     Input(fp04, input_types=(int, float, str)),

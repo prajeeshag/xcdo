@@ -80,14 +80,20 @@ class Operator:
         self._params: list[str] = [x[0] for x in params]
 
         self._args: list[_Param] = []
-        self._kwargs: dict[str, _Param] = OrderedDict()
+        self._optional_kwargs: dict[str, _Param] = OrderedDict()
+        self._required_kwargs: dict[str, _Param] = OrderedDict()
         self._is_variadic_input = False
         self._input_types: list[type] = []
         self._var_arg: _Param | None = None
         self._var_kwarg: _Param | None = None
         for i in range(len(params)):
             if params[i][0] == "input":
-                if self._args or self._kwargs or self._var_kwarg or self._var_arg:
+                if (
+                    self._args
+                    or self._optional_kwargs
+                    or self._var_kwarg
+                    or self._var_arg
+                ):
                     raise InvalidFunction(
                         "If present, the 'input' parameter should be the first parameter",
                         self._fn,
@@ -101,17 +107,19 @@ class Operator:
             elif params[i][0].startswith("**"):
                 self._var_kwarg = _Param(self._fn, *params[i])
             elif params[i][0].startswith("*"):
-                if self._kwargs:
+                if self._optional_kwargs:
                     raise InvalidFunction(
                         "Variadic positional arguments should be before keyword-arguments",
                         self._fn,
                         params[i][0],
                     )
                 self._var_arg = _Param(self._fn, *params[i])
-            elif params[i][2] is _EMPTY:
+            elif params[i][2] is _EMPTY and not self._var_arg:
                 self._args.append(_Param(self._fn, *params[i]))
+            elif params[i][2] is _EMPTY and self._var_arg:
+                self._required_kwargs[params[i][0]] = _Param(self._fn, *params[i])
             else:
-                self._kwargs[params[i][0]] = _Param(self._fn, *params[i])
+                self._optional_kwargs[params[i][0]] = _Param(self._fn, *params[i])
 
     def _parse_input(self, input: Any):
         self._check_type_hints(input[0], input[1])
@@ -168,11 +176,17 @@ class Operator:
         return self._var_arg
 
     @property
-    def kwarg_keys(self) -> tuple[str, ...]:
-        return tuple(self._kwargs.keys())
+    def optional_kwarg_keys(self) -> tuple[str, ...]:
+        return tuple(self._optional_kwargs.keys())
+
+    @property
+    def required_kwarg_keys(self) -> tuple[str, ...]:
+        return tuple(self._required_kwargs.keys())
 
     def get_kwarg(self, key: str) -> _Param:
-        return self._kwargs[key]
+        if key in self._optional_kwargs:
+            return self._optional_kwargs[key]
+        return self._required_kwargs[key]
 
     @property
     def var_kwarg(self) -> _Param | None:
