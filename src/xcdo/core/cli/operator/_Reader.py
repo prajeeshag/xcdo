@@ -1,32 +1,11 @@
-from typing import Callable
+from typing import Any, Callable
 
 from ..exceptions import InvalidFunction
-from ._utils import inspect_function, type2str
+from ._Converter import Converter
 
 
-class Reader:
-    def __init__(
-        self,
-        fn: Callable[[str], object],
-    ) -> None:
-        self._fn = fn
-        self._fname, params, output = inspect_function(fn)
-        if output is None or output is type(None):
-            raise (InvalidFunction("Return type cannot be NoneType", fn))
-        if len(params) != 1:
-            raise (InvalidFunction("Should take a single input of type <str>", fn))
-        if params[0][0].startswith("*"):
-            raise (InvalidFunction("Should take a single input of type <str>", fn))
-        self._output_type = output
-
-    @property
-    def data_type(self) -> type:
-        return self._output_type
-
-    def __call__(self, input: str) -> object:
-        output = self._fn(input)
-        if not isinstance(output, self.data_type):
-            raise TypeError(
-                f"Promised <{type2str(self.data_type)}> but recieved <{type2str(type(output))}> from function <{self._fname}>"
-            )
-        return output
+class Reader(Converter):
+    def __init__(self, fn: Callable[[str], Any]) -> None:
+        super().__init__(fn)
+        if self.input_type is not str:
+            raise InvalidFunction("Input should be of type <str>", self._fn)

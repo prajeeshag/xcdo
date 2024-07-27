@@ -9,3 +9,12 @@ def e_args(fn):
     if len(docstring) > 3:
         res.append(docstring[2].strip())
     return tuple(res)
+
+
+def list_functions(current_module, startswith):
+    ff_functions = [
+        getattr(current_module, func)
+        for func in dir(current_module)
+        if func.startswith(startswith) and callable(getattr(current_module, func))
+    ]
+    return ff_functions

@@ -5,7 +5,8 @@ import pytest
 from xcdo.core.cli.exceptions import InvalidFunction
 from xcdo.core.cli.operator import Operator
 
-from .testdata.operator import Input, failing, passing
+from .testdata.operator_invalid_fns import failing
+from .testdata.operator_valid_fns import passing
 
 
 @pytest.mark.parametrize("input", failing)
@@ -18,7 +19,7 @@ def test_failing(input):
 
 
 @pytest.mark.parametrize("input", passing)
-def test_passing(input: Input):
+def test_passing(input: Any):
     op = Operator(input.fn)
     assert op.num_inputs == input.num_inputs
     assert op.is_variadic_input == input.variadic_input
@@ -26,18 +27,31 @@ def test_passing(input: Input):
         assert op.get_input_type() == input.input_types[0]
     for n in range(op.num_inputs):
         assert op.get_input_type(n) == input.input_types[n]
+
     assert op.num_args == input.num_args
     for n in range(op.num_args):
-        assert op.get_arg_name(n) == input.args[n][0]
-        assert op.get_arg_type(n) == input.args[n][1]
-    assert op.var_arg == input.var_arg[0]
-    assert op.var_arg_type == input.var_arg[1]
+        arg = op.get_arg(n)
+        assert arg.name == input.args[n].name
+        assert arg.dtype == input.args[n].dtype
+        assert arg.data_reader == input.args[n].data_reader
+
+    assert bool(op.var_arg) == bool(input.var_arg)
+    if op.var_arg:
+        assert op.var_arg.dtype == input.var_arg.dtype
+        assert op.var_arg.data_reader == input.var_arg.data_reader
+
     assert op.kwarg_keys == tuple(input.kwargs.keys())
     for k in op.kwarg_keys:
-        assert op.get_kwarg_type(k) == input.kwargs[k][0]
-        assert op.get_kwarg_default_value(k) == input.kwargs[k][1]
-    assert op.var_kwarg == input.var_kwarg[0]
-    assert op.var_kwarg_type == input.var_kwarg[1]
+        arg = op.get_kwarg(k)
+        assert arg.dtype == input.kwargs[k].dtype
+        assert arg.data_reader == input.kwargs[k].data_reader
+        assert arg.default == input.kwargs[k].default
+
+    assert bool(op.var_kwarg) == bool(input.var_kwarg)
+    if op.var_kwarg:
+        assert op.var_kwarg.dtype == input.var_kwarg.dtype
+        assert op.var_kwarg.data_reader == input.var_kwarg.data_reader
+
     assert op.output_type == input.output_type
 
 

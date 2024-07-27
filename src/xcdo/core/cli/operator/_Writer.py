@@ -1,38 +1,36 @@
 from typing import Any, Callable
 
 from ..exceptions import InvalidFunction
-from ._utils import inspect_function
+from ._Operator import Operator
 
 
-class Writer:
-    def __init__(self, fn: Callable[[Any, str], None]) -> None:
-        self._fn = fn
-        self._fname, params, _ = inspect_function(fn)
-        if len(params) < 1 or len(params) > 2:
+class Writer(Operator):
+    def __init__(self, fn: Callable[[Any, str], None] | Callable[[Any], None]) -> None:
+        super().__init__(fn)
+        if self.num_inputs != 1:
+            raise InvalidFunction("Must take a single 'input'", self._fn)
+
+        if self.num_args > 1:
             raise InvalidFunction(
-                "Must have at least one and no more than two arguments", self._fn
+                "Cannot have more than two arguments, including 'input'", self._fn
             )
-        if params[0][0].startswith("*"):
+
+        if self.num_args and self.get_arg(0).dtype is not str:
+            raise InvalidFunction("The second argument must be of type <str>", self._fn)
+
+        if self.output_type is not type(None):
+            raise InvalidFunction("Should return 'None'", self._fn)
+
+        if self.kwarg_keys:
+            raise InvalidFunction("Cannot have keyword arguments", self._fn)
+
+        if self.var_arg or self.var_kwarg:
             raise InvalidFunction("Cannot have variadic arguments", self._fn)
-
-        if len(params) == 2 and params[1][0].startswith("*"):
-            raise InvalidFunction("Cannot have variadic arguments", self._fn)
-
-        if params[0][1] is None:
-            raise InvalidFunction("Parameters should have valid type hints", self._fn)
-
-        self._input_type = params[0][1]
-        self._requires_file_path = False
-        if len(params) == 2:
-            self._requires_file_path = True
-
-    @property
-    def data_type(self) -> type:
-        return self._input_type
 
     @property
     def requires_file_path(self) -> bool:
-        return self._requires_file_path
+        return self.num_args == 1
 
-    def __call__(self, *args: Any) -> None:
-        self._fn(*args)
+    @property
+    def input_type(self) -> type:
+        return self.get_input_type(0)

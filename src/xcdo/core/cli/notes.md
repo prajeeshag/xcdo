@@ -14,3 +14,9 @@
 - If you are asking me something tell me the type (Ask for type hints)
 - If you are saying you will return a particular type (Ask for type hints). And I will cross-check your promise at runtime
 - If I am telling that I will give something I will make sure that I keep the promise (Don't ask for type hints)
+
+
+
+## Misc
+- Variadic argument can be at the starting or at the end. Depending upon where it is placed the argument parsing will change.
+- In case Variadic keyword argument any 'key' is a valid key as long as the type is correct
