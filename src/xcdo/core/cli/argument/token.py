@@ -1,6 +1,6 @@
 import re
-from abc import ABC, abstractmethod
-from typing import Any, Type
+from abc import abstractmethod
+from typing import Any
 
 
 class ArgumentMeta(type):
@@ -26,16 +26,18 @@ class ArgumentToken[S: (re.Pattern[str], str)](metaclass=ArgumentMeta):
             return string == cls.pattern
 
     def __init__(self, string: str) -> None:
-        self.string = string
+        self._string = string
         if not self.is_match(string):
-            raise ValueError(f"The string '{string}' does not a match a OperatorToken")
+            raise ValueError(f"Unrecognized pattern '{string}'")
         self._parse()
 
+    @abstractmethod
     def _parse(self):
         pass
 
-    def _string__(self) -> str:
-        return self.string
+    @property
+    def string(self) -> str:
+        return self._string
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.string})"
@@ -44,12 +46,3 @@ class ArgumentToken[S: (re.Pattern[str], str)](metaclass=ArgumentMeta):
         if type(value) is type(self) and self.string == value.string:
             return True
         return False
-
-
-class AbstractTokenFactory(ABC):
-    def __init__(self, token_classes: list[Type[ArgumentToken[Any]]]) -> None:
-        self._token_classes = token_classes
-
-    @abstractmethod
-    def create(self, string: str) -> ArgumentToken[Any]:
-        pass

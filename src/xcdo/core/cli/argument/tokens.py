@@ -1,4 +1,5 @@
 import re
+from functools import cached_property
 from typing import TypeGuard
 
 from xcdo.core.cli.exceptions import ArgSyntaxError
@@ -26,14 +27,26 @@ class OperatorToken(ArgumentToken[re.Pattern[str]]):
     # pattern = re.compile(r"^-(\w\w+)((\,([^=\s\,]*))|(\,(([^=\s\,]+)=([^\s\,]*))))*\,?")
     pattern = re.compile(r"^-(\w\w+)(\,(\S)*)*\,?")
 
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @cached_property
+    def params(self) -> list[str]:
+        return self._params
+
+    @cached_property
+    def kwparams(self) -> dict[str, str]:
+        return self._kwparams
+
     def _get_pos(self, subarg: str) -> int:
         return self.string.index(subarg)
 
     def _parse(self):
         argList = list(self.string.split(","))
-        self.name = argList.pop(0).lstrip("-")
-        self.params: list[str] = []
-        self.kwparams: dict[str, str] = {}
+        self._name = argList.pop(0).lstrip("-")
+        self._params: list[str] = []
+        self._kwparams: dict[str, str] = {}
         for arg in argList[:]:
             if "=" in arg:
                 try:
@@ -50,23 +63,23 @@ class OperatorToken(ArgumentToken[re.Pattern[str]]):
                         self.string,
                         "Invalid parameter",
                     )
-                if k in self.kwparams:
+                if k in self._kwparams:
                     raise ArgSyntaxError(
                         self._get_pos(arg),
                         self.string,
                         f"Parameter '{k}' is already assigned",
                     )
 
-                self.kwparams[k] = v
+                self._kwparams[k] = v
             else:
-                if not self.kwparams == {}:
+                if not self._kwparams == {}:
                     raise ArgSyntaxError(
                         self._get_pos(arg),
                         self.string,
                         "Positional parameter after keyword parameter",
                     )
 
-                self.params.append(arg)
+                self._params.append(arg)
 
 
 class FilePathToken(ArgumentToken[re.Pattern[str]]):

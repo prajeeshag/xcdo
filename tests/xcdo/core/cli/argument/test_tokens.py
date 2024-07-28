@@ -156,17 +156,17 @@ class Test_OperatorToken:
         @pytest.mark.parametrize("string,expected", parameters)
         def test_name(self, string: str, expected: Any):
             opArg = OperatorToken(string)
-            assert opArg.name == expected[0]
+            assert opArg._name == expected[0]
 
         @pytest.mark.parametrize("string,expected", parameters)
         def test_params(self, string: str, expected: Any):
             opArg = OperatorToken(string)
-            assert opArg.params == list(expected[1])
+            assert opArg._params == list(expected[1])
 
         @pytest.mark.parametrize("string,expected", parameters)
         def test_kwparams(self, string: str, expected: Any):
             opArg = OperatorToken(string)
-            assert opArg.kwparams == expected[2]
+            assert opArg._kwparams == expected[2]
 
 
 @pytest.mark.parametrize(
