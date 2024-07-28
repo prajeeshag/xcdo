@@ -251,19 +251,21 @@ class Operator:
     def output_type(self) -> type:
         return self._output_type
 
-    def load_params(
-        self, args: list[str], kwds: dict[str, str]
-    ) -> tuple[tuple[Any, ...], dict[str, Any]]:
-        self._validate_params(args, kwds)
-        pargs: tuple[Any, ...] = tuple(
-            self.get_arg(i).data_reader(args[i]) for i in range(len(args))
-        )
+    def load_kwargs(self, kwds: dict[str, str]) -> dict[str, Any]:
+        self._validate_kwargs(kwds)
         pkwds: dict[str, Any] = {
             k: self.get_kwarg(k).data_reader(kwds[k]) for k in kwds
         }
-        return pargs, pkwds
+        return pkwds
 
-    def _validate_params(self, args: list[str], kwds: dict[str, str]):
+    def load_args(self, args: list[str]) -> tuple[Any, ...]:
+        self._validate_args(args)
+        pargs: tuple[Any, ...] = tuple(
+            self.get_arg(i).data_reader(args[i]) for i in range(len(args))
+        )
+        return pargs
+
+    def _validate_args(self, args: list[str]):
         if self.var_arg:
             if len(args) < self.num_args:
                 raise InvalidArguments(
@@ -275,6 +277,7 @@ class Operator:
                     f"Expected {self.num_args} argument(s), got {len(args)}"
                 )
 
+    def _validate_kwargs(self, kwds: dict[str, str]):
         for k in self.required_kwarg_keys:
             if k not in kwds:
                 raise InvalidArguments(f"Missing required keyword argument [{k}]")
