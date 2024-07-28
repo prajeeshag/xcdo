@@ -18,3 +18,7 @@ class InvalidFunction(Exception):
         self.fn = fn
         self.pname = pname
         super().__init__(*args)
+
+
+class InvalidArguments(Exception):
+    pass

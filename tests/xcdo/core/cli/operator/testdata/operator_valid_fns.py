@@ -70,7 +70,7 @@ class Input:
 
 
 def _toBool(s: str) -> bool:
-    return False
+    return int(s) != 0
 
 
 _toBoolReader = Reader(_toBool)

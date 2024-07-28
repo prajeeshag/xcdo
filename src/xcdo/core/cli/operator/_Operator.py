@@ -1,9 +1,10 @@
 import inspect
 from collections import OrderedDict
 from dataclasses import dataclass
+from functools import cached_property
 from typing import Annotated, Any, Callable, TypeGuard, cast, get_args, get_origin
 
-from ..exceptions import InvalidFunction
+from ..exceptions import InvalidArguments, InvalidFunction
 from ._Reader import Reader
 from ._utils import inspect_function, type2str
 
@@ -210,30 +211,37 @@ class Operator:
     def input(self) -> _Input:
         return self._input
 
-    @property
+    @cached_property
     def num_args(self) -> int:
-        print(self._args)
         return len(self._args)
 
     def get_arg(self, n: int) -> _Param:
-        return self._args[n]
+        if n < self.num_args:
+            return self._args[n]
+        elif self.var_arg:
+            return self.var_arg
+        raise IndexError(f"No argument at position [{n}]")
 
     @property
     def var_arg(self) -> _Param | None:
         return self._var_arg
 
-    @property
+    @cached_property
     def optional_kwarg_keys(self) -> tuple[str, ...]:
         return tuple(self._optional_kwargs.keys())
 
-    @property
+    @cached_property
     def required_kwarg_keys(self) -> tuple[str, ...]:
         return tuple(self._required_kwargs.keys())
 
     def get_kwarg(self, key: str) -> _Param:
         if key in self._optional_kwargs:
             return self._optional_kwargs[key]
-        return self._required_kwargs[key]
+        if key in self._required_kwargs:
+            return self._required_kwargs[key]
+        if self.var_kwarg:
+            return self.var_kwarg
+        raise KeyError(f"No keyword argument with key [{key}]")
 
     @property
     def var_kwarg(self) -> _Param | None:
@@ -243,7 +251,52 @@ class Operator:
     def output_type(self) -> type:
         return self._output_type
 
-    def __call__(self, input: object, *args: Any, **kwds: Any) -> Any:
+    def load_params(
+        self, args: list[str], kwds: dict[str, str]
+    ) -> tuple[tuple[Any, ...], dict[str, Any]]:
+        self._validate_params(args, kwds)
+        pargs: tuple[Any, ...] = tuple(
+            self.get_arg(i).data_reader(args[i]) for i in range(len(args))
+        )
+        pkwds: dict[str, Any] = {
+            k: self.get_kwarg(k).data_reader(kwds[k]) for k in kwds
+        }
+        return pargs, pkwds
+
+    def _validate_params(self, args: list[str], kwds: dict[str, str]):
+        if self.var_arg:
+            if len(args) < self.num_args:
+                raise InvalidArguments(
+                    f"Expected at least {self.num_args} argument(s), got {len(args)}"
+                )
+        else:
+            if len(args) != self.num_args:
+                raise InvalidArguments(
+                    f"Expected {self.num_args} argument(s), got {len(args)}"
+                )
+
+        for k in self.required_kwarg_keys:
+            if k not in kwds:
+                raise InvalidArguments(f"Missing required keyword argument [{k}]")
+
+        for k in kwds:
+            if (
+                not self.var_kwarg
+                and k not in self.required_kwarg_keys
+                and k not in self.optional_kwarg_keys
+            ):
+                raise InvalidArguments(f"Got an unexpected keyword argument [{k}]")
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        output: object = self._fn(*args, **kwds)
+        if not isinstance(output, self.output_type):
+            raise TypeError(
+                f"Expected <{type2str(self.output_type)}> but received"
+                + f" <{type2str(type(output))}> from function <{self._fname}>"
+            )
+        return output
+
+    def _validate_input(self, input: object):
         if self.input.len > 1:
             if not _is_list_tuple(input):
                 raise TypeError(
@@ -276,11 +329,3 @@ class Operator:
                     raise TypeError(
                         f"Expected a <{type2str(etype)}>, but got <{type2str(type(input))}> for 'input[0]'"
                     )
-
-        output: object = self._fn(*args, **kwds)
-        if not isinstance(output, self.output_type):
-            raise TypeError(
-                f"Expected <{type2str(self.output_type)}> but received"
-                + f" <{type2str(type(output))}> from function <{self._fname}>"
-            )
-        return output

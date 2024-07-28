@@ -60,22 +60,6 @@ def test_passing(input: Any):
     assert op.output_type == input.output_type
 
 
-# @pytest.mark.parametrize(
-#     "params,input,res",
-#     [[], 1],
-# )
-# def test_callable_invalid(mocker: Any, params: Any, input: Any):
-#     fn = mocker.Mock()
-#     inspect_function = mocker.patch("xcdo.core.cli.operator._Operator.inspect_function")
-#     params = [("i", int, None)]
-#     inspect_function.return_value = ("name", params[:], type(res))
-#     operator = Operator(fn)
-#     fn.return_value = res
-#     result = operator(*args, **kwds)
-#     fn.assert_called_once_with(*args, **kwds)
-#     assert result == res
-
-
 @pytest.mark.parametrize(
     "args,kwds,res",
     [

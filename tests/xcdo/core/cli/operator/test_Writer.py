@@ -22,7 +22,7 @@ def test_failing(input: Any):
 @pytest.mark.parametrize("input", passing)
 def test_passing(input: Any, mocker: Any):
     writer = Writer(input.fn)
-    assert writer.input_type == input.data_type
+    assert writer.dtype == input.data_type
     assert writer.requires_file_path == input.requires_file_path
 
 

@@ -7,7 +7,10 @@ from ._Operator import Operator
 class Writer(Operator):
     def __init__(self, fn: Callable[[Any, str], None] | Callable[[Any], None]) -> None:
         super().__init__(fn)
-        if self.num_inputs != 1:
+        self._validate_fn()
+
+    def _validate_fn(self):
+        if self.input.len != 1 or self.input.is_variadic or self.input.is_list_or_tuple:
             raise InvalidFunction("Must take a single 'input'", self._fn)
 
         if self.num_args > 1:
@@ -32,5 +35,5 @@ class Writer(Operator):
         return self.num_args == 1
 
     @property
-    def input_type(self) -> type:
-        return self.get_input_type(0)
+    def dtype(self) -> type:
+        return self.input.dtypes[0]
