@@ -2,7 +2,7 @@ import inspect
 from collections import OrderedDict
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Annotated, Any, Callable, TypeGuard, cast, get_args, get_origin
+from typing import Annotated, Any, Callable, TypeGuard, get_args, get_origin
 
 from ..exceptions import InvalidArguments, InvalidFunction
 from ._Reader import Reader
