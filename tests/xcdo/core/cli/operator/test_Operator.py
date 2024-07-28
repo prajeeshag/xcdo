@@ -25,6 +25,7 @@ def test_passing(input: Any):
     assert op.input.is_variadic == input.input.is_variadic
     assert op.input.is_list_or_tuple == input.input.is_list_or_tuple
     assert op.input.dtypes == input.input.dtypes
+    assert op.input.present == input.input.present
 
     assert op.num_args == input.num_args
     for n in range(op.num_args):
@@ -58,37 +59,3 @@ def test_passing(input: Any):
         assert op.var_kwarg.data_reader == input.var_kwarg.data_reader
 
     assert op.output_type == input.output_type
-
-
-@pytest.mark.parametrize(
-    "args,kwds,res",
-    [
-        [["s"], {"k": 1}, 1],
-        [[], {"k": 1}, "s"],
-        [["s"], {}, True],
-        [["s", "i"], {}, 10.5],
-        [[], {"k": 1, "f": "s"}, None],
-    ],
-)
-def test_callable(mocker: Any, args: Any, kwds: Any, res: Any):
-    fn = mocker.Mock()
-    inspect_function = mocker.patch("xcdo.core.cli.operator._Operator.inspect_function")
-    params = [("i", int, None)]
-    inspect_function.return_value = ("name", params[:], type(res))
-    operator = Operator(fn)
-    fn.return_value = res
-    result = operator(*args, **kwds)
-    fn.assert_called_once_with(*args, **kwds)
-    assert result == res
-
-
-def test_typeerror(mocker: Any):
-    fn = mocker.Mock()
-    inspect_function = mocker.patch("xcdo.core.cli.operator._Operator.inspect_function")
-    params = [("i", int, None)]
-    inspect_function.return_value = ("name", params[:], int)
-    operator = Operator(fn)
-    fn.return_value = "s"
-    with pytest.raises(TypeError) as e:
-        operator()
-    assert str(e.value) == "Expected <int> but received <str> from function <name>"

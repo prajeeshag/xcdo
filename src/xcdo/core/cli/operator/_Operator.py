@@ -33,7 +33,7 @@ _EMPTY = inspect.Parameter.empty
 
 @dataclass(frozen=True)
 class _Input:
-    empty: bool
+    present: bool
     dtypes: tuple[type, ...]
     is_variadic: bool
     is_list_or_tuple: bool
@@ -45,15 +45,15 @@ class _Input:
 
 def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
     _fn = fn
-    empty = True
+    present = False
     dtypes: list[type] = []
     is_variadic = False
     is_list_or_tuple = False
 
     if fn is None:
-        return _Input(empty, tuple(dtypes), is_variadic, is_list_or_tuple)
+        return _Input(present, tuple(dtypes), is_variadic, is_list_or_tuple)
 
-    empty = False
+    present = True
     pname = "input"
 
     if ptype is None:
@@ -91,7 +91,7 @@ def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
                     _fn,
                 )
             dtypes.append(targ)
-    return _Input(empty, tuple(dtypes), is_variadic, is_list_or_tuple)
+    return _Input(present, tuple(dtypes), is_variadic, is_list_or_tuple)
 
 
 @dataclass(frozen=True)
@@ -298,37 +298,3 @@ class Operator:
                 + f" <{type2str(type(output))}> from function <{self._fname}>"
             )
         return output
-
-    def _validate_input(self, input: object):
-        if self.input.len > 1:
-            if not _is_list_tuple(input):
-                raise TypeError(
-                    f"Expected a <list> or <tuple> for 'input', but got <{type2str(type(input))}>"
-                )
-            if self.input.len != len(input):
-                raise ValueError(
-                    f"'input' size mismatch: Expected ({self.input.len}), Recieved ({len(input)})"
-                )
-            for n in range(self.input.len):
-                etype = self.input.dtypes[n]
-                if not isinstance(input[n], etype):
-                    raise TypeError(
-                        f"Expected a <{type2str(etype)}>, but got <{type2str(type(input[n]))}> for 'input[{n}]'"
-                    )
-        elif self.input.len == 1:
-            if _is_list_tuple(input):
-                if len(input) != 1:
-                    raise ValueError(
-                        f"'input' size mismatch: Expected ({self.input.len}), Recieved ({len(input)})"
-                    )
-                etype = self.input.dtypes[0]
-                if not isinstance(input[0], etype):
-                    raise TypeError(
-                        f"Expected a <{type2str(etype)}>, but got <{type2str(type(input[0]))}> for 'input[0]'"
-                    )
-            else:
-                etype = self.input.dtypes[0]
-                if not isinstance(input, etype):
-                    raise TypeError(
-                        f"Expected a <{type2str(etype)}>, but got <{type2str(type(input))}> for 'input[0]'"
-                    )

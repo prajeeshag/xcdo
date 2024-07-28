@@ -33,13 +33,13 @@ class _VParams(_KParams):
 @dataclass
 class _Input:
     dtypes: tuple[type, ...] = field(default_factory=tuple)
-    empty: bool = True
+    present: bool = False
     is_list_or_tuple: bool = False
     is_variadic: bool = False
 
     def __post_init__(self):
         self.len = len(self.dtypes)
-        self.empty = self.empty and not bool(self.dtypes)
+        self.present = self.present or bool(self.dtypes)
 
 
 @dataclass
