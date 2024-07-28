@@ -2,7 +2,7 @@ import inspect
 from collections import OrderedDict
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Annotated, Any, Callable, TypeGuard, get_args, get_origin
+from typing import Annotated, Any, Callable, get_args, get_origin
 
 from ..exceptions import InvalidArguments, InvalidFunction
 from ._Reader import Reader
@@ -131,10 +131,6 @@ def _param_factory(fn: Any, pname: str, ptype: Any, default: Any = _EMPTY) -> _P
             f"Non-{_base_types} types should be annotated with a <Reader>", fn, pname
         )
     return _Param(name, dtype, default, data_reader)
-
-
-def _is_list_tuple(x: object) -> TypeGuard[list[object] | tuple[object, ...]]:
-    return isinstance(x, (list, tuple))
 
 
 class Operator:
