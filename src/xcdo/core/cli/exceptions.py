@@ -11,14 +11,19 @@ class ArgSyntaxError(Exception):
 class InvalidFunction(Exception):
     def __init__(
         self,
-        *args: object,
+        msg: object,
         fn: Callable[..., Any] | None = None,
         pname: str = "",
     ) -> None:
         self.fn = fn
         self.pname = pname
-        super().__init__(*args)
+        super().__init__(msg)
 
 
 class InvalidArguments(Exception):
     pass
+
+
+class OperatorNotFound(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)

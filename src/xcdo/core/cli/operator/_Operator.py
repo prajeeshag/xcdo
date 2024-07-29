@@ -44,7 +44,6 @@ class _Input:
 
 
 def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
-    _fn = fn
     present = False
     dtypes: list[type] = []
     is_variadic = False
@@ -71,7 +70,7 @@ def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
         if torigin is not None:
             raise InvalidFunction(
                 "Unsupported parameterized generic type for 'input'",
-                _fn,
+                fn,
             )
         dtypes = [ptype]
     elif torigin is list or (torigin is tuple and targs[-1] is Ellipsis):
@@ -79,7 +78,7 @@ def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
         is_list_or_tuple = True
         if get_origin(targs[0]) is not None:
             raise InvalidFunction(
-                "Type of 'input' items cannot be a parameterized generic", _fn
+                "Type of 'input' items cannot be a parameterized generic", fn
             )
         dtypes = [targs[0]]
     elif torigin is tuple:
@@ -88,7 +87,7 @@ def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
             if get_origin(targ) is not None:
                 raise InvalidFunction(
                     "Type of 'input' items cannot be a parameterized generic",
-                    _fn,
+                    fn,
                 )
             dtypes.append(targ)
     return _Input(present, tuple(dtypes), is_variadic, is_list_or_tuple)
