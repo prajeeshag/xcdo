@@ -4,10 +4,10 @@ from .registry import OperatorRegistry
 
 class Operation:
     """
-    Operation class takes an OperatorToken and OperatorRegistry
+    Operation takes an OperatorToken and OperatorRegistry
     and sets the operator and its arguments. (and its children recursively
     which are again Operation)??
     """
 
     def __init__(self, token: OperatorToken, registry: OperatorRegistry) -> None:
-        pass
+        registry.get(token.name)

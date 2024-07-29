@@ -20,3 +20,7 @@
 ## Misc
 - Variadic argument can be at the starting or at the end. Depending upon where it is placed the argument parsing will change.
 - In case Variadic keyword argument any 'key' is a valid key as long as the type is correct
+
+## Testing
+- While mocking an implemented object, mock the correct behaviour
+- While mocking an yet to implement object, document the expected behaviour 
