@@ -4,7 +4,7 @@ from typing import Annotated
 
 import pytest
 from xcdo.core.cli.exceptions import InvalidArguments as Error
-from xcdo.core.cli.operator import Operator
+from xcdo.core.cli.operator import operator_factory
 
 from .testdata.operator_valid_fns import _toBoolReader
 
@@ -99,5 +99,5 @@ def arrange(mocker, params):
     fn = mocker.Mock()
     inspect_function = mocker.patch("xcdo.core.cli.operator._Operator.inspect_function")
     inspect_function.return_value = ("name", params, None)
-    op = Operator(fn)
+    op = operator_factory(fn)
     return op
