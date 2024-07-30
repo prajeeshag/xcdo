@@ -1,6 +1,5 @@
 import inspect
-from collections import OrderedDict
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from functools import cached_property
 from typing import Annotated, Any, Callable, get_args, get_origin
 
@@ -49,17 +48,15 @@ def _input_factory(fn: Any, ptype: Any = None) -> _Input:
 
     pname = "input"
 
-    if ptype is None:
-        raise InvalidFunction("Should have valid type annotation", fn, pname)
-
-    if get_origin(ptype) is tuple:
-        targs = get_args(ptype)
-        if Ellipsis in targs and (len(targs) != 2 or targs[0] is Ellipsis):
-            raise InvalidFunction("Should have valid type annotation", fn, pname)
-    if get_origin(ptype) is list and len(get_args(ptype)) != 1:
-        raise InvalidFunction("Should have valid type annotation", fn, pname)
     torigin = get_origin(ptype)
     targs = get_args(ptype)
+    if torigin is tuple:
+        if Ellipsis in targs and (len(targs) != 2 or targs[0] is Ellipsis):
+            raise InvalidFunction("Should have valid type annotation", fn, pname)
+
+    if torigin is list and len(targs) != 1:
+        raise InvalidFunction("Should have valid type annotation", fn, pname)
+
     if torigin not in (list, tuple):
         if torigin is not None:
             raise InvalidFunction(
@@ -70,6 +67,9 @@ def _input_factory(fn: Any, ptype: Any = None) -> _Input:
     elif torigin is list or (torigin is tuple and targs[-1] is Ellipsis):
         is_variadic = True
         is_list_or_tuple = True
+        if type(targs[0]) is type(None):
+            raise InvalidFunction("Input cannot be type 'None'", fn)
+
         if get_origin(targs[0]) is not None:
             raise InvalidFunction(
                 "Type of 'input' items cannot be a parameterized generic", fn
@@ -91,16 +91,13 @@ def _input_factory(fn: Any, ptype: Any = None) -> _Input:
 class _Param:
     name: str
     dtype: type
-    default: object
     data_reader: Reader
+    default: object = _EMPTY
 
 
-def _param_factory(fn: Any, pname: str, ptype: Any, default: Any = _EMPTY) -> _Param:
+def _param_factory(fn: Any, pname: str, ptype: Any, default: Any) -> _Param:
     name = pname
     data_reader = None
-
-    if ptype is None:
-        raise InvalidFunction("Should have valid type annotation", fn, pname)
 
     torigin = get_origin(ptype)
     dtype = ptype
@@ -123,18 +120,18 @@ def _param_factory(fn: Any, pname: str, ptype: Any, default: Any = _EMPTY) -> _P
         raise InvalidFunction(
             f"Non-{_base_types} types should be annotated with a <Reader>", fn, pname
         )
-    return _Param(name, dtype, default, data_reader)
+    return _Param(name, dtype, data_reader, default)
 
 
 @dataclass(frozen=True)
 class BaseOperator:
     fn: Callable[..., object | None]
-    args: tuple[_Param, ...]
-    var_arg: _Param | None
-    required_kwargs: tuple[_Param, ...]
-    optional_kwargs: tuple[_Param, ...]
-    var_kwarg: _Param | None
-    output_type: type
+    args: tuple[_Param, ...] = ()
+    var_arg: _Param | None = None
+    required_kwargs: tuple[_Param, ...] = ()
+    optional_kwargs: tuple[_Param, ...] = ()
+    var_kwarg: _Param | None = None
+    output_type: type = type(None)
 
     @cached_property
     def num_args(self) -> int:
@@ -218,19 +215,13 @@ class BaseOperator:
 
 @dataclass(frozen=True)
 class Generator(BaseOperator):
-    def __init__
+    pass
 
 
 @dataclass(frozen=True)
 class Operator(BaseOperator):
-    fn: Callable[..., object | None]
+    _: KW_ONLY
     input: _Input
-    args: tuple[_Param, ...] = ()
-    var_arg: _Param | None = None
-    required_kwargs: tuple[_Param, ...] = ()
-    optional_kwargs: tuple[_Param, ...] = ()
-    var_kwarg: _Param | None = None
-    output_type: type = type(None)
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         output: object = self.fn(*args, **kwds)
@@ -242,7 +233,7 @@ class Operator(BaseOperator):
         return output
 
 
-def operator_factory(fn: Callable[..., object | None]) -> "Operator":
+def operator_factory(fn: Callable[..., object | None]) -> BaseOperator:
     _, params, output_type = inspect_function(fn)
     if output_type is None:
         output_type = type(None)
@@ -253,41 +244,68 @@ def operator_factory(fn: Callable[..., object | None]) -> "Operator":
         raise InvalidFunction("Return type cannot be a parameterized generic type", fn)
 
     input = None
-    args: tuple[_Param, ...] = ()
+    args: list[_Param] = []
     var_arg: _Param | None = None
-    required_kwargs: tuple[_Param, ...] = ()
-    optional_kwargs: tuple[_Param, ...] = ()
+    required_kwargs: list[_Param] = []
+    optional_kwargs: list[_Param] = []
     var_kwarg: _Param | None = None
 
-    for i in range(len(params)):
-        if params[i][1] is Any:
-            raise InvalidFunction("Type 'Any' is not supported", fn, params[i][0])
+    for i, param in enumerate(params):
+        if param[1] is None:
+            raise InvalidFunction("Should have valid type annotation", fn, param[0])
 
-        if params[i][0] == "input":
+        if param[1] is Any:
+            raise InvalidFunction("Type 'Any' is not supported", fn, param[0])
+
+        if param[1] is type(None):
+            raise InvalidFunction("Parameter cannot be type 'None'", fn, param[0])
+
+        if param[0] == "input":
             if i > 0:
                 raise InvalidFunction(
                     "If present, the 'input' parameter should be the first parameter",
                     fn,
                 )
-            if params[i][2] is not _EMPTY:
+            if param[2] is not _EMPTY:
                 raise InvalidFunction(
                     "The name 'input' is reserved for the `input` parameter and cannot used as an optional parameter",
                     fn,
                 )
-            input = _input_factory(fn, params[i][1])
-        elif params[i][0].startswith("**"):
-            var_kwarg = _param_factory(fn, *params[i])
-        elif params[i][0].startswith("*"):
+            input = _input_factory(fn, param[1])
+        elif param[0].startswith("**"):
+            var_kwarg = _param_factory(fn, *param)
+        elif param[0].startswith("*"):
             if optional_kwargs:
                 raise InvalidFunction(
                     "Variadic positional arguments should be before keyword-arguments",
                     fn,
-                    params[i][0],
+                    param[0],
                 )
-            var_arg = _param_factory(fn, *params[i])
-        elif params[i][2] is _EMPTY and not var_arg:
-            args.append(_param_factory(fn, *params[i]))
-        elif params[i][2] is _EMPTY and var_arg:
-            required_kwargs[params[i][0]] = _param_factory(fn, *params[i])
+            var_arg = _param_factory(fn, *param)
+        elif param[2] is _EMPTY and not var_arg:
+            args.append(_param_factory(fn, *param))
+        elif param[2] is _EMPTY:
+            required_kwargs.append(_param_factory(fn, *param))
         else:
-            optional_kwargs[params[i][0]] = _param_factory(fn, *params[i])
+            optional_kwargs.append(_param_factory(fn, *param))
+
+    if input:
+        return Operator(
+            fn,
+            tuple(args),
+            var_arg,
+            tuple(required_kwargs),
+            tuple(optional_kwargs),
+            var_kwarg,
+            output_type,
+            input=input,
+        )
+    return Generator(
+        fn,
+        tuple(args),
+        var_arg,
+        tuple(required_kwargs),
+        tuple(optional_kwargs),
+        var_kwarg,
+        output_type,
+    )

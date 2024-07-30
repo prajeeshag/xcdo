@@ -1,72 +1,12 @@
 # type: ignore
-import inspect
-from collections import OrderedDict
-from dataclasses import dataclass, field
-from typing import Annotated, Any
+from typing import Annotated
 
+from xcdo.core.cli.operator import Generator as Ge
+from xcdo.core.cli.operator import Operator as Op
 from xcdo.core.cli.operator import Reader
-from xcdo.core.cli.operator._Operator import _BASE_DATA_READERS
-
-
-@dataclass
-class _KParams:
-    dtype: type = type(None)
-    default: Any = inspect.Parameter.empty
-    data_reader: Any = None
-
-    def __post_init__(self):
-        if self.data_reader is None and self.dtype in _BASE_DATA_READERS:
-            self.data_reader = _BASE_DATA_READERS[self.dtype]
-
-
-class _Params(_KParams):
-    def __init__(self, name: str, dtype: type, data_reader: Any = None):
-        super().__init__(dtype=dtype, data_reader=data_reader)
-        self.name = name
-
-
-class _VParams(_KParams):
-    def __init__(self, dtype: type):
-        super().__init__(dtype, default=None)
-
-
-@dataclass
-class _Input:
-    dtypes: tuple[type, ...] = field(default_factory=tuple)
-    present: bool = False
-    is_list_or_tuple: bool = False
-    is_variadic: bool = False
-
-    def __post_init__(self):
-        self.len = len(self.dtypes)
-        self.present = self.present or bool(self.dtypes)
-
-
-@dataclass
-class Input:
-    fn: Any
-    input_types: Any = None
-    args: list[_Params] = field(default_factory=list)
-    var_arg: _VParams = None
-    kwargs: OrderedDict[str, _KParams] = field(default_factory=OrderedDict)
-    required_kwargs: OrderedDict[str, _KParams] = field(default_factory=OrderedDict)
-    var_kwarg: _VParams = None
-    output_type: type = type(None)
-
-    def __post_init__(self):
-        self.num_args: int = len(self.args)
-        self.variadic_input = True
-
-        if self.input_types is None:
-            self.input = _Input()
-        elif isinstance(self.input_types, list):
-            self.input = _Input(
-                dtypes=tuple(self.input_types), is_variadic=True, is_list_or_tuple=True
-            )
-        elif isinstance(self.input_types, tuple):
-            self.input = _Input(dtypes=tuple(self.input_types), is_list_or_tuple=True)
-        else:
-            self.input = _Input(dtypes=tuple([self.input_types]))
+from xcdo.core.cli.operator._Operator import _BASE_DATA_READERS as dR
+from xcdo.core.cli.operator._Operator import _Input as I
+from xcdo.core.cli.operator._Operator import _Param as P
 
 
 def _toBool(s: str) -> bool:
@@ -75,19 +15,97 @@ def _toBool(s: str) -> bool:
 
 _toBoolReader = Reader(_toBool)
 
+passing = []
+
 
 def fp00(): ...
+
+
+passing += [Ge(fp00)]
+
+
 def fp01() -> None: ...
+
+
+passing += [Ge(fp01)]
+
+
 def fp02(input: int) -> None: ...
+
+
+passing += [Op(fp02, input=I((int,), False, False))]
+
+
 def fp03(input: tuple[int]) -> None: ...
+
+
+passing += [Op(fp03, input=I((int,), False, True))]
+
+
 def fp04(input: tuple[int, float, str]) -> None: ...
+
+
+passing += [Op(fp04, input=I((int, float, str), False, True))]
+
+
 def fp05(input: list[int]) -> None: ...
+
+
+passing += [Op(fp05, input=I((int,), True, True))]
+
+
 def fp06(input: tuple[int, ...]) -> None: ...
+
+
+passing += [Op(fp06, input=I((int,), True, True))]
+
+
 def fp07(*params: int) -> None: ...
+
+
+passing += [Ge(fp07, var_arg=P("*params", int, dR[int]))]
+
+
 def fp08(i: int) -> None: ...
+
+
+passing += [Ge(fp08, args=(P("i", int, dR[int]),))]
+
+
 def fp09(input: tuple[int, str], i: int, j: str, *params: str) -> None: ...
+
+
+passing += [
+    Op(
+        fp09,
+        args=(
+            P("i", int, dR[int]),
+            P("j", str, dR[str]),
+        ),
+        var_arg=P("*params", str, dR[str]),
+        input=I((int, str), False, True),
+    )
+]
+
+
 def fp10(ik: int = 1) -> None: ...
+
+
+passing += [Ge(fp10, optional_kwargs=(P("ik", int, dR[int], 1),))]
+
+
 def fp11(ik: int = 1, **kwds: str) -> None: ...
+
+
+passing += [
+    Ge(
+        fp11,
+        optional_kwargs=(P("ik", int, dR[int], 1),),
+        var_kwarg=P("**kwds", str, dR[str]),
+    )
+]
+
+
 def fp12(
     input: tuple[int, str],
     i: int,
@@ -97,72 +115,75 @@ def fp12(
     sk: str = "hi",
     **kwargs: int,
 ) -> int: ...
+
+
+passing += [
+    Op(
+        fp12,
+        (P("i", int, dR[int]), P("j", str, dR[str])),
+        P("*params", str, dR[str]),
+        (),
+        (
+            P("ik", int, dR[int], 10),
+            P("sk", str, dR[str], "hi"),
+        ),
+        P("**kwargs", int, dR[int]),
+        int,
+        input=I((int, str), False, True),
+    )
+]
+
+
 def fp13(input: list[bool]) -> None: ...
+
+
+passing += [Op(fp13, input=I((bool,), True, True))]
+
+
 def fp14(input: tuple[bool, ...]) -> None: ...
+
+
+passing += [Op(fp14, input=I((bool,), True, True))]
+
+
 def fp15(input: tuple[bool, int]) -> None: ...
+
+
+passing += [Op(fp15, input=I((bool, int), False, True))]
+
+
 def fp16(i: Annotated[bool, _toBoolReader]) -> None: ...
+
+
+passing += [Ge(fp16, (P("i", bool, _toBoolReader),))]
+
+
 def fp17(input: int, i: int, j: int, *args: int, k: int, m: int) -> None: ...
+
+
+passing += [
+    Op(
+        fp17,
+        (P("i", int, dR[int]), P("j", int, dR[int])),
+        P("*args", int, dR[int]),
+        (P("k", int, dR[int]), P("m", int, dR[int])),
+        input=I((int,), False, False),
+    )
+]
+
+
 def fp18(
     input: int, i: int, j: int, *args: int, k: int, m: int, n: int = 1
 ) -> None: ...
 
 
-passing = [
-    Input(
+passing += [
+    Op(
         fp18,
-        args=[_Params("i", int), _Params("j", int)],
-        required_kwargs=OrderedDict([("k", _KParams(int)), ("m", _KParams(int))]),
-        kwargs=OrderedDict([("n", _KParams(int, 1))]),
-        var_arg=_VParams(int),
-        input_types=int,
+        args=(P("i", int, dR[int]), P("j", int, dR[int])),
+        required_kwargs=(P("k", int, dR[int]), P("m", int, dR[int])),
+        optional_kwargs=(P("n", int, dR[int], 1),),
+        var_arg=P("*args", int, dR[int]),
+        input=I((int,), False, False),
     ),
-    Input(
-        fp17,
-        args=[_Params("i", int), _Params("j", int)],
-        required_kwargs=OrderedDict([("k", _KParams(int)), ("m", _KParams(int))]),
-        var_arg=_VParams(int),
-        input_types=int,
-    ),
-    Input(
-        fp16,
-        args=[_Params("i", bool, _toBoolReader)],
-    ),
-    Input(fp15, input_types=(bool, int)),
-    Input(fp14, input_types=[bool]),
-    Input(fp13, input_types=[bool]),
-    Input(
-        fp12,
-        kwargs=OrderedDict(
-            [
-                ("ik", _KParams(int, 10)),
-                ("sk", _KParams(str, "hi")),
-            ]
-        ),
-        var_kwarg=_VParams(int),
-        var_arg=_VParams(str),
-        args=[_Params("i", int), _Params("j", str)],
-        input_types=(int, str),
-        output_type=int,
-    ),
-    Input(
-        fp11,
-        kwargs=OrderedDict([("ik", _KParams(int, 1))]),
-        var_kwarg=_VParams(str),
-    ),
-    Input(fp10, kwargs=OrderedDict([("ik", _KParams(int, 1))])),
-    Input(
-        fp09,
-        args=[_Params("i", int), _Params("j", str)],
-        var_arg=_VParams(str),
-        input_types=(int, str),
-    ),
-    Input(fp08, args=[_Params("i", int)]),
-    Input(fp07, var_arg=_VParams(int)),
-    Input(fp06, input_types=[int]),
-    Input(fp05, input_types=[int]),
-    Input(fp04, input_types=(int, float, str)),
-    Input(fp03, input_types=(int,)),
-    Input(fp02, input_types=int),
-    Input(fp01),
-    Input(fp00),
 ]

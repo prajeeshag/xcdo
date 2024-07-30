@@ -207,7 +207,20 @@ def ff29(**i: Any):
 
 def ff30(input: None) -> int:
     """
-    Input cannot be type "None"
+    Parameter cannot be type 'None'
+    input
+    """
+
+
+def ff31(input: list[None]) -> int:
+    """
+    Input cannot be type 'None'
+    """
+
+
+def ff32(input: tuple[None, ...]) -> int:
+    """
+    Input cannot be type 'None'
     """
 
 
