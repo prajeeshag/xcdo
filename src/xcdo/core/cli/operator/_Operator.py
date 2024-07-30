@@ -33,7 +33,6 @@ _EMPTY = inspect.Parameter.empty
 
 @dataclass(frozen=True)
 class _Input:
-    present: bool
     dtypes: tuple[type, ...]
     is_variadic: bool
     is_list_or_tuple: bool
@@ -43,16 +42,11 @@ class _Input:
         return len(self.dtypes)
 
 
-def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
-    present = False
+def _input_factory(fn: Any, ptype: Any = None) -> _Input:
     dtypes: list[type] = []
     is_variadic = False
     is_list_or_tuple = False
 
-    if fn is None:
-        return _Input(present, tuple(dtypes), is_variadic, is_list_or_tuple)
-
-    present = True
     pname = "input"
 
     if ptype is None:
@@ -90,7 +84,7 @@ def _input_factory(fn: Any = None, ptype: Any = None) -> _Input:
                     fn,
                 )
             dtypes.append(targ)
-    return _Input(present, tuple(dtypes), is_variadic, is_list_or_tuple)
+    return _Input(tuple(dtypes), is_variadic, is_list_or_tuple)
 
 
 @dataclass(frozen=True)
@@ -132,119 +126,46 @@ def _param_factory(fn: Any, pname: str, ptype: Any, default: Any = _EMPTY) -> _P
     return _Param(name, dtype, default, data_reader)
 
 
-class Operator:
-    def __init__(self, fn: Callable[..., Any]) -> None:
-        self._fn = fn
-        self._parse()
-
-    def _parse(self) -> None:
-        self._fname, params, self._output_type = inspect_function(self._fn)
-        # Needed To maintain the original order of arguments because `input` will be removed from _params
-        if self._output_type is None:
-            self._output_type = type(None)
-
-        if self._output_type is Any:
-            raise InvalidFunction("Type 'Any' is not supported", self._fn)
-        elif get_origin(self._output_type) is not None:
-            raise InvalidFunction(
-                "Return type cannot be a parameterized generic type", self._fn
-            )
-
-        self._params: list[str] = [x[0] for x in params]
-        self._args: list[_Param] = []
-        self._optional_kwargs: dict[str, _Param] = OrderedDict()
-        self._required_kwargs: dict[str, _Param] = OrderedDict()
-        self._var_arg: _Param | None = None
-        self._var_kwarg: _Param | None = None
-        self._input = _input_factory()
-
-        for i in range(len(params)):
-            if params[i][1] is Any:
-                raise InvalidFunction(
-                    "Type 'Any' is not supported", self._fn, params[i][0]
-                )
-
-            if params[i][0] == "input":
-                if (
-                    self._args
-                    or self._optional_kwargs
-                    or self._var_kwarg
-                    or self._var_arg
-                ):
-                    raise InvalidFunction(
-                        "If present, the 'input' parameter should be the first parameter",
-                        self._fn,
-                    )
-                if params[i][2] is not _EMPTY:
-                    raise InvalidFunction(
-                        "The name 'input' is reserved for the `input` parameter and cannot used as an optional parameter",
-                        self._fn,
-                    )
-                self._input = _input_factory(self._fn, params[i][1])
-            elif params[i][0].startswith("**"):
-                self._var_kwarg = _param_factory(self._fn, *params[i])
-            elif params[i][0].startswith("*"):
-                if self._optional_kwargs:
-                    raise InvalidFunction(
-                        "Variadic positional arguments should be before keyword-arguments",
-                        self._fn,
-                        params[i][0],
-                    )
-                self._var_arg = _param_factory(self._fn, *params[i])
-            elif params[i][2] is _EMPTY and not self._var_arg:
-                self._args.append(_param_factory(self._fn, *params[i]))
-            elif params[i][2] is _EMPTY and self._var_arg:
-                self._required_kwargs[params[i][0]] = _param_factory(
-                    self._fn, *params[i]
-                )
-            else:
-                self._optional_kwargs[params[i][0]] = _param_factory(
-                    self._fn, *params[i]
-                )
-
-    @property
-    def input(self) -> _Input:
-        return self._input
+@dataclass(frozen=True)
+class BaseOperator:
+    fn: Callable[..., object | None]
+    args: tuple[_Param, ...]
+    var_arg: _Param | None
+    required_kwargs: tuple[_Param, ...]
+    optional_kwargs: tuple[_Param, ...]
+    var_kwarg: _Param | None
+    output_type: type
 
     @cached_property
     def num_args(self) -> int:
-        return len(self._args)
+        return len(self.args)
 
     def get_arg(self, n: int) -> _Param:
         if n < self.num_args:
-            return self._args[n]
+            return self.args[n]
         elif self.var_arg:
             return self.var_arg
         raise IndexError(f"No argument at position [{n}]")
 
-    @property
-    def var_arg(self) -> _Param | None:
-        return self._var_arg
-
     @cached_property
     def optional_kwarg_keys(self) -> tuple[str, ...]:
-        return tuple(self._optional_kwargs.keys())
+        return tuple(x.name for x in self.optional_kwargs)
 
     @cached_property
     def required_kwarg_keys(self) -> tuple[str, ...]:
-        return tuple(self._required_kwargs.keys())
+        return tuple(x.name for x in self.optional_kwargs)
 
     def get_kwarg(self, key: str) -> _Param:
-        if key in self._optional_kwargs:
-            return self._optional_kwargs[key]
-        if key in self._required_kwargs:
-            return self._required_kwargs[key]
+        def get_key(obj: _Param) -> bool:
+            return obj.name == key
+
+        if key in self.optional_kwarg_keys:
+            return next(filter(get_key, self.optional_kwargs))
+        if key in self.required_kwarg_keys:
+            return next(filter(get_key, self.required_kwargs))
         if self.var_kwarg:
             return self.var_kwarg
         raise KeyError(f"No keyword argument with key [{key}]")
-
-    @property
-    def var_kwarg(self) -> _Param | None:
-        return self._var_kwarg
-
-    @property
-    def output_type(self) -> type:
-        return self._output_type
 
     def load_kwargs(self, kwds: dict[str, str]) -> dict[str, Any]:
         self._validate_kwargs(kwds)
@@ -286,10 +207,87 @@ class Operator:
                 raise InvalidArguments(f"Got an unexpected keyword argument [{k}]")
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
-        output: object = self._fn(*args, **kwds)
+        output: object = self.fn(*args, **kwds)
         if not isinstance(output, self.output_type):
             raise TypeError(
                 f"Expected <{type2str(self.output_type)}> but received"
-                + f" <{type2str(type(output))}> from function <{self._fname}>"
+                + f" <{type2str(type(output))}> from function <{self.fn.__name__}>"
             )
         return output
+
+
+@dataclass(frozen=True)
+class Generator(BaseOperator):
+    def __init__
+
+
+@dataclass(frozen=True)
+class Operator(BaseOperator):
+    fn: Callable[..., object | None]
+    input: _Input
+    args: tuple[_Param, ...] = ()
+    var_arg: _Param | None = None
+    required_kwargs: tuple[_Param, ...] = ()
+    optional_kwargs: tuple[_Param, ...] = ()
+    var_kwarg: _Param | None = None
+    output_type: type = type(None)
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        output: object = self.fn(*args, **kwds)
+        if not isinstance(output, self.output_type):
+            raise TypeError(
+                f"Expected <{type2str(self.output_type)}> but received"
+                + f" <{type2str(type(output))}> from function <{self.fn.__name__}>"
+            )
+        return output
+
+
+def operator_factory(fn: Callable[..., object | None]) -> "Operator":
+    _, params, output_type = inspect_function(fn)
+    if output_type is None:
+        output_type = type(None)
+
+    if output_type is Any:
+        raise InvalidFunction("Type 'Any' is not supported", fn)
+    elif get_origin(output_type) is not None:
+        raise InvalidFunction("Return type cannot be a parameterized generic type", fn)
+
+    input = None
+    args: tuple[_Param, ...] = ()
+    var_arg: _Param | None = None
+    required_kwargs: tuple[_Param, ...] = ()
+    optional_kwargs: tuple[_Param, ...] = ()
+    var_kwarg: _Param | None = None
+
+    for i in range(len(params)):
+        if params[i][1] is Any:
+            raise InvalidFunction("Type 'Any' is not supported", fn, params[i][0])
+
+        if params[i][0] == "input":
+            if i > 0:
+                raise InvalidFunction(
+                    "If present, the 'input' parameter should be the first parameter",
+                    fn,
+                )
+            if params[i][2] is not _EMPTY:
+                raise InvalidFunction(
+                    "The name 'input' is reserved for the `input` parameter and cannot used as an optional parameter",
+                    fn,
+                )
+            input = _input_factory(fn, params[i][1])
+        elif params[i][0].startswith("**"):
+            var_kwarg = _param_factory(fn, *params[i])
+        elif params[i][0].startswith("*"):
+            if optional_kwargs:
+                raise InvalidFunction(
+                    "Variadic positional arguments should be before keyword-arguments",
+                    fn,
+                    params[i][0],
+                )
+            var_arg = _param_factory(fn, *params[i])
+        elif params[i][2] is _EMPTY and not var_arg:
+            args.append(_param_factory(fn, *params[i]))
+        elif params[i][2] is _EMPTY and var_arg:
+            required_kwargs[params[i][0]] = _param_factory(fn, *params[i])
+        else:
+            optional_kwargs[params[i][0]] = _param_factory(fn, *params[i])

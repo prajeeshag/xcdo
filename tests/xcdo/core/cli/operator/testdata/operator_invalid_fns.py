@@ -205,6 +205,12 @@ def ff29(**i: Any):
     """
 
 
+def ff30(input: None) -> int:
+    """
+    Input cannot be type "None"
+    """
+
+
 _current_module = sys.modules[__name__]
 ff_fns = list_functions(_current_module, "ff")
 failing = [InputFailing(fn, InvalidFunction(*e_args(fn))) for fn in ff_fns]
