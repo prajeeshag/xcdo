@@ -114,47 +114,29 @@ def ff15(ik: int, input: str, *params: str) -> int:
 
 def ff16(i: list[str]) -> int:
     """
-    Parameter type cannot be a parameterized generic
+    Non-(str,int,float) types should be annotated with a <Reader>
     i
     """
 
 
 def ff17(j: int, k: dict[str, str] = {"k": "j"}) -> int:
     """
-    Parameter type cannot be a parameterized generic
+    Non-(str,int,float) types should be annotated with a <Reader>
     k
     """
 
 
 def ff18(j: int, *k: dict[str, str]) -> int:
     """
-    Parameter type cannot be a parameterized generic
+    Non-(str,int,float) types should be annotated with a <Reader>
     *k
     """
 
 
 def ff19(j: int, **k: dict[str, str]) -> int:
     """
-    Parameter type cannot be a parameterized generic
+    Non-(str,int,float) types should be annotated with a <Reader>
     **k
-    """
-
-
-def ff20(input: list[tuple[str, ...]]) -> int:
-    """
-    Type of 'input' items cannot be a parameterized generic
-    """
-
-
-def ff21(input: tuple[list[str]]) -> int:
-    """
-    Type of 'input' items cannot be a parameterized generic
-    """
-
-
-def ff22(input: Callable[str, str]) -> int:
-    """
-    Unsupported parameterized generic type for 'input'
     """
 
 

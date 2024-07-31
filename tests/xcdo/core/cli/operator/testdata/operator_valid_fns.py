@@ -1,5 +1,5 @@
 # type: ignore
-from typing import Annotated
+from typing import Annotated, Callable
 
 from xcdo.core.cli.operator import Generator as Ge
 from xcdo.core.cli.operator import Operator as Op
@@ -13,7 +13,7 @@ def _toBool(s: str) -> bool:
     return int(s) != 0
 
 
-_toBoolReader = Reader(_toBool)
+_toBoolReader = Reader(_toBool, bool)
 
 passing = []
 
@@ -186,4 +186,37 @@ passing += [
         var_arg=P("*args", int, dR[int]),
         input=I((int,), False, False),
     ),
+]
+
+
+def fp19(input: Callable[str, str]): ...
+
+
+passing += [
+    Op(
+        fp19,
+        input=I((Callable[str, str],), False, False),
+    ),
+]
+
+
+def fp20(input: tuple[list[str]]): ...
+
+
+passing += [
+    Op(
+        fp20,
+        input=I((list[str],), False, True),
+    )
+]
+
+
+def fp21(input: list[tuple[str, ...]]): ...
+
+
+passing += [
+    Op(
+        fp21,
+        input=I((tuple[str, ...],), True, True),
+    )
 ]

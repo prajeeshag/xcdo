@@ -7,24 +7,11 @@ from ..exceptions import InvalidArguments, InvalidFunction
 from ._Reader import Reader
 from ._utils import inspect_function, type2str
 
-
-def _to_str(i: str) -> str:
-    return i
-
-
-def _to_int(i: str) -> int:
-    return int(i)
-
-
-def _to_float(i: str) -> float:
-    return float(i)
-
-
 # Others should pass Readers
 _BASE_DATA_READERS = {
-    str: Reader(_to_str),
-    int: Reader(_to_int),
-    float: Reader(_to_float),
+    str: Reader(lambda x: x, str),
+    int: Reader(int, int),
+    float: Reader(float, float),
 }
 
 _EMPTY = inspect.Parameter.empty
@@ -166,7 +153,7 @@ def operator_factory(fn: Callable[..., object | None]) -> BaseOperator:
 
     if output_type is Any:
         raise InvalidFunction("Type 'Any' is not supported", fn)
-    elif get_origin(output_type) is not None:
+    elif get_origin(output_type) is not None or get_args(output_type) != ():
         raise InvalidFunction("Return type cannot be a parameterized generic type", fn)
 
     input = None
@@ -250,10 +237,6 @@ def _param_factory(fn: Any, pname: str, ptype: Any, default: Any) -> _Param:
             if isinstance(m, Reader):
                 data_reader = m
                 break
-    elif torigin is not None:
-        raise InvalidFunction(
-            "Parameter type cannot be a parameterized generic", fn, pname
-        )
     elif ptype in _BASE_DATA_READERS:
         dtype = ptype
         data_reader = _BASE_DATA_READERS[ptype]
@@ -282,30 +265,15 @@ def _input_factory(fn: Any, ptype: Any = None) -> _Input:
         raise InvalidFunction("Should have valid type annotation", fn, pname)
 
     if torigin not in (list, tuple):
-        if torigin is not None:
-            raise InvalidFunction(
-                "Unsupported parameterized generic type for 'input'",
-                fn,
-            )
         dtypes = [ptype]
     elif torigin is list or (torigin is tuple and targs[-1] is Ellipsis):
         is_variadic = True
         is_list_or_tuple = True
         if type(targs[0]) is type(None):
             raise InvalidFunction("Input cannot be type 'None'", fn)
-
-        if get_origin(targs[0]) is not None:
-            raise InvalidFunction(
-                "Type of 'input' items cannot be a parameterized generic", fn
-            )
         dtypes = [targs[0]]
     elif torigin is tuple:
         is_list_or_tuple = True
         for targ in targs:
-            if get_origin(targ) is not None:
-                raise InvalidFunction(
-                    "Type of 'input' items cannot be a parameterized generic",
-                    fn,
-                )
             dtypes.append(targ)
     return _Input(tuple(dtypes), is_variadic, is_list_or_tuple)
