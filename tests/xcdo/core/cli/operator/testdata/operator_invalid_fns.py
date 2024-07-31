@@ -1,13 +1,11 @@
 # type: ignore
 import sys
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 from xcdo.core.cli.exceptions import InvalidFunction
 
-from tests.xcdo.core.cli.operator.testdata.utils import list_functions
-
-from .utils import e_args
+from .utils import e_args, list_functions
 
 
 @dataclass
@@ -16,83 +14,83 @@ class InputFailing:
     e: InvalidFunction
 
 
-def ff00(i):
+def ff00(i) -> int:
     """
     Should have valid type annotation
     i
     """
 
 
-def ff01(ik=1):
+def ff01(ik=1) -> int:
     """
     Should have valid type annotation
     ik
     """
 
 
-def ff02(b: bool):
+def ff02(b: bool) -> int:
     """
     Non-(str,int,float) types should be annotated with a <Reader>
     b
     """
 
 
-def ff03(bk: bool = False):
+def ff03(bk: bool = False) -> int:
     """
     Non-(str,int,float) types should be annotated with a <Reader>
     bk
     """
 
 
-def ff04(input: str = ""):
+def ff04(input: str = "") -> int:
     """
     The name 'input' is reserved for the `input` parameter and cannot used as an optional parameter
     """
 
 
-def ff05(input: tuple[int, str, ...]) -> None:
+def ff05(input: tuple[int, str, ...]) -> int:
     """
     Should have valid type annotation
     input
     """
 
 
-def ff06(input: list[int, str]) -> None:
+def ff06(input: list[int, str]) -> int:
     """
     Should have valid type annotation
     input
     """
 
 
-def ff07(input: tuple[int, ..., str]) -> None:
+def ff07(input: tuple[int, ..., str]) -> int:
     """
     Should have valid type annotation
     input
     """
 
 
-def ff08(input: tuple[..., str]) -> None:
+def ff08(input: tuple[..., str]) -> int:
     """
     Should have valid type annotation
     input
     """
 
 
-def ff09(input: tuple[...]) -> None:
+def ff09(input: tuple[...]) -> int:
     """
     Should have valid type annotation
     input
     """
 
 
-def ff10(input: list[int, ...]) -> None:
+def ff10(input: list[int, ...]) -> int:
     """
     Should have valid type annotation
     input
     """
 
 
-def ff13(*b: bool):
+def ff13(*b: bool) -> int:
     """
     Non-(str,int,float) types should be annotated with a <Reader>
     *b
@@ -142,67 +140,25 @@ def ff19(j: int, **k: dict[str, str]) -> int:
 
 def ff23() -> list[int]:
     """
-    Return type cannot be a parameterized generic type
+    Type <list[int]> is not supported
     """
 
 
 def ff24() -> Any:
     """
-    Type 'Any' is not supported
+    Type <typing.Any> is not supported
     """
 
 
-def ff25(i: Any):
+def ff33():
     """
-    Type 'Any' is not supported
-    i
-    """
-
-
-def ff26(ik: Any = 1):
-    """
-    Type 'Any' is not supported
-    ik
+    Return type cannot be 'None'
     """
 
 
-def ff27(input: Any):
+def ff34() -> None:
     """
-    Type 'Any' is not supported
-    input
-    """
-
-
-def ff28(*i: Any):
-    """
-    Type 'Any' is not supported
-    *i
-    """
-
-
-def ff29(**i: Any):
-    """
-    Type 'Any' is not supported
-    **i
-    """
-
-
-def ff30(input: None) -> int:
-    """
-    Parameter cannot be type 'None'
-    input
-    """
-
-
-def ff31(input: list[None]) -> int:
-    """
-    Input cannot be type 'None'
-    """
-
-
-def ff32(input: tuple[None, ...]) -> int:
-    """
-    Input cannot be type 'None'
+    Return type cannot be 'None'
     """
 
 

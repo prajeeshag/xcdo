@@ -18,66 +18,61 @@ _toBoolReader = Reader(_toBool, bool)
 passing = []
 
 
-def fp00(): ...
+def fp00() -> int: ...
 
 
-passing += [Ge(fp00)]
+passing += [Ge(fp00, int)]
 
 
-def fp01() -> None: ...
+def fp02(input: int) -> int: ...
 
 
-passing += [Ge(fp01)]
+passing += [Op(fp02, int, input=I((int,), False, False))]
 
 
-def fp02(input: int) -> None: ...
+def fp03(input: tuple[int]) -> int: ...
 
 
-passing += [Op(fp02, input=I((int,), False, False))]
+passing += [Op(fp03, int, input=I((int,), False, True))]
 
 
-def fp03(input: tuple[int]) -> None: ...
+def fp04(input: tuple[int, float, str]) -> int: ...
 
 
-passing += [Op(fp03, input=I((int,), False, True))]
+passing += [Op(fp04, int, input=I((int, float, str), False, True))]
 
 
-def fp04(input: tuple[int, float, str]) -> None: ...
+def fp05(input: list[int]) -> int: ...
 
 
-passing += [Op(fp04, input=I((int, float, str), False, True))]
+passing += [Op(fp05, int, input=I((int,), True, True))]
 
 
-def fp05(input: list[int]) -> None: ...
+def fp06(input: tuple[int, ...]) -> int: ...
 
 
-passing += [Op(fp05, input=I((int,), True, True))]
+passing += [Op(fp06, int, input=I((int,), True, True))]
 
 
-def fp06(input: tuple[int, ...]) -> None: ...
+def fp07(*params: int) -> int: ...
 
 
-passing += [Op(fp06, input=I((int,), True, True))]
+passing += [Ge(fp07, int, var_arg=P("*params", int, dR[int]))]
 
 
-def fp07(*params: int) -> None: ...
+def fp08(i: int) -> int: ...
 
 
-passing += [Ge(fp07, var_arg=P("*params", int, dR[int]))]
+passing += [Ge(fp08, int, args=(P("i", int, dR[int]),))]
 
 
-def fp08(i: int) -> None: ...
-
-
-passing += [Ge(fp08, args=(P("i", int, dR[int]),))]
-
-
-def fp09(input: tuple[int, str], i: int, j: str, *params: str) -> None: ...
+def fp09(input: tuple[int, str], i: int, j: str, *params: str) -> int: ...
 
 
 passing += [
     Op(
         fp09,
+        int,
         args=(
             P("i", int, dR[int]),
             P("j", str, dR[str]),
@@ -88,18 +83,19 @@ passing += [
 ]
 
 
-def fp10(ik: int = 1) -> None: ...
+def fp10(ik: int = 1) -> int: ...
 
 
-passing += [Ge(fp10, optional_kwargs=(P("ik", int, dR[int], 1),))]
+passing += [Ge(fp10, int, optional_kwargs=(P("ik", int, dR[int], 1),))]
 
 
-def fp11(ik: int = 1, **kwds: str) -> None: ...
+def fp11(ik: int = 1, **kwds: str) -> int: ...
 
 
 passing += [
     Ge(
         fp11,
+        int,
         optional_kwargs=(P("ik", int, dR[int], 1),),
         var_kwarg=P("**kwds", str, dR[str]),
     )
@@ -120,6 +116,7 @@ def fp12(
 passing += [
     Op(
         fp12,
+        int,
         (P("i", int, dR[int]), P("j", str, dR[str])),
         P("*params", str, dR[str]),
         (),
@@ -128,42 +125,42 @@ passing += [
             P("sk", str, dR[str], "hi"),
         ),
         P("**kwargs", int, dR[int]),
-        int,
         input=I((int, str), False, True),
     )
 ]
 
 
-def fp13(input: list[bool]) -> None: ...
+def fp13(input: list[bool]) -> int: ...
 
 
-passing += [Op(fp13, input=I((bool,), True, True))]
+passing += [Op(fp13, int, input=I((bool,), True, True))]
 
 
-def fp14(input: tuple[bool, ...]) -> None: ...
+def fp14(input: tuple[bool, ...]) -> int: ...
 
 
-passing += [Op(fp14, input=I((bool,), True, True))]
+passing += [Op(fp14, int, input=I((bool,), True, True))]
 
 
-def fp15(input: tuple[bool, int]) -> None: ...
+def fp15(input: tuple[bool, int]) -> int: ...
 
 
-passing += [Op(fp15, input=I((bool, int), False, True))]
+passing += [Op(fp15, int, input=I((bool, int), False, True))]
 
 
-def fp16(i: Annotated[bool, _toBoolReader]) -> None: ...
+def fp16(i: Annotated[bool, _toBoolReader]) -> int: ...
 
 
-passing += [Ge(fp16, (P("i", bool, _toBoolReader),))]
+passing += [Ge(fp16, int, (P("i", bool, _toBoolReader),))]
 
 
-def fp17(input: int, i: int, j: int, *args: int, k: int, m: int) -> None: ...
+def fp17(input: int, i: int, j: int, *args: int, k: int, m: int) -> int: ...
 
 
 passing += [
     Op(
         fp17,
+        int,
         (P("i", int, dR[int]), P("j", int, dR[int])),
         P("*args", int, dR[int]),
         (P("k", int, dR[int]), P("m", int, dR[int])),
@@ -172,14 +169,13 @@ passing += [
 ]
 
 
-def fp18(
-    input: int, i: int, j: int, *args: int, k: int, m: int, n: int = 1
-) -> None: ...
+def fp18(input: int, i: int, j: int, *args: int, k: int, m: int, n: int = 1) -> int: ...
 
 
 passing += [
     Op(
         fp18,
+        int,
         args=(P("i", int, dR[int]), P("j", int, dR[int])),
         required_kwargs=(P("k", int, dR[int]), P("m", int, dR[int])),
         optional_kwargs=(P("n", int, dR[int], 1),),
@@ -189,34 +185,37 @@ passing += [
 ]
 
 
-def fp19(input: Callable[str, str]): ...
+def fp19(input: Callable[str, str]) -> int: ...
 
 
 passing += [
     Op(
         fp19,
+        int,
         input=I((Callable[str, str],), False, False),
     ),
 ]
 
 
-def fp20(input: tuple[list[str]]): ...
+def fp20(input: tuple[list[str]]) -> int: ...
 
 
 passing += [
     Op(
         fp20,
+        int,
         input=I((list[str],), False, True),
     )
 ]
 
 
-def fp21(input: list[tuple[str, ...]]): ...
+def fp21(input: list[tuple[str, ...]]) -> int: ...
 
 
 passing += [
     Op(
         fp21,
+        int,
         input=I((tuple[str, ...],), True, True),
     )
 ]

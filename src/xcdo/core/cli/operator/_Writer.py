@@ -1,39 +1,32 @@
-from typing import Any, Callable
+import inspect
+from dataclasses import dataclass
+from typing import Callable
 
 from ..exceptions import InvalidFunction
-from ._Operator import Operator
+from ._utils import inspect_function
+
+_empty = inspect.Parameter.empty
 
 
-class Writer(Operator):
-    def __init__(self, fn: Callable[[Any, str], None] | Callable[[Any], None]) -> None:
-        super().__init__(fn)
-        self._validate_fn()
+@dataclass
+class Writer:
+    fn: Callable[[object, str, *tuple[str, ...]], None]
+    dtype: type
+    num_outputs: int = 1
 
-    def _validate_fn(self):
-        if self.input.len != 1 or self.input.is_variadic or self.input.is_list_or_tuple:
-            raise InvalidFunction("Must take a single 'input'", self._fn)
 
-        if self.num_args > 1:
-            raise InvalidFunction(
-                "Cannot have more than two arguments, including 'input'", self._fn
-            )
+def writer_factory(fn: Callable[[object, str, *tuple[str, ...]], None]):
+    _, params, output_type = inspect_function(fn)
+    if len(params) < 2:
+        raise InvalidFunction("Should have atleast 2 parameters", fn)
 
-        if self.num_args and self.get_arg(0).dtype is not str:
-            raise InvalidFunction("The second argument must be of type <str>", self._fn)
+    if params[0][1] is None:
+        raise InvalidFunction("Should have valid type annotations", fn, params[0][0])
 
-        if self.output_type is not type(None):
-            raise InvalidFunction("Should return 'None'", self._fn)
+    for param in params:
+        if param[0].startswith("*"):
+            raise InvalidFunction("Cannot have variadic parameters", fn, param[0])
+        if param[2] is not _empty:
+            raise InvalidFunction("Cannot have optional arguments", fn, param[0])
 
-        if self.required_kwarg_keys or self.optional_kwarg_keys:
-            raise InvalidFunction("Cannot have keyword arguments", self._fn)
-
-        if self.var_arg or self.var_kwarg:
-            raise InvalidFunction("Cannot have variadic arguments", self._fn)
-
-    @property
-    def requires_file_path(self) -> bool:
-        return self.num_args == 1
-
-    @property
-    def dtype(self) -> type:
-        return self.input.dtypes[0]
+    return Writer(fn, params[0][1], len(params[1:]))

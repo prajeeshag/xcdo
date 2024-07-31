@@ -1,0 +1,18 @@
+# type: ignore
+from typing import Annotated, Callable
+
+from xcdo.core.cli.operator import Writer as W
+
+passing = []
+
+
+def fp00(i: int, c): ...
+
+
+passing += [W(fp00, int, 1)]
+
+
+def fp01(i: str, c, b, d): ...
+
+
+passing += [W(fp01, str, 3)]

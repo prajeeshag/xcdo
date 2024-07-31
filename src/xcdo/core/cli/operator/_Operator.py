@@ -39,12 +39,12 @@ class _Param:
 @dataclass(frozen=True)
 class BaseOperator:
     fn: Callable[..., object | None]
+    output_type: type
     args: tuple[_Param, ...] = ()
     var_arg: _Param | None = None
     required_kwargs: tuple[_Param, ...] = ()
     optional_kwargs: tuple[_Param, ...] = ()
     var_kwarg: _Param | None = None
-    output_type: type = type(None)
 
     @cached_property
     def num_args(self) -> int:
@@ -148,13 +148,14 @@ class Operator(BaseOperator):
 
 def operator_factory(fn: Callable[..., object | None]) -> BaseOperator:
     _, params, output_type = inspect_function(fn)
-    if output_type is None:
-        output_type = type(None)
 
-    if output_type is Any:
-        raise InvalidFunction("Type 'Any' is not supported", fn)
-    elif get_origin(output_type) is not None or get_args(output_type) != ():
-        raise InvalidFunction("Return type cannot be a parameterized generic type", fn)
+    if output_type is None or output_type is type(None):
+        raise InvalidFunction("Return type cannot be 'None'", fn)
+
+    try:
+        isinstance("", output_type)
+    except Exception:
+        raise InvalidFunction(f"Type <{type2str(output_type)}> is not supported", fn)
 
     input = None
     args: list[_Param] = []
@@ -166,12 +167,6 @@ def operator_factory(fn: Callable[..., object | None]) -> BaseOperator:
     for i, param in enumerate(params):
         if param[1] is None:
             raise InvalidFunction("Should have valid type annotation", fn, param[0])
-
-        if param[1] is Any:
-            raise InvalidFunction("Type 'Any' is not supported", fn, param[0])
-
-        if param[1] is type(None):
-            raise InvalidFunction("Parameter cannot be type 'None'", fn, param[0])
 
         if param[0] == "input":
             if i > 0:
@@ -205,22 +200,22 @@ def operator_factory(fn: Callable[..., object | None]) -> BaseOperator:
     if input:
         return Operator(
             fn,
+            output_type,
             tuple(args),
             var_arg,
             tuple(required_kwargs),
             tuple(optional_kwargs),
             var_kwarg,
-            output_type,
             input=input,
         )
     return Generator(
         fn,
+        output_type,
         tuple(args),
         var_arg,
         tuple(required_kwargs),
         tuple(optional_kwargs),
         var_kwarg,
-        output_type,
     )
 
 
@@ -269,8 +264,6 @@ def _input_factory(fn: Any, ptype: Any = None) -> _Input:
     elif torigin is list or (torigin is tuple and targs[-1] is Ellipsis):
         is_variadic = True
         is_list_or_tuple = True
-        if type(targs[0]) is type(None):
-            raise InvalidFunction("Input cannot be type 'None'", fn)
         dtypes = [targs[0]]
     elif torigin is tuple:
         is_list_or_tuple = True
