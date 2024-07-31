@@ -20,8 +20,22 @@ _EMPTY = inspect.Parameter.empty
 @dataclass(frozen=True)
 class _Input:
     dtypes: tuple[type, ...]
-    is_variadic: bool
-    is_list_or_tuple: bool
+    var_tuple: bool = False
+    var_list: bool = False
+
+    def __post_init__(self):
+        if self.var_tuple and self.var_list:
+            raise TypeError("Class _Input: cannot be both var_tuple and var_list")
+        if len(self.dtypes) < 1:
+            raise TypeError("Class _Input: dtypes size cannot be Zero")
+        if self.is_variadic and len(self.dtypes) > 1:
+            raise TypeError(
+                "Class _Input: if var_tuple or var_list cannot have multiple input types"
+            )
+
+    @property
+    def is_variadic(self):
+        return self.var_list or self.var_tuple
 
     @property
     def len(self):
@@ -77,21 +91,21 @@ class BaseOperator:
             return self.var_kwarg
         raise KeyError(f"No keyword argument with key [{key}]")
 
-    def load_kwargs(self, kwds: dict[str, str]) -> dict[str, Any]:
+    def load_kwargs(self, kwds: dict[str, str]) -> dict[str, object]:
         self._validate_kwargs(kwds)
-        pkwds: dict[str, Any] = {
+        pkwds: dict[str, object] = {
             k: self.get_kwarg(k).data_reader(kwds[k]) for k in kwds
         }
         return pkwds
 
-    def load_args(self, args: list[str]) -> tuple[Any, ...]:
+    def load_args(self, args: tuple[str, ...]) -> tuple[object, ...]:
         self._validate_args(args)
-        pargs: tuple[Any, ...] = tuple(
+        pargs: tuple[object, ...] = tuple(
             self.get_arg(i).data_reader(args[i]) for i in range(len(args))
         )
         return pargs
 
-    def _validate_args(self, args: list[str]):
+    def _validate_args(self, args: tuple[str, ...]):
         if self.var_arg:
             if len(args) < self.num_args:
                 raise InvalidArguments(
@@ -116,7 +130,10 @@ class BaseOperator:
             ):
                 raise InvalidArguments(f"Got an unexpected keyword argument [{k}]")
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+
+@dataclass(frozen=True)
+class Generator(BaseOperator):
+    def __call__(self, *args: object, **kwds: object) -> object:
         output: object = self.fn(*args, **kwds)
         if not isinstance(output, self.output_type):
             raise TypeError(
@@ -127,17 +144,20 @@ class BaseOperator:
 
 
 @dataclass(frozen=True)
-class Generator(BaseOperator):
-    pass
-
-
-@dataclass(frozen=True)
 class Operator(BaseOperator):
     _: KW_ONLY
     input: _Input
 
-    def __call__(self, input: tuple[object, ...], *args: Any, **kwds: Any) -> Any:
-        output: object = self.fn(input, *args, **kwds)
+    def __call__(
+        self, input: tuple[object, ...], *args: object, **kwds: object
+    ) -> object:
+        if self.input.len == 1 and not self.input.is_variadic:
+            output: object = self.fn(input[0], *args, **kwds)
+        elif self.input.var_list:
+            output: object = self.fn(list(input), *args, **kwds)
+        else:
+            output: object = self.fn(input, *args, **kwds)
+
         if not isinstance(output, self.output_type):
             raise TypeError(
                 f"Expected <{type2str(self.output_type)}> but received"
@@ -146,7 +166,7 @@ class Operator(BaseOperator):
         return output
 
 
-def operator_factory(fn: Callable[..., object | None]) -> BaseOperator:
+def operator_factory(fn: Callable[..., object]) -> BaseOperator:
     _, params, output_type = inspect_function(fn)
 
     if output_type is None or output_type is type(None):
@@ -219,7 +239,9 @@ def operator_factory(fn: Callable[..., object | None]) -> BaseOperator:
     )
 
 
-def _param_factory(fn: Any, pname: str, ptype: Any, default: Any) -> _Param:
+def _param_factory(
+    fn: Callable[..., object], pname: str, ptype: Any, default: object
+) -> _Param:
     name = pname
     data_reader = None
 
@@ -243,10 +265,10 @@ def _param_factory(fn: Any, pname: str, ptype: Any, default: Any) -> _Param:
     return _Param(name, dtype, data_reader, default)
 
 
-def _input_factory(fn: Any, ptype: Any = None) -> _Input:
+def _input_factory(fn: Callable[..., object], ptype: Any = None) -> _Input:
     dtypes: list[type] = []
-    is_variadic = False
-    is_list_or_tuple = False
+    var_list = False
+    var_tuple = False
 
     pname = "input"
 
@@ -261,12 +283,13 @@ def _input_factory(fn: Any, ptype: Any = None) -> _Input:
 
     if torigin not in (list, tuple):
         dtypes = [ptype]
-    elif torigin is list or (torigin is tuple and targs[-1] is Ellipsis):
-        is_variadic = True
-        is_list_or_tuple = True
+    elif torigin is list:
+        var_list = True
+        dtypes = [targs[0]]
+    elif torigin is tuple and targs[-1] is Ellipsis:
+        var_tuple = True
         dtypes = [targs[0]]
     elif torigin is tuple:
-        is_list_or_tuple = True
         for targ in targs:
             dtypes.append(targ)
-    return _Input(tuple(dtypes), is_variadic, is_list_or_tuple)
+    return _Input(tuple(dtypes), var_tuple=var_tuple, var_list=var_list)

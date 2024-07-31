@@ -20,6 +20,9 @@
 ## Misc
 - Variadic argument can be at the starting or at the end. Depending upon where it is placed the argument parsing will change.
 - In case Variadic keyword argument any 'key' is a valid key as long as the type is correct
+- Input: 
+    - tuple[int] equivalent to int
+    - tuple[int,...] and list[int] are both variadic inputs of same type int will be provided as tuple in the first case and list in the second
 
 ## Testing
 - While mocking an implemented object, mock the correct behaviour

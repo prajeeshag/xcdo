@@ -27,31 +27,31 @@ passing += [Ge(fp00, int)]
 def fp02(input: int) -> int: ...
 
 
-passing += [Op(fp02, int, input=I((int,), False, False))]
+passing += [Op(fp02, int, input=I((int,)))]
 
 
 def fp03(input: tuple[int]) -> int: ...
 
 
-passing += [Op(fp03, int, input=I((int,), False, True))]
+passing += [Op(fp03, int, input=I((int,)))]
 
 
 def fp04(input: tuple[int, float, str]) -> int: ...
 
 
-passing += [Op(fp04, int, input=I((int, float, str), False, True))]
+passing += [Op(fp04, int, input=I((int, float, str)))]
 
 
 def fp05(input: list[int]) -> int: ...
 
 
-passing += [Op(fp05, int, input=I((int,), True, True))]
+passing += [Op(fp05, int, input=I((int,), var_list=True))]
 
 
 def fp06(input: tuple[int, ...]) -> int: ...
 
 
-passing += [Op(fp06, int, input=I((int,), True, True))]
+passing += [Op(fp06, int, input=I((int,), var_tuple=True))]
 
 
 def fp07(*params: int) -> int: ...
@@ -78,7 +78,7 @@ passing += [
             P("j", str, dR[str]),
         ),
         var_arg=P("*params", str, dR[str]),
-        input=I((int, str), False, True),
+        input=I((int, str)),
     )
 ]
 
@@ -125,7 +125,7 @@ passing += [
             P("sk", str, dR[str], "hi"),
         ),
         P("**kwargs", int, dR[int]),
-        input=I((int, str), False, True),
+        input=I((int, str)),
     )
 ]
 
@@ -133,19 +133,19 @@ passing += [
 def fp13(input: list[bool]) -> int: ...
 
 
-passing += [Op(fp13, int, input=I((bool,), True, True))]
+passing += [Op(fp13, int, input=I((bool,), var_list=True))]
 
 
 def fp14(input: tuple[bool, ...]) -> int: ...
 
 
-passing += [Op(fp14, int, input=I((bool,), True, True))]
+passing += [Op(fp14, int, input=I((bool,), var_tuple=True))]
 
 
 def fp15(input: tuple[bool, int]) -> int: ...
 
 
-passing += [Op(fp15, int, input=I((bool, int), False, True))]
+passing += [Op(fp15, int, input=I((bool, int)))]
 
 
 def fp16(i: Annotated[bool, _toBoolReader]) -> int: ...
@@ -164,7 +164,7 @@ passing += [
         (P("i", int, dR[int]), P("j", int, dR[int])),
         P("*args", int, dR[int]),
         (P("k", int, dR[int]), P("m", int, dR[int])),
-        input=I((int,), False, False),
+        input=I((int,)),
     )
 ]
 
@@ -180,7 +180,7 @@ passing += [
         required_kwargs=(P("k", int, dR[int]), P("m", int, dR[int])),
         optional_kwargs=(P("n", int, dR[int], 1),),
         var_arg=P("*args", int, dR[int]),
-        input=I((int,), False, False),
+        input=I((int,)),
     ),
 ]
 
@@ -192,7 +192,7 @@ passing += [
     Op(
         fp19,
         int,
-        input=I((Callable[str, str],), False, False),
+        input=I((Callable[str, str],)),
     ),
 ]
 
@@ -204,7 +204,7 @@ passing += [
     Op(
         fp20,
         int,
-        input=I((list[str],), False, True),
+        input=I((list[str],)),
     )
 ]
 
@@ -216,6 +216,6 @@ passing += [
     Op(
         fp21,
         int,
-        input=I((tuple[str, ...],), True, True),
+        input=I((tuple[str, ...],), var_list=True),
     )
 ]
