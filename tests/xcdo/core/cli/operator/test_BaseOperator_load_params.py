@@ -98,6 +98,6 @@ def test_load_kwargs_valid_inputs(mocker, params, kwds, res):
 def arrange(mocker, params):
     fn = mocker.Mock()
     inspect_function = mocker.patch("xcdo.core.cli.operator._Operator.inspect_function")
-    inspect_function.return_value = ("name", params, None)
+    inspect_function.return_value = ("name", params, int)
     op = operator_factory(fn)
     return op

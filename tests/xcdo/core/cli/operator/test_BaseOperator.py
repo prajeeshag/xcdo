@@ -16,6 +16,7 @@ def fn(): ...
 def test_no_var_arg():
     op = BaseOperator(
         fn,
+        int,
         (_P("1"), _P("2"), _P("3")),
         required_kwargs=(_P("r1"), _P("r2")),
         optional_kwargs=(_P("o1"),),
@@ -38,6 +39,7 @@ def test_no_var_arg():
 def test_var_arg():
     op = BaseOperator(
         fn,
+        int,
         (_P("1"), _P("2"), _P("3")),
         var_arg=_P("varg"),
         required_kwargs=(_P("r1"), _P("r2")),

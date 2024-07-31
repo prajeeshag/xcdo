@@ -14,9 +14,12 @@ class Writer:
     dtype: type
     num_outputs: int = 1
 
+    def __call__(self, input: object, fpath: str, *fpaths: str) -> None:
+        self.fn(input, fpath, *fpaths)
+
 
 def writer_factory(fn: Callable[[object, str, *tuple[str, ...]], None]):
-    _, params, output_type = inspect_function(fn)
+    _, params, _ = inspect_function(fn)
     if len(params) < 2:
         raise InvalidFunction("Should have atleast 2 parameters", fn)
 
