@@ -12,16 +12,16 @@ _empty = inspect.Parameter.empty
 class Writer:
     fn: Callable[[object, str, *tuple[str, ...]], None]
     dtype: type
-    num_outputs: int = 1
+    num_outputs: int = 0
 
-    def __call__(self, input: object, fpath: str, *fpaths: str) -> None:
-        self.fn(input, fpath, *fpaths)
+    def __call__(self, input: object, *fpaths: str) -> None:
+        self.fn(input, *fpaths)
 
 
-def writer_factory(fn: Callable[[object, str, *tuple[str, ...]], None]):
+def writer_factory(fn: Callable[[object, *tuple[str, ...]], None]):
     _, params, _ = inspect_function(fn)
-    if len(params) < 2:
-        raise InvalidFunction("Should have atleast 2 parameters", fn)
+    if len(params) < 1:
+        raise InvalidFunction("Should have atleast 1 parameter", fn)
 
     if params[0][1] is None:
         raise InvalidFunction("Should have valid type annotations", fn, params[0][0])

@@ -16,30 +16,33 @@ class ChainableOperation(BaseOperation):
 
 
 @dataclass
-class LeafOperation(ChainableOperation):
-    operator: Generator | Reader
+class ReaderOperation(ChainableOperation):
+    operator: Reader
+    input: str
+
+    def execute(self) -> object:
+        return self.operator(self.input)
+
+
+@dataclass
+class GeneratorOperation(ChainableOperation):
+    operator: Generator
     args: tuple[str, ...] = ()
     kwargs: tuple[tuple[str, str], ...] = ()
 
     def execute(self) -> object:
-        if isinstance(self.operator, Generator):
-            return self.operator(
-                *self.operator.load_args(self.args),
-                **self.operator.load_kwargs(dict(self.kwargs)),
-            )
-        else:
-            return self.operator(self.args[0])
-
-
-OperationType: TypeAlias = "Operation"
+        return self.operator(
+            *self.operator.load_args(self.args),
+            **self.operator.load_kwargs(dict(self.kwargs)),
+        )
 
 
 @dataclass
 class Operation(ChainableOperation):
     operator: Operator
+    children: tuple[ChainableOperation, *tuple[ChainableOperation, ...]]
     args: tuple[str, ...] = ()
     kwargs: tuple[tuple[str, str], ...] = ()
-    children: tuple[ChainableOperation, ...] = ()
 
     def execute(self) -> object:
         args = self.operator.load_args(self.args)
@@ -49,10 +52,10 @@ class Operation(ChainableOperation):
 
 
 @dataclass
-class RootOperation(BaseOperation):
+class WriterOperation(BaseOperation):
     operator: Writer
     child: Operation
-    args: tuple[str, ...] = ()
+    file_paths: tuple[str, ...] = ()
 
     def execute(self) -> None:
-        self.operator(self.child.execute(), *self.args)
+        self.operator(self.child.execute(), *self.file_paths)

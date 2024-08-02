@@ -18,7 +18,7 @@ class InputFailing:
 
 def ff00():
     """
-    Should have atleast 2 parameters
+    Should have atleast 1 parameter
     """
 
 

@@ -16,3 +16,9 @@ def fp01(i: str, c, b, d): ...
 
 
 passing += [W(fp01, str, 3)]
+
+
+def fp02(i: str): ...
+
+
+passing += [W(fp02, str)]

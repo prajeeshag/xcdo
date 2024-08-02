@@ -2,7 +2,7 @@
 
 import pytest
 from pytest_mock import MockerFixture
-from xcdo.core.cli.operation import LeafOperation
+from xcdo.core.cli.operation import GeneratorOperation, ReaderOperation
 
 
 @pytest.mark.parametrize(
@@ -13,7 +13,7 @@ from xcdo.core.cli.operation import LeafOperation
         [("a", "1", "c"), (("k", "s"), ("l", "1")), 10.5],
     ],
 )
-def test_LeafOperationGenerator(mocker: MockerFixture, args, kwargs, res):
+def test_GeneratorOperation(mocker: MockerFixture, args, kwargs, res):
     generator = mocker.patch(
         "xcdo.core.cli.operator.Generator", autospec=True
     ).return_value
@@ -21,7 +21,7 @@ def test_LeafOperationGenerator(mocker: MockerFixture, args, kwargs, res):
     generator.load_kwargs.return_value = dict(kwargs)
     generator.return_value = res
 
-    op = LeafOperation(generator, args=args, kwargs=kwargs)
+    op = GeneratorOperation(generator, args=args, kwargs=kwargs)
     result = op.execute()
     generator.load_args.assert_called_once_with(args)
     generator.load_kwargs.assert_called_once_with(dict(kwargs))
@@ -36,9 +36,9 @@ def test_LeafOperationGenerator(mocker: MockerFixture, args, kwargs, res):
         ["file2", 1],
     ],
 )
-def test_LeafOperationReader(mocker, filepath, res):
+def test_ReaderOperation(mocker, filepath, res):
     reader = mocker.patch("xcdo.core.cli.operator.Reader", autospec=True).return_value
-    op = LeafOperation(reader, args=(filepath,))
+    op = ReaderOperation(reader, filepath)
     reader.return_value = res
     result = op.execute()
     reader.assert_called_once_with(filepath)

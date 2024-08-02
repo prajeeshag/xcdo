@@ -3,7 +3,7 @@ import pytest
 from xcdo.core.cli.operator import Writer
 
 
-@pytest.mark.parametrize("params", [[1, "s"], [1, "s", "z", "a"]])
+@pytest.mark.parametrize("params", [[1], [1, "s"], [1, "s", "z", "a"]])
 def test_call(mocker, params):
     fn = mocker.Mock()
     fn.__name__ = "fn"
