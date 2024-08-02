@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from .operator import Generator, Operator, Reader, Writer
+from ..operator import Generator, Operator, Reader, Writer
 
 
 class BaseOperation(ABC):
