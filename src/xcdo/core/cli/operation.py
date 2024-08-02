@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TypeAlias
 
 from .operator import Generator, Operator, Reader, Writer
 
@@ -16,7 +15,7 @@ class ChainableOperation(BaseOperation):
 
 
 @dataclass
-class ReaderOperation(ChainableOperation):
+class ReadOperation(ChainableOperation):
     operator: Reader
     input: str
 
@@ -52,7 +51,7 @@ class Operation(ChainableOperation):
 
 
 @dataclass
-class WriterOperation(BaseOperation):
+class WriteOperation(BaseOperation):
     operator: Writer
     child: Operation
     file_paths: tuple[str, ...] = ()
