@@ -1,5 +1,6 @@
-from ._OperatorRegistry import OperatorRegistry
+from ._Registry import KeyExistsError, Registry
 
 __all__ = [
-    "OperatorRegistry",
+    "Registry",
+    "KeyExistsError",
 ]

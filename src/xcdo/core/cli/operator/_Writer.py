@@ -10,7 +10,7 @@ _empty = inspect.Parameter.empty
 
 @dataclass
 class Writer:
-    fn: Callable[[object, str, *tuple[str, ...]], None]
+    fn: Callable[[object, *tuple[str, ...]], None]
     dtype: type
     num_outputs: int = 0
 
