@@ -1,6 +1,6 @@
 import re
 from functools import cached_property
-from typing import TypeGuard
+from typing import Any, Type, TypeGuard
 
 from xcdo.cli.exceptions import ArgSyntaxError
 
@@ -84,3 +84,24 @@ class OperatorToken(ArgumentToken[re.Pattern[str]]):
 
 class FilePathToken(ArgumentToken[re.Pattern[str]]):
     pattern = re.compile(r"([^\-]\S(\S|\s)+)|(\"\S(\S|\s)+\")")
+
+
+class TokenParser:
+    def __init__(self, available_tokens: list[Type[ArgumentToken[Any]]]) -> None:
+        self._available_tokens = available_tokens
+
+    def tokenize(
+        self, argv: list[str]
+    ) -> list[ArgumentToken[str] | ArgumentToken[re.Pattern[str]]]:
+        res: list[ArgumentToken[str] | ArgumentToken[re.Pattern[str]]] = []
+        for i, arg in enumerate(argv):
+            argToken = self._get_valid_token(arg)
+            if argToken is None:
+                raise ArgSyntaxError(i, arg)
+            res.append(argToken)
+        return res
+
+    def _get_valid_token(self, arg: str) -> ArgumentToken[Any] | None:
+        for token in self._available_tokens:
+            if token.is_match(arg):
+                return token(arg)

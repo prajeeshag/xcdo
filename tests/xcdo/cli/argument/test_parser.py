@@ -1,12 +1,12 @@
 from typing import Any
 
 import pytest
-from xcdo.cli.argument.parser import ArgumentParser
 from xcdo.cli.argument.tokens import (
     FilePathToken,
     LeftSquareBracket,
     OperatorToken,
     RightSquareBracket,
+    TokenParser,
 )
 
 lSqB = LeftSquareBracket("[")
@@ -17,7 +17,7 @@ fileToken = FilePathToken("file.nc")
 
 @pytest.fixture
 def argParser():
-    return ArgumentParser(
+    return TokenParser(
         available_tokens=[
             LeftSquareBracket,
             RightSquareBracket,
@@ -37,5 +37,5 @@ class Test_tokenize:
             ["-operator file.nc", [opToken, fileToken]],
         ],
     )
-    def test_valid(self, input: str, expected: Any, argParser: ArgumentParser):
+    def test_valid(self, input: str, expected: Any, argParser: TokenParser):
         assert argParser.tokenize(input.split()) == expected
