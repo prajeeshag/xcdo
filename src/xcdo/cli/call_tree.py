@@ -1,6 +1,16 @@
-from .argument import FilePathToken, OperatorToken, TokenParser
+from dataclasses import dataclass
+
+from .argument import TokenParser
+from .operation import WriteOperation
+from .registry import OperatorRegistry, ReaderRegistry, WriterRegistry
 
 
+@dataclass
 class CallTree:
-    def __init__(self, operator_registry, writer_registry, reader_registry) -> None:
-        pass
+    operators: OperatorRegistry
+    writers: WriterRegistry
+    readers: ReaderRegistry
+    token_parser: TokenParser
+
+    def parse_arguments(self, args: list[str]) -> WriteOperation:
+        raise NotImplementedError
