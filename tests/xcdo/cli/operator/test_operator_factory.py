@@ -2,8 +2,8 @@
 from typing import Any
 
 import pytest
-from xcdo.core.cli.exceptions import InvalidFunction
-from xcdo.core.cli.operator import operator_factory
+from xcdo.cli.exceptions import InvalidFunction
+from xcdo.cli.operator import operator_factory
 
 from .testdata.operator_invalid_fns import failing
 from .testdata.operator_valid_fns import passing

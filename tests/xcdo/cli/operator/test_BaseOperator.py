@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 import pytest
-from xcdo.core.cli.operator import BaseOperator
+from xcdo.cli.operator import BaseOperator
 
 
 @dataclass

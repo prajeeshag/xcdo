@@ -1,6 +1,6 @@
 # type: ignore
 import pytest
-from xcdo.core.cli.operator import Writer
+from xcdo.cli.operator import Writer
 
 
 @pytest.mark.parametrize("params", [[1], [1, "s"], [1, "s", "z", "a"]])

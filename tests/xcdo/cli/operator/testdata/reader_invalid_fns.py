@@ -3,9 +3,9 @@ import sys
 from dataclasses import dataclass
 from typing import Any
 
-from xcdo.core.cli.exceptions import InvalidFunction
+from xcdo.cli.exceptions import InvalidFunction
 
-from tests.xcdo.core.cli.operator.testdata.utils import list_functions
+from tests.xcdo.cli.operator.testdata.utils import list_functions
 
 from .utils import e_args
 

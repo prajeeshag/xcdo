@@ -1,8 +1,8 @@
 from typing import Any
 
 import pytest
-from xcdo.core.cli.argument.parser import ArgumentParser
-from xcdo.core.cli.argument.tokens import (
+from xcdo.cli.argument.parser import ArgumentParser
+from xcdo.cli.argument.tokens import (
     FilePathToken,
     LeftSquareBracket,
     OperatorToken,

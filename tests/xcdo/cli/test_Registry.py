@@ -1,5 +1,5 @@
 import pytest
-from xcdo.core.cli.registry import KeyExistsError, Registry
+from xcdo.cli.registry import KeyExistsError, Registry
 
 
 def test_set_get():

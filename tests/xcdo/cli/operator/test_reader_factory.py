@@ -1,8 +1,8 @@
 # type: ignore
 
 import pytest
-from xcdo.core.cli.exceptions import InvalidFunction
-from xcdo.core.cli.operator import Reader, reader_factory
+from xcdo.cli.exceptions import InvalidFunction
+from xcdo.cli.operator import Reader, reader_factory
 
 from .testdata.reader_invalid_fns import failing
 

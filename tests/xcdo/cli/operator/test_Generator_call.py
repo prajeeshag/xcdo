@@ -2,7 +2,7 @@
 import inspect
 
 import pytest
-from xcdo.core.cli.operator import Generator
+from xcdo.cli.operator import Generator
 
 _nil = inspect.Parameter.empty
 

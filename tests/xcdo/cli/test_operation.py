@@ -2,7 +2,7 @@
 
 import pytest
 from pytest_mock import MockerFixture
-from xcdo.core.cli.operation import (
+from xcdo.cli.operation import (
     GeneratorOperation,
     Operation,
     ReadOperation,
@@ -19,9 +19,7 @@ from xcdo.core.cli.operation import (
     ],
 )
 def test_GeneratorOperation(mocker: MockerFixture, args, kwargs, res):
-    generator = mocker.patch(
-        "xcdo.core.cli.operator.Generator", autospec=True
-    ).return_value
+    generator = mocker.patch("xcdo.cli.operator.Generator", autospec=True).return_value
     generator.load_args.return_value = args
     generator.load_kwargs.return_value = dict(kwargs)
     generator.return_value = res
@@ -43,9 +41,7 @@ def test_GeneratorOperation(mocker: MockerFixture, args, kwargs, res):
     ],
 )
 def test_Operation(mocker: MockerFixture, args, kwargs, res):
-    operator = mocker.patch(
-        "xcdo.core.cli.operator.Operator", autospec=True
-    ).return_value
+    operator = mocker.patch("xcdo.cli.operator.Operator", autospec=True).return_value
     operator.load_args.return_value = args
     operator.load_kwargs.return_value = dict(kwargs)
     operator.return_value = res
@@ -73,7 +69,7 @@ def test_Operation(mocker: MockerFixture, args, kwargs, res):
     ],
 )
 def test_ReaderOperation(mocker, filepath, res):
-    reader = mocker.patch("xcdo.core.cli.operator.Reader", autospec=True).return_value
+    reader = mocker.patch("xcdo.cli.operator.Reader", autospec=True).return_value
     op = ReadOperation(reader, filepath)
     reader.return_value = res
     result = op.execute()
@@ -90,7 +86,7 @@ def test_ReaderOperation(mocker, filepath, res):
     ],
 )
 def test_WriterOperation(mocker, filepaths, input):
-    writer = mocker.patch("xcdo.core.cli.operator.Writer", autospec=True).return_value
+    writer = mocker.patch("xcdo.cli.operator.Writer", autospec=True).return_value
     child_op = mocker.Mock()
     child_op.execute.return_value = input
     op = WriteOperation(writer, child_op, filepaths)

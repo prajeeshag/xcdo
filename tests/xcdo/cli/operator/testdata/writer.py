@@ -3,7 +3,7 @@ import sys
 from dataclasses import dataclass
 from typing import Any
 
-from xcdo.core.cli.exceptions import InvalidFunction
+from xcdo.cli.exceptions import InvalidFunction
 
 from .utils import e_args, list_functions
 

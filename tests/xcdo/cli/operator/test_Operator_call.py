@@ -2,8 +2,8 @@
 import inspect
 
 import pytest
-from xcdo.core.cli.operator import Operator
-from xcdo.core.cli.operator._Operator import _Input
+from xcdo.cli.operator import Operator
+from xcdo.cli.operator._Operator import _Input
 
 _nil = inspect.Parameter.empty
 

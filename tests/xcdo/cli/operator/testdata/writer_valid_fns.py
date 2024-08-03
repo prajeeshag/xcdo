@@ -1,7 +1,7 @@
 # type: ignore
 from typing import Annotated, Callable
 
-from xcdo.core.cli.operator import Writer as W
+from xcdo.cli.operator import Writer as W
 
 passing = []
 

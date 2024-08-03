@@ -2,7 +2,7 @@ import re
 from functools import cached_property
 from typing import TypeGuard
 
-from xcdo.core.cli.exceptions import ArgSyntaxError
+from xcdo.cli.exceptions import ArgSyntaxError
 
 from .token import ArgumentToken
 

@@ -1,12 +1,12 @@
 # type: ignore
 from typing import Annotated, Callable
 
-from xcdo.core.cli.operator import Generator as Ge
-from xcdo.core.cli.operator import Operator as Op
-from xcdo.core.cli.operator import Reader
-from xcdo.core.cli.operator._Operator import _BASE_DATA_READERS as dR
-from xcdo.core.cli.operator._Operator import _Input as I
-from xcdo.core.cli.operator._Operator import _Param as P
+from xcdo.cli.operator import Generator as Ge
+from xcdo.cli.operator import Operator as Op
+from xcdo.cli.operator import Reader
+from xcdo.cli.operator._Operator import _BASE_DATA_READERS as dR
+from xcdo.cli.operator._Operator import _Input as I
+from xcdo.cli.operator._Operator import _Param as P
 
 
 def _toBool(s: str) -> bool:

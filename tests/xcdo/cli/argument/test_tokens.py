@@ -1,14 +1,14 @@
 from typing import Any
 
 import pytest
-from xcdo.core.cli.argument.tokens import (
+from xcdo.cli.argument.tokens import (
     Colon,
     FilePathToken,
     LeftSquareBracket,
     OperatorToken,
     RightSquareBracket,
 )
-from xcdo.core.cli.exceptions import ArgSyntaxError
+from xcdo.cli.exceptions import ArgSyntaxError
 
 
 @pytest.mark.parametrize(

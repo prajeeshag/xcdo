@@ -1,7 +1,7 @@
 # type: ignore
 
 import pytest
-from xcdo.core.cli.operator import Reader, reader_factory
+from xcdo.cli.operator import Reader, reader_factory
 
 
 def test_call(mocker):

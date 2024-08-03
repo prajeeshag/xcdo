@@ -3,8 +3,8 @@ import inspect
 from typing import Annotated
 
 import pytest
-from xcdo.core.cli.exceptions import InvalidArguments as Error
-from xcdo.core.cli.operator import operator_factory
+from xcdo.cli.exceptions import InvalidArguments as Error
+from xcdo.cli.operator import operator_factory
 
 from .testdata.operator_valid_fns import _toBoolReader
 
@@ -97,7 +97,7 @@ def test_load_kwargs_valid_inputs(mocker, params, kwds, res):
 
 def arrange(mocker, params):
     fn = mocker.Mock()
-    inspect_function = mocker.patch("xcdo.core.cli.operator._Operator.inspect_function")
+    inspect_function = mocker.patch("xcdo.cli.operator._Operator.inspect_function")
     inspect_function.return_value = ("name", params, int)
     op = operator_factory(fn)
     return op

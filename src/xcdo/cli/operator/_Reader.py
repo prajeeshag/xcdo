@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from xcdo.core.cli.operator._utils import inspect_function
+from xcdo.cli.operator._utils import inspect_function
 
 from ..exceptions import InvalidFunction
 from ._utils import type2str

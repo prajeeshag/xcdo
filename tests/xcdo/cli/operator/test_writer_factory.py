@@ -1,8 +1,8 @@
 # type: ignore
 
 import pytest
-from xcdo.core.cli.exceptions import InvalidFunction
-from xcdo.core.cli.operator import writer_factory
+from xcdo.cli.exceptions import InvalidFunction
+from xcdo.cli.operator import writer_factory
 
 from .testdata.writer_invalid_fns import failing
 from .testdata.writer_valid_fns import passing
