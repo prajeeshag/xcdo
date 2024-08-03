@@ -2,9 +2,12 @@ from typing import Any, Callable
 
 
 class ArgSyntaxError(Exception):
-    def __init__(self, pos: int, string: str, *args: object) -> None:
+    def __init__(self, pos: int = 0, index: int = 0, msg: str = "") -> None:
         self.pos = pos
-        self.string = string
+        self.index = index
+        args = ()
+        if msg:
+            args = (msg,)
         super().__init__(*args)
 
 

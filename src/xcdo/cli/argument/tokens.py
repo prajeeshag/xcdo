@@ -53,55 +53,41 @@ class OperatorToken(ArgumentToken[re.Pattern[str]]):
                     k, v = arg.split("=")  # Should split to 2 items
                 except ValueError:
                     raise ArgSyntaxError(
-                        self._get_pos(arg),
-                        self.string,
-                        "Invalid parameter",
+                        pos=self._get_pos(arg),
+                        msg="Invalid parameter",
                     )
                 if not v:
                     raise ArgSyntaxError(
-                        self._get_pos(arg),
-                        self.string,
-                        "Invalid parameter",
+                        pos=self._get_pos(arg),
+                        msg="Invalid parameter",
                     )
                 if k in self._kwparams:
                     raise ArgSyntaxError(
-                        self._get_pos(arg),
-                        self.string,
-                        f"Parameter '{k}' is already assigned",
+                        pos=self._get_pos(arg),
+                        msg="Parameter already assigned",
                     )
 
                 self._kwparams[k] = v
             else:
                 if not self._kwparams == {}:
                     raise ArgSyntaxError(
-                        self._get_pos(arg),
-                        self.string,
-                        "Positional parameter after keyword parameter",
+                        pos=self._get_pos(arg),
+                        msg="Positional parameter after keyword parameter is not allowed",
                     )
 
                 self._params.append(arg)
 
 
 class FilePathToken(ArgumentToken[re.Pattern[str]]):
-    pattern = re.compile(r"([^\-]\S(\S|\s)+)|(\"\S(\S|\s)+\")")
+    pattern = re.compile(r"([^\-]\S(\S|\s)+)")
 
 
 class TokenParser:
     def __init__(self, available_tokens: list[Type[ArgumentToken[Any]]]) -> None:
         self._available_tokens = available_tokens
 
-    def tokenize(
-        self, argv: list[str]
-    ) -> list[ArgumentToken[str] | ArgumentToken[re.Pattern[str]]]:
-        res: list[ArgumentToken[str] | ArgumentToken[re.Pattern[str]]] = []
-        for i, arg in enumerate(argv):
-            argToken = self._get_valid_token(arg)
-            if argToken is None:
-                raise ArgSyntaxError(i, arg)
-            res.append(argToken)
-        return res
-
-    def _get_valid_token(self, arg: str) -> ArgumentToken[Any] | None:
+    def tokenize(self, arg: str) -> ArgumentToken[str] | ArgumentToken[re.Pattern[str]]:
         for token in self._available_tokens:
             if token.is_match(arg):
                 return token(arg)
+        raise ArgSyntaxError(msg="Unknown pattern")

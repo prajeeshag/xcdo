@@ -91,12 +91,12 @@ def test_OperatorTokenPattern(input: str, expected: bool):
 class Test_OperatorToken:
     parameters: Any = (
         ("-simple,k1=v1=v2", (8, "Invalid parameter")),
-        ("-simple,k1=v1,k1=v2", (14, "Parameter 'k1' is already assigned")),
-        ("-simple,k2=v1,k1=v2,k2=v2", (20, "Parameter 'k2' is already assigned")),
+        ("-simple,k1=v1,k1=v2", (14, "Parameter already assigned")),
+        ("-simple,k2=v1,k1=v2,k2=v2", (20, "Parameter already assigned")),
         ["-operator,abc=", (10, "Invalid parameter")],
         [
             "-operator,abc=dfg,123",
-            (18, "Positional parameter after keyword parameter"),
+            (18, "Positional parameter after keyword parameter is not allowed"),
         ],
     )
 
@@ -106,7 +106,6 @@ class Test_OperatorToken:
             OperatorToken(string)
 
         assert result.value.pos == expected[0]
-        assert result.value.string == string
         assert str(result.value) == expected[1]
 
     class Test_valid:

@@ -1,4 +1,4 @@
-from typing import Any
+# type: ignore
 
 import pytest
 from xcdo.cli.argument.tokens import (
@@ -8,6 +8,7 @@ from xcdo.cli.argument.tokens import (
     RightSquareBracket,
     TokenParser,
 )
+from xcdo.cli.exceptions import ArgSyntaxError
 
 lSqB = LeftSquareBracket("[")
 rSqB = RightSquareBracket("]")
@@ -31,11 +32,24 @@ class Test_tokenize:
     @pytest.mark.parametrize(
         "input,expected",
         [
-            ["[ ]", [lSqB, rSqB]],
-            ["[ -operator ]", [lSqB, opToken, rSqB]],
-            ["[ -operator file.nc ]", [lSqB, opToken, fileToken, rSqB]],
-            ["-operator file.nc", [opToken, fileToken]],
+            ["[", lSqB],
+            ["-operator", opToken],
+            ["file.nc", fileToken],
         ],
     )
-    def test_valid(self, input: str, expected: Any, argParser: TokenParser):
-        assert argParser.tokenize(input.split()) == expected
+    def test_valid(self, input: str, expected, argParser: TokenParser):
+        assert argParser.tokenize(input) == expected
+
+    @pytest.mark.parametrize(
+        "input,expected",
+        [
+            ["-a", ArgSyntaxError(msg="Unknown pattern")],
+            ["-a:sa", ArgSyntaxError(msg="Unknown pattern")],
+            ["-abc,x=y=z", ArgSyntaxError(msg="Invalid parameter", pos=5)],
+        ],
+    )
+    def test_invalid(self, argParser: TokenParser, input, expected):
+        with pytest.raises(ArgSyntaxError) as e:
+            argParser.tokenize(input)
+        assert e.value.pos == expected.pos
+        assert str(e.value) == str(expected)
