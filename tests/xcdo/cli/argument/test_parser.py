@@ -10,16 +10,16 @@ from xcdo.cli.argument.tokens import (
 )
 from xcdo.cli.exceptions import ArgSyntaxError
 
-lSqB = LeftSquareBracket("[")
-rSqB = RightSquareBracket("]")
-opToken = OperatorToken("-operator")
+lSqB = LeftSquareBracket()
+rSqB = RightSquareBracket()
+opToken = OperatorToken("operator")
 fileToken = FilePathToken("file.nc")
 
 
 @pytest.fixture
 def argParser():
     return TokenParser(
-        available_tokens=[
+        [
             LeftSquareBracket,
             RightSquareBracket,
             OperatorToken,

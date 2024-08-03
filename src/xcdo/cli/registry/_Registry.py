@@ -22,7 +22,7 @@ class Registry[K, O]:
         self._db[key] = obj
 
 
-class OperatorRegistry(Registry[str, Operator | Writer]):
+class OperatorRegistry(Registry[str, Operator]):
     pass
 
 
@@ -30,5 +30,5 @@ class WriterRegistry(Registry[type, Writer]):
     pass
 
 
-class ReaderRegistry(Registry[type, Writer]):
+class ReaderRegistry(Registry[type, Reader]):
     pass

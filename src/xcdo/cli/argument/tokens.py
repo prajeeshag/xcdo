@@ -1,93 +1,105 @@
 import re
-from functools import cached_property
-from typing import Any, Type, TypeGuard
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Type, TypeGuard
 
 from xcdo.cli.exceptions import ArgSyntaxError
 
-from .token import ArgumentToken
+
+class ArgumentToken(ABC):
+    @classmethod
+    @abstractmethod
+    def factory(cls, string: str) -> "ArgumentToken | None":
+        raise NotImplementedError
 
 
-class LeftSquareBracket(ArgumentToken[str]):
-    pattern = "["
+@dataclass(frozen=True)
+class LeftSquareBracket(ArgumentToken):
+    @classmethod
+    def factory(cls, string: str) -> ArgumentToken | None:
+        if string == "[":
+            return cls()
 
 
-class RightSquareBracket(ArgumentToken[str]):
-    pattern = "]"
+@dataclass(frozen=True)
+class RightSquareBracket(ArgumentToken):
+    @classmethod
+    def factory(cls, string: str) -> ArgumentToken | None:
+        if string == "]":
+            return cls()
 
 
-class Colon(ArgumentToken[str]):
-    pattern = ":"
+@dataclass(frozen=True)
+class Colon(ArgumentToken):
+    @classmethod
+    def factory(cls, string: str) -> ArgumentToken | None:
+        if string == ":":
+            return cls()
 
 
 def is_operator_token(val: object) -> TypeGuard["OperatorToken"]:
     return isinstance(val, OperatorToken)
 
 
-class OperatorToken(ArgumentToken[re.Pattern[str]]):
-    # pattern = re.compile(r"^-(\w\w+)((\,([^=\s\,]*))|(\,(([^=\s\,]+)=([^\s\,]*))))*\,?")
-    pattern = re.compile(r"^-(\w\w+)(\,(\S)*)*\,?")
+@dataclass(frozen=True)
+class OperatorToken(ArgumentToken):
+    name: str
+    params: tuple[str, ...] = ()
+    kwparams: tuple[tuple[str, str], ...] = ()
 
-    @property
-    def name(self) -> str:
-        return self._name
+    @classmethod
+    def factory(cls, string: str) -> ArgumentToken | None:
+        pattern = re.compile(r"^-(\w\w+)(\,(\S)*)*\,?")
+        if not bool(pattern.fullmatch(string)):
+            return None
 
-    @cached_property
-    def params(self) -> list[str]:
-        return self._params
-
-    @cached_property
-    def kwparams(self) -> dict[str, str]:
-        return self._kwparams
-
-    def _get_pos(self, subarg: str) -> int:
-        return self.string.index(subarg)
-
-    def _parse(self):
-        argList = list(self.string.split(","))
-        self._name = argList.pop(0).lstrip("-")
-        self._params: list[str] = []
-        self._kwparams: dict[str, str] = {}
+        argList = list(string.split(","))
+        name = argList.pop(0).lstrip("-")
+        params: list[str] = []
+        kwparams: list[tuple[str, str]] = []
         for arg in argList[:]:
             if "=" in arg:
                 try:
                     k, v = arg.split("=")  # Should split to 2 items
                 except ValueError:
-                    raise ArgSyntaxError(
-                        pos=self._get_pos(arg),
-                        msg="Invalid parameter",
-                    )
+                    raise ArgSyntaxError(pos=string.index(arg), msg="Invalid parameter")
                 if not v:
+                    raise ArgSyntaxError(pos=string.index(arg), msg="Invalid parameter")
+                if k in dict(kwparams):
                     raise ArgSyntaxError(
-                        pos=self._get_pos(arg),
-                        msg="Invalid parameter",
-                    )
-                if k in self._kwparams:
-                    raise ArgSyntaxError(
-                        pos=self._get_pos(arg),
-                        msg="Parameter already assigned",
+                        pos=string.index(arg), msg="Parameter already assigned"
                     )
 
-                self._kwparams[k] = v
+                kwparams.append((k, v))
             else:
-                if not self._kwparams == {}:
+                if len(kwparams) != 0:
                     raise ArgSyntaxError(
-                        pos=self._get_pos(arg),
+                        pos=string.index(arg),
                         msg="Positional parameter after keyword parameter is not allowed",
                     )
 
-                self._params.append(arg)
+                params.append(arg)
+        return OperatorToken(name, tuple(params), tuple(kwparams))
 
 
-class FilePathToken(ArgumentToken[re.Pattern[str]]):
-    pattern = re.compile(r"([^\-]\S(\S|\s)+)")
+@dataclass(frozen=True)
+class FilePathToken(ArgumentToken):
+    path: str
+
+    @classmethod
+    def factory(cls, string: str) -> ArgumentToken | None:
+        pattern = re.compile(r"([^\-]\S(\S|\s)+)")
+        if bool(pattern.fullmatch(string)):
+            return FilePathToken(string)
 
 
 class TokenParser:
-    def __init__(self, available_tokens: list[Type[ArgumentToken[Any]]]) -> None:
-        self._available_tokens = available_tokens
+    def __init__(self, token_classes: list[Type[ArgumentToken]]) -> None:
+        self._token_classes = token_classes
 
-    def tokenize(self, arg: str) -> ArgumentToken[str] | ArgumentToken[re.Pattern[str]]:
-        for token in self._available_tokens:
-            if token.is_match(arg):
-                return token(arg)
+    def tokenize(self, arg: str) -> ArgumentToken:
+        for token_class in self._token_classes:
+            token = token_class.factory(arg)
+            if token is not None:
+                return token
         raise ArgSyntaxError(msg="Unknown pattern")

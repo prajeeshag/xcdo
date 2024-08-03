@@ -1,6 +1,13 @@
-from ._Operation import GeneratorOperation, Operation, ReadOperation, WriteOperation
+from ._Operation import (
+    BaseOperation,
+    GeneratorOperation,
+    Operation,
+    ReadOperation,
+    WriteOperation,
+)
 
 __all__ = [
+    "BaseOperation",
     "Operation",
     "ReadOperation",
     "WriteOperation",
