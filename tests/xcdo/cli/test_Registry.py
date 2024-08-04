@@ -6,10 +6,12 @@ def test_set_get():
     reg = Registry[str, str]()
     reg.set("k", "object")
     assert reg.get("k") == "object"
+    assert reg.has_key("k") is True
 
 
 def test_get_none():
     reg = Registry[str, str]()
+    assert reg.has_key("k") is False
     with pytest.raises(KeyError):
         reg.get("k")
 

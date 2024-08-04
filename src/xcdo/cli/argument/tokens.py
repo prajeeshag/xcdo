@@ -3,13 +3,17 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Type, TypeGuard
 
-from xcdo.cli.exceptions import ArgSyntaxError
+from xcdo.cli.exceptions import SyntaxError
 
 
 class ArgumentToken(ABC):
     @classmethod
     @abstractmethod
     def factory(cls, string: str) -> "ArgumentToken | None":
+        raise NotImplementedError
+
+    @abstractmethod
+    def __str__(self) -> str:
         raise NotImplementedError
 
 
@@ -20,6 +24,9 @@ class LeftSquareBracket(ArgumentToken):
         if string == "[":
             return cls()
 
+    def __str__(self) -> str:
+        return "["
+
 
 @dataclass(frozen=True)
 class RightSquareBracket(ArgumentToken):
@@ -28,6 +35,9 @@ class RightSquareBracket(ArgumentToken):
         if string == "]":
             return cls()
 
+    def __str__(self) -> str:
+        return "]"
+
 
 @dataclass(frozen=True)
 class Colon(ArgumentToken):
@@ -35,6 +45,9 @@ class Colon(ArgumentToken):
     def factory(cls, string: str) -> ArgumentToken | None:
         if string == ":":
             return cls()
+
+    def __str__(self) -> str:
+        return ":"
 
 
 def is_operator_token(val: object) -> TypeGuard["OperatorToken"]:
@@ -46,6 +59,11 @@ class OperatorToken(ArgumentToken):
     name: str
     params: tuple[str, ...] = ()
     kwparams: tuple[tuple[str, str], ...] = ()
+
+    def __str__(self) -> str:
+        args = ",".join(self.params)
+        kwds = ",".join([f"{k}={v}" for k, v in self.kwparams])
+        return f"-{self.name},{args},{kwds}"
 
     @classmethod
     def factory(cls, string: str) -> ArgumentToken | None:
@@ -62,18 +80,18 @@ class OperatorToken(ArgumentToken):
                 try:
                     k, v = arg.split("=")  # Should split to 2 items
                 except ValueError:
-                    raise ArgSyntaxError(pos=string.index(arg), msg="Invalid parameter")
+                    raise SyntaxError(pos=string.index(arg), msg="Invalid parameter")
                 if not v:
-                    raise ArgSyntaxError(pos=string.index(arg), msg="Invalid parameter")
+                    raise SyntaxError(pos=string.index(arg), msg="Invalid parameter")
                 if k in dict(kwparams):
-                    raise ArgSyntaxError(
+                    raise SyntaxError(
                         pos=string.index(arg), msg="Parameter already assigned"
                     )
 
                 kwparams.append((k, v))
             else:
                 if len(kwparams) != 0:
-                    raise ArgSyntaxError(
+                    raise SyntaxError(
                         pos=string.index(arg),
                         msg="Positional parameter after keyword parameter is not allowed",
                     )
@@ -92,6 +110,9 @@ class FilePathToken(ArgumentToken):
         if bool(pattern.fullmatch(string)):
             return FilePathToken(string)
 
+    def __str__(self) -> str:
+        return self.path
+
 
 class TokenParser:
     def __init__(self, token_classes: list[Type[ArgumentToken]]) -> None:
@@ -102,4 +123,4 @@ class TokenParser:
             token = token_class.factory(arg)
             if token is not None:
                 return token
-        raise ArgSyntaxError(msg="Unknown pattern")
+        raise SyntaxError(msg="Unknown pattern")

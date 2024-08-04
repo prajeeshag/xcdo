@@ -8,7 +8,7 @@ from xcdo.cli.argument.tokens import (
     RightSquareBracket,
     TokenParser,
 )
-from xcdo.cli.exceptions import ArgSyntaxError
+from xcdo.cli.exceptions import SyntaxError
 
 lSqB = LeftSquareBracket()
 rSqB = RightSquareBracket()
@@ -43,13 +43,13 @@ class Test_tokenize:
     @pytest.mark.parametrize(
         "input,expected",
         [
-            ["-a", ArgSyntaxError(msg="Unknown pattern")],
-            ["-a:sa", ArgSyntaxError(msg="Unknown pattern")],
-            ["-abc,x=y=z", ArgSyntaxError(msg="Invalid parameter", pos=5)],
+            ["-a", SyntaxError(msg="Unknown pattern")],
+            ["-a:sa", SyntaxError(msg="Unknown pattern")],
+            ["-abc,x=y=z", SyntaxError(msg="Invalid parameter", pos=5)],
         ],
     )
     def test_invalid(self, argParser: TokenParser, input, expected):
-        with pytest.raises(ArgSyntaxError) as e:
+        with pytest.raises(SyntaxError) as e:
             argParser.tokenize(input)
         assert e.value.pos == expected.pos
         assert str(e.value) == str(expected)

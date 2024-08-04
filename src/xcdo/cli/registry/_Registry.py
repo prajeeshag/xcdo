@@ -21,6 +21,9 @@ class Registry[K, O]:
             raise KeyExistsError(key)
         self._db[key] = obj
 
+    def has_key(self, key: K) -> bool:
+        return key in self._db
+
 
 class OperatorRegistry(Registry[str, Operator]):
     pass

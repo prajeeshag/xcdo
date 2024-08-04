@@ -8,7 +8,7 @@ from xcdo.cli.argument.tokens import (
     RightSquareBracket,
 )
 from xcdo.cli.argument.tokens import OperatorToken as Optkn
-from xcdo.cli.exceptions import ArgSyntaxError
+from xcdo.cli.exceptions import SyntaxError
 
 
 @pytest.mark.parametrize(
@@ -66,7 +66,7 @@ class Test_Optkn:
 
     @pytest.mark.parametrize("string,expected", parameters)
     def test_invalid(self, string: str, expected):
-        with pytest.raises(ArgSyntaxError) as result:
+        with pytest.raises(SyntaxError) as result:
             Optkn.factory(string)
 
         assert result.value.pos == expected[0]
