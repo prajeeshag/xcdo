@@ -1,4 +1,5 @@
 from .tokens import (
+    ArgumentToken,
     FilePathToken,
     OperatorToken,
     TokenParser,
@@ -7,5 +8,6 @@ from .tokens import (
 __all__ = [
     "FilePathToken",
     "OperatorToken",
+    "ArgumentToken",
     "TokenParser",
 ]

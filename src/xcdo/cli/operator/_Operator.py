@@ -34,11 +34,11 @@ class _Input:
             )
 
     @property
-    def is_variadic(self):
+    def is_variadic(self) -> bool:
         return self.var_list or self.var_tuple
 
     @property
-    def len(self):
+    def len(self) -> int:
         return len(self.dtypes)
 
 
@@ -147,6 +147,9 @@ class Generator(BaseOperator):
 class Operator(BaseOperator):
     _: KW_ONLY
     input: _Input
+
+    def num_input(self):
+        return
 
     def __call__(
         self, input: tuple[object, ...], *args: object, **kwds: object
