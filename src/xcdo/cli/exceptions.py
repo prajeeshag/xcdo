@@ -1,10 +1,10 @@
 from typing import Any, Callable
 
 
-class SyntaxError(Exception):
-    def __init__(self, pos: int = 0, index: int = 0, msg: str = "") -> None:
+class ArgSyntaxError(Exception):
+    def __init__(self, token: str, pos: int = 0, msg: str = "") -> None:
         self.pos = pos
-        self.index = index
+        self.token = token
         args = ()
         if msg:
             args = (msg,)
@@ -12,9 +12,8 @@ class SyntaxError(Exception):
 
 
 class OperatorNotFound(Exception):
-    def __init__(self, operator: str, index: int = -1) -> None:
+    def __init__(self, operator: str) -> None:
         self.operator = operator
-        self.index = index
 
 
 class InvalidFunction(Exception):

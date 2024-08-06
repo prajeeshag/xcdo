@@ -1,5 +1,6 @@
 from ._Operation import (
     BaseOperation,
+    ChainableOperation,
     GeneratorOperation,
     Operation,
     ReadOperation,
@@ -12,4 +13,5 @@ __all__ = [
     "ReadOperation",
     "WriteOperation",
     "GeneratorOperation",
+    "ChainableOperation",
 ]

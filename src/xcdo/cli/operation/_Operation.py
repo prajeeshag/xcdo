@@ -14,7 +14,7 @@ class ChainableOperation(BaseOperation):
     pass
 
 
-@dataclass
+@dataclass(frozen=True)
 class ReadOperation(ChainableOperation):
     operator: Reader
     input: str
@@ -23,7 +23,7 @@ class ReadOperation(ChainableOperation):
         return self.operator(self.input)
 
 
-@dataclass
+@dataclass(frozen=True)
 class GeneratorOperation(ChainableOperation):
     operator: Generator
     args: tuple[str, ...] = ()
@@ -36,10 +36,10 @@ class GeneratorOperation(ChainableOperation):
         )
 
 
-@dataclass
+@dataclass(frozen=True)
 class Operation(ChainableOperation):
     operator: Operator
-    children: tuple[ChainableOperation, *tuple[ChainableOperation, ...]]
+    children: tuple[ChainableOperation, ...]
     args: tuple[str, ...] = ()
     kwargs: tuple[tuple[str, str], ...] = ()
 
@@ -50,10 +50,10 @@ class Operation(ChainableOperation):
         return self.operator(input, *args, **kwargs)
 
 
-@dataclass
+@dataclass(frozen=True)
 class WriteOperation(BaseOperation):
     operator: Writer
-    child: Operation
+    child: Operation | GeneratorOperation
     file_paths: tuple[str, ...] = ()
 
     def execute(self) -> None:

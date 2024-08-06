@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Type, TypeGuard
 
-from xcdo.cli.exceptions import SyntaxError
+from xcdo.cli.exceptions import ArgSyntaxError
 
 
 class ArgumentToken(ABC):
@@ -80,18 +80,23 @@ class OperatorToken(ArgumentToken):
                 try:
                     k, v = arg.split("=")  # Should split to 2 items
                 except ValueError:
-                    raise SyntaxError(pos=string.index(arg), msg="Invalid parameter")
+                    raise ArgSyntaxError(
+                        string, pos=string.index(arg), msg="Invalid parameter"
+                    )
                 if not v:
-                    raise SyntaxError(pos=string.index(arg), msg="Invalid parameter")
+                    raise ArgSyntaxError(
+                        string, pos=string.index(arg), msg="Invalid parameter"
+                    )
                 if k in dict(kwparams):
-                    raise SyntaxError(
-                        pos=string.index(arg), msg="Parameter already assigned"
+                    raise ArgSyntaxError(
+                        string, pos=string.index(arg), msg="Parameter already assigned"
                     )
 
                 kwparams.append((k, v))
             else:
                 if len(kwparams) != 0:
-                    raise SyntaxError(
+                    raise ArgSyntaxError(
+                        string,
                         pos=string.index(arg),
                         msg="Positional parameter after keyword parameter is not allowed",
                     )
@@ -123,4 +128,4 @@ class TokenParser:
             token = token_class.factory(arg)
             if token is not None:
                 return token
-        raise SyntaxError(msg="Unknown pattern")
+        raise ArgSyntaxError(arg, msg="Unknown pattern")
