@@ -1,4 +1,30 @@
+[build-system]
+requires = ["setuptools >= 61.0", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xcdo"
+dynamic = ["version"]
+description = "Extended Climate Data Operator"
+authors = [{ name = "Prajeesh Ag", email = "prajeeshag@gmail.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["xarray"]
+
+
+[project.urls]
+homepage = "https://xcdo.prajeesh-ag.com"
+repository = "https://github.com/prajeeshag/xcdo"
+documentation = "https://xcdo.prajeesh-ag.com"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests", "docs"]
+
 [tool.pytest.ini_options]
-addopts = ["--import-mode=importlib"]
-pythonpath = ["src"]
-testpaths = ["tests"]
+testpaths = ["tests", "examples"]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "node-and-timestamp"
