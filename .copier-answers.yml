@@ -1,0 +1,10 @@
+_commit: 5caa2b2
+_src_path: gh:prajeeshag/pyproject_template
+author_email: prajeeshag@gmail.com
+author_name: Prajeesh Ag
+docs_site_name: XCDO
+ghname: prajeeshag
+module_name: xcdo
+project_name: xcdo
+requires_python: '>=3.12'
+year: '2024'
