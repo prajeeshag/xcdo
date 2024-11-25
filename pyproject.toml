@@ -10,7 +10,18 @@ authors = [{ name = "Prajeesh Ag", email = "prajeeshag@gmail.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "cartopy>=0.24.1",
+    "cftime>=1.6.4.post1",
+    "clios>=0.2.1",
+    "matplotlib>=3.9.2",
+    "nc-time-axis>=1.4.1",
+    "netcdf4>=1.7.2",
+    "seaborn>=0.13.2",
+    "typer>=0.13.1",
+    "xarray>=2024.11,<2024.12",
+    "zarr>=2.18.3",
+]
 
 [project.scripts]
 # xcdo = "xcdo:app"
