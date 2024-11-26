@@ -1,5 +1,5 @@
 
-# Xcdo
+# XCDO
 
 ![Test](https://github.com/prajeeshag/xcdo/actions/workflows/test.yml/badge.svg)
 ![Doc](https://github.com/prajeeshag/xcdo/actions/workflows/build-docs.yml/badge.svg)
