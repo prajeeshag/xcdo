@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools >= 61.0", "wheel", "setuptools_scm"]
-build-backend = "setuptools.build_meta"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [project]
 name = "xcdo"
@@ -18,8 +18,7 @@ dependencies = [
     "nc-time-axis>=1.4.1",
     "netcdf4>=1.7.2",
     "seaborn>=0.13.2",
-    "typer>=0.13.1",
-    "xarray>=2024.11,<2024.12",
+    "xarray>=2024.11",
     "zarr>=2.18.3",
 ]
 
@@ -31,29 +30,40 @@ homepage = "https://prajeeshag.github.io/xcdo"
 repository = "https://github.com/prajeeshag/xcdo"
 documentation = "https://prajeeshag.github.io/xcdo"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["xcdo"]
+[tool.pdm.build]
+excludes = ["tests", "docs", "examples"]
+
+[tool.pdm.version]
+source = "scm"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-
-[tool.setuptools_scm]
-version_scheme = "guess-next-dev"
-local_scheme = "node-and-timestamp"
-
-[tool.setuptools.package-data]
-"xcdo" = ["static/*"]
+testpaths = ["tests", "examples"]
 
 [tool.commitizen]
 name = "cz_gitmoji"
 
 [tool.uv]
+default-groups = ["dev", "docs"]
 
 [dependency-groups]
-dev = ["ruff"]
-test = ["pytest","pytest_mock", "pytest-sugar", "pytest-cov"]
-docs = [
-    "mkdocs",
-    "mkdocs-material",
+dev = [
+    "ruff",
+    "pytest",
+    "pytest_mock",
+    "pytest-sugar",
+    "pytest-cov",
+    "mypy>=1.13.0",
 ]
+docs = ["mkdocs", "mkdocs-material"]
+
+[tool.coverage.run]
+branch = true
+source = ["xcdo"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+
+[tool.mypy]
+strict = true
