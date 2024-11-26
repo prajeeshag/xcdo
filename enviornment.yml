@@ -1,0 +1,4 @@
+channels:
+  - conda-forge
+dependencies:
+  - cdo>=2.4.0,<2.5.0
