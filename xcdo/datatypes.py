@@ -6,6 +6,12 @@ from clios import Input, Output, Param
 from .utils import save_dataset
 from .validators import input_file_validator, path_to_dataset_validator
 
+StrParam = t.Annotated[str, Param()]
+IntParam = t.Annotated[int, Param()]
+FloatParam = t.Annotated[float, Param()]
+BoolParam = t.Annotated[bool, Param()]
+
+
 DatasetIn = t.Annotated[
     xr.Dataset,
     Input(

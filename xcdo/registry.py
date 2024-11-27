@@ -2,4 +2,6 @@ from clios import OperatorFns
 
 
 def load_operator_registry() -> OperatorFns:
-    return OperatorFns()
+    from .operators import fn_registry
+
+    return fn_registry

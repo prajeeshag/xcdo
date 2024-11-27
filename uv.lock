@@ -207,8 +207,8 @@ wheels = [
 
 [[package]]
 name = "clios"
-version = "0.3.0a3.dev2+gcbe7c3b"
-source = { git = "https://github.com/prajeeshag/clios?rev=dev#cbe7c3ba55e500704e4468539c11290676b35d82" }
+version = "0.3.0a3.dev4+g73995ad"
+source = { git = "https://github.com/prajeeshag/clios?rev=dev#73995adacb8545fdb0e83e4fe1481fc6e60b45ef" }
 dependencies = [
     { name = "click" },
     { name = "griffe" },
@@ -1562,7 +1562,7 @@ wheels = [
 
 [[package]]
 name = "xcdo"
-version = "0.1.dev7+g5b1ce3f.d20241127"
+version = "0.1.dev9+g6f58ba8.d20241127"
 source = { editable = "." }
 dependencies = [
     { name = "cartopy" },
