@@ -10,9 +10,6 @@ def get_xarray_from_dataset(dataset: xr.Dataset) -> xr.DataArray:
     Raises:
         AssertionError: if the Dataset has multiple data variables
     """
-    data_vars = dataset.data_vars
-    if "time_bnds" in data_vars:
-        dataset = dataset.drop_vars("time_bnds")
     assert (
         len(dataset.data_vars) == 1
     ), f"Dataset should have a single data variable, Got {dataset.data_vars}"
