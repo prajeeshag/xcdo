@@ -10,7 +10,8 @@ fn_registry = OperatorFns()
 @fn_registry.register(name="selname")
 @fn_registry.register()
 def selvar(
-    DatasetIn: DatasetIn, name: t.Annotated[StrParam, Doc("Name of the variable")]
+    input: DatasetIn,
+    name: t.Annotated[StrParam, Doc("Name of the variable")],
 ) -> DatasetOut:
     """
     Select a data variable from a dataset.
@@ -19,11 +20,9 @@ def selvar(
         xcdo -selvar,tas infile.nc outfile.nc
     """
     try:
-        return DatasetIn.data_vars[name].to_dataset()
+        return input.data_vars[name].to_dataset()
     except KeyError:
-        raise ValueError(
-            f"`{name}` is not data variable! Available {DatasetIn.data_vars}"
-        )
+        raise ValueError(f"`{name}` is not data variable! Available {input.data_vars}")
 
 
 @fn_registry.register(name="isel")
