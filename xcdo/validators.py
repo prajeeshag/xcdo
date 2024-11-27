@@ -37,6 +37,13 @@ def _guess_engine(path: str) -> str | None:
     return None
 
 
+def _guess_output_format(path: str) -> str:
+    """Guess the output format based on the file extension"""
+    if path.endswith(".zarr") or path.endswith(".zip"):
+        return "zarr"
+    return "netcdf"
+
+
 def open_dataset(path: str) -> xr.Dataset:
     engine = _guess_engine(path)
     return xr.open_dataset(  # pyright: ignore
@@ -44,3 +51,11 @@ def open_dataset(path: str) -> xr.Dataset:
         chunks={},
         engine=engine,
     )
+
+
+def save_dataset(dataset: xr.Dataset, path: str) -> None:
+    format = _guess_output_format(path)
+    if format == "zarr":
+        dataset.to_zarr(path, mode="w")  # pyright: ignore
+        return
+    dataset.to_netcdf(path)  # pyright: ignore
