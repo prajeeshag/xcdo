@@ -1473,7 +1473,7 @@ wheels = [
 
 [[package]]
 name = "xcdo"
-version = "0.1.dev13+g7804988.d20241128"
+version = "0.1.dev17+g409e498.d20241128"
 source = { editable = "." }
 dependencies = [
     { name = "cfgrib" },
