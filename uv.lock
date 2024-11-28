@@ -183,13 +183,17 @@ wheels = [
 
 [[package]]
 name = "clios"
-version = "0.3.0a3.dev7+g206b7f6"
-source = { git = "https://github.com/prajeeshag/clios?rev=dev#206b7f614da71a71bb1647995cc0fa06062ea356" }
+version = "0.3.0a3"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "griffe" },
     { name = "pydantic" },
     { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/06/c5/5a6e5e4339d881db3c945dcdd992393940194911351e5d3f822e2fca386b/clios-0.3.0a3.tar.gz", hash = "sha256:b79b96cabe6ba2fe49be6bc7f17c6c5575cd5bcf4a1b09a3eae8b5d515d32136", size = 15869 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/53/d4/ccf49231d647b4a458dbba1d953581150265d6920cc5e44358e8dd0c2f17/clios-0.3.0a3-py3-none-any.whl", hash = "sha256:b9b20a34d401b2afdf51b2c98fca53e99a9e5bde79a60614cc6c704d8271cabd", size = 21000 },
 ]
 
 [[package]]
@@ -1469,7 +1473,7 @@ wheels = [
 
 [[package]]
 name = "xcdo"
-version = "0.1.dev12+gf3b5ecb.d20241128"
+version = "0.1.dev13+g7804988.d20241128"
 source = { editable = "." }
 dependencies = [
     { name = "cfgrib" },
@@ -1504,7 +1508,7 @@ docs = [
 requires-dist = [
     { name = "cfgrib", specifier = ">=0.9.14.1" },
     { name = "cftime", specifier = ">=1.6.4.post1" },
-    { name = "clios", git = "https://github.com/prajeeshag/clios?rev=dev" },
+    { name = "clios", specifier = "==0.3.0a3" },
     { name = "dask", extras = ["array", "distributed"], specifier = ">=2024.11.2" },
     { name = "eccodes", specifier = ">=2.39.0" },
     { name = "nc-time-axis", specifier = ">=1.4.1" },

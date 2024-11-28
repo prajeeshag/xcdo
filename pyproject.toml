@@ -13,7 +13,7 @@ requires-python = ">=3.12"
 dependencies = [
     "cfgrib>=0.9.14.1",
     "cftime>=1.6.4.post1",
-    "clios",
+    "clios==0.3.0a3",
     "dask[array,distributed]>=2024.11.2",
     "eccodes>=2.39.0",
     "nc-time-axis>=1.4.1",
@@ -46,9 +46,6 @@ name = "cz_gitmoji"
 
 [tool.uv]
 default-groups = ["dev", "docs"]
-
-[tool.uv.sources]
-clios = { git = "https://github.com/prajeeshag/clios", rev = "dev" }
 
 [dependency-groups]
 dev = [
