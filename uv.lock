@@ -183,8 +183,8 @@ wheels = [
 
 [[package]]
 name = "clios"
-version = "0.3.0a3.dev5+gac101d6"
-source = { git = "https://github.com/prajeeshag/clios?rev=dev#ac101d61ddbc33e52456318a724fffecd9c07bba" }
+version = "0.3.0a3.dev7+g206b7f6"
+source = { git = "https://github.com/prajeeshag/clios?rev=dev#206b7f614da71a71bb1647995cc0fa06062ea356" }
 dependencies = [
     { name = "click" },
     { name = "griffe" },
@@ -1469,7 +1469,7 @@ wheels = [
 
 [[package]]
 name = "xcdo"
-version = "0.1.dev11+g7518d24.d20241127"
+version = "0.1.dev12+gf3b5ecb.d20241128"
 source = { editable = "." }
 dependencies = [
     { name = "cfgrib" },

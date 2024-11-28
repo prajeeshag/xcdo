@@ -18,6 +18,7 @@ def selvar(
 
     operator examples:
         xcdo -selvar,tas infile.nc outfile.nc
+        xcdo -selname,tas infile.nc outfile.nc
     """
     try:
         return input.data_vars[name].to_dataset()
