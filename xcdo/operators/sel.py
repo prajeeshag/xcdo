@@ -31,7 +31,10 @@ def isel(
     DatasetIn: DatasetIn, **indexes: t.Annotated[IntParam, Doc("Indexes to select")]
 ) -> DatasetOut:
     """
-    Use xarray's isel method to select data from a dataset.
+    Index along specified dimensions.
+
+    description:
+        Use xarray's `isel` method to return a new dataset with each array indexed along the specified dimension(s).
 
     operator examples:
         xcdo -isel,time=0,lon=100 infile.nc outfile.nc
