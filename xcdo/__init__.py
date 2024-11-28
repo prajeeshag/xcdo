@@ -11,3 +11,4 @@ from .datatypes import DatasetParam as DatasetParam
 from .datatypes import FloatParam as FloatParam
 from .datatypes import IntParam as IntParam
 from .datatypes import StrParam as StrParam
+from .xarray_accessors import xarray as xarray

@@ -1,5 +1,4 @@
 from xcdo import DatasetIn, OperatorFns
-from xcdo.utils import get_xarray_from_dataset
 
 fn_registry = OperatorFns()
 
@@ -20,6 +19,6 @@ def plot(input: DatasetIn) -> None:
         import matplotlib.pyplot as plt
     except ImportError:
         raise ImportError("`matplotlib` is required for plotting")
-    darray = get_xarray_from_dataset(input)
+    darray = input.get_dataarray()
     darray.plot()  # type: ignore
     plt.show()

@@ -2,7 +2,7 @@ import typing as t
 
 from typing_extensions import Doc
 
-from xcdo import DatasetIn, DatasetOut, IntParam, OperatorFns, StrParam
+from xcdo import DatasetIn, DatasetOut, FloatParam, IntParam, OperatorFns, StrParam
 
 fn_registry = OperatorFns()
 
@@ -28,7 +28,7 @@ def selvar(
 
 @fn_registry.register(name="isel")
 def isel(
-    DatasetIn: DatasetIn, **indexes: t.Annotated[IntParam, Doc("Indexes to select")]
+    input: DatasetIn, **indexes: t.Annotated[IntParam, Doc("Indexes to select")]
 ) -> DatasetOut:
     """
     Index along specified dimensions.
@@ -39,6 +39,27 @@ def isel(
     operator examples:
         xcdo -isel,time=0,lon=100 infile.nc outfile.nc
     """
-    return DatasetIn.isel(
+    return input.isel(
         indexes,
+    )
+
+
+@fn_registry.register()
+def sellonlatbox(
+    input: DatasetIn,
+    wlon: t.Annotated[FloatParam, Doc("Western longitude")],
+    elon: t.Annotated[FloatParam, Doc("Eastern longitude")],
+    slat: t.Annotated[FloatParam, Doc("Southern latitude")],
+    nlat: t.Annotated[FloatParam, Doc("Northern latitude")],
+) -> DatasetOut:
+    """
+    Select a region using the longitude and latitude bounds.
+
+    operator examples:
+        xcdo -sellonlatbox,-180,180,-90,90 infile.nc outfile.nc
+    """
+
+    return input.sel(
+        lon=slice(wlon, elon),
+        lat=slice(slat, nlat),
     )

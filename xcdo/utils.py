@@ -1,21 +1,6 @@
 import xarray as xr
 
 
-def get_xarray_from_dataset(dataset: xr.Dataset) -> xr.DataArray:
-    """
-    Get a DataArray from a Dataset
-
-    if the Dataset has only one data variable, return that variable as a DataArray
-
-    Raises:
-        AssertionError: if the Dataset has multiple data variables
-    """
-    assert (
-        len(dataset.data_vars) == 1
-    ), f"Dataset should have a single data variable, Got {dataset.data_vars}"
-    return dataset.to_array()
-
-
 def _guess_engine(path: str) -> str | None:
     grib_extensions = [".grib", ".grib1", ".grb", ".grb1", ".grib2", ".grb2"]
     zarr_extensions = [".zarr", ".zip"]
