@@ -2,13 +2,13 @@ import typing as t
 
 from typing_extensions import Doc
 
-from xcdo import DatasetIn, DatasetOut, FloatParam, IntParam, OperatorFns, StrParam
+from xcdo import DatasetIn, DatasetOut, FloatParam, IntParam, StrParam
 
-fn_registry = OperatorFns()
+from . import operator
 
 
-@fn_registry.register(name="selname")
-@fn_registry.register()
+@operator(name="selname")
+@operator()
 def selvar(
     input: DatasetIn,
     name: t.Annotated[StrParam, Doc("Name of the variable")],
@@ -26,7 +26,7 @@ def selvar(
         raise ValueError(f"`{name}` is not data variable! Available {input.data_vars}")
 
 
-@fn_registry.register(name="isel")
+@operator(name="isel")
 def isel(
     input: DatasetIn, **indexes: t.Annotated[IntParam, Doc("Indexes to select")]
 ) -> DatasetOut:
@@ -44,7 +44,7 @@ def isel(
     )
 
 
-@fn_registry.register()
+@operator()
 def sellonlatbox(
     input: DatasetIn,
     wlon: t.Annotated[FloatParam, Doc("Western longitude")],
@@ -55,11 +55,13 @@ def sellonlatbox(
     """
     Select a region using the longitude and latitude bounds.
 
+    description:
+        Use xarray's `sel` method to select a region using the longitude and latitude bounds.
+
     operator examples:
         xcdo -sellonlatbox,-180,180,-90,90 infile.nc outfile.nc
     """
-
+    lon_name, lat_name = input.lon.name, input.lat.name
     return input.sel(
-        lon=slice(wlon, elon),
-        lat=slice(slat, nlat),
+        {lon_name: slice(wlon, elon), lat_name: slice(slat, nlat)},
     )

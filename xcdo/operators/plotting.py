@@ -1,9 +1,9 @@
-from xcdo import DatasetIn, OperatorFns
+from xcdo import DatasetIn
 
-fn_registry = OperatorFns()
+from . import operator
 
 
-@fn_registry.register()
+@operator()
 def plot(input: DatasetIn) -> None:
     """
     A simple plot function for xarray DataArray.
@@ -20,5 +20,5 @@ def plot(input: DatasetIn) -> None:
     except ImportError:
         raise ImportError("`matplotlib` is required for plotting")
     darray = input.get_dataarray()
-    darray.plot()  # type: ignore
+    darray.plot()
     plt.show()

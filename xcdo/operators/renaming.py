@@ -2,12 +2,12 @@ import typing as t
 
 from typing_extensions import Doc
 
-from xcdo import DatasetIn, DatasetOut, OperatorFns, StrParam
+from xcdo import DatasetIn, DatasetOut, StrParam
 
-fn_registry = OperatorFns()
+from . import operator
 
 
-@fn_registry.register()
+@operator()
 def renamedim(
     input: DatasetIn,
     oldname: t.Annotated[StrParam, Doc("Old name of the dimension")],
@@ -22,7 +22,7 @@ def renamedim(
     return input.rename_dims({oldname: newname})
 
 
-@fn_registry.register()
+@operator()
 def rename(
     input: DatasetIn,
     oldname: t.Annotated[StrParam, Doc("Old name of the variable")],
