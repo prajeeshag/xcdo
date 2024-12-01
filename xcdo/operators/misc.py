@@ -1,9 +1,27 @@
 import typing as t
 
+import rich
+
 from xcdo import DatasetIn, DatasetOut
 from xcdo import xarray as xr
 
 from . import operator
+
+
+@operator(implicit="param", name="print")
+def print_dataset(input: DatasetIn) -> None:
+    """
+    Simply print the given dataset.
+
+    description:
+        This operator simply prints the given dataset to the terminal.
+        It uses `rich` library to display the dataset in a more readable format.
+
+    operator examples:
+        xcdo -print infile.nc
+        xcdo -print -selvar,var infile.nc
+    """
+    rich.print(input)
 
 
 @operator(implicit="param")
