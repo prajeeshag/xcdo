@@ -11,6 +11,7 @@ license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "cartopy>=0.24.1",
     "cf-xarray>=0.10.0,<1.0.0",
     "cfgrib>=0.9.14.1",
     "cftime>=1.6.4.post1",
