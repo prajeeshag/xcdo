@@ -50,7 +50,7 @@ name = "cz_gitmoji"
 default-groups = ["dev", "docs"]
 
 [tool.uv.sources]
-clios = { git = "https://github.com/prajeeshag/clios", rev = "dev" }
+clios = { git = "https://github.com/prajeeshag/clios", branch = "dev" }
 
 [dependency-groups]
 dev = [

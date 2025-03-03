@@ -220,7 +220,7 @@ wheels = [
 [[package]]
 name = "clios"
 version = "0.3.0a4.dev10+g9207c16"
-source = { git = "https://github.com/prajeeshag/clios?rev=dev#9207c16784fd14d7852bdc23a16eba36ff87bc74" }
+source = { git = "https://github.com/prajeeshag/clios?branch=dev#9207c16784fd14d7852bdc23a16eba36ff87bc74" }
 dependencies = [
     { name = "click" },
     { name = "griffe" },
@@ -1560,7 +1560,7 @@ wheels = [
 
 [[package]]
 name = "xcdo"
-version = "0.1.dev24+g286e0cf.d20250303"
+version = "0.1.dev25+g0bbb3bc.d20250303"
 source = { editable = "." }
 dependencies = [
     { name = "cartopy" },
@@ -1599,7 +1599,7 @@ requires-dist = [
     { name = "cf-xarray", specifier = ">=0.10.0,<1.0.0" },
     { name = "cfgrib", specifier = ">=0.9.14.1" },
     { name = "cftime", specifier = ">=1.6.4.post1" },
-    { name = "clios", git = "https://github.com/prajeeshag/clios?rev=dev" },
+    { name = "clios", git = "https://github.com/prajeeshag/clios?branch=dev" },
     { name = "dask", extras = ["array", "distributed"], specifier = ">=2024.11.2" },
     { name = "eccodes", specifier = ">=2.39.0" },
     { name = "nc-time-axis", specifier = ">=1.4.1" },
