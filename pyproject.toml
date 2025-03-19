@@ -62,7 +62,11 @@ dev = [
     "mypy>=1.13.0",
     "cdo>=1.6.1",
 ]
-docs = ["mkdocs>=1.6.1", "mkdocs-material>=9.5.46"]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.5.46",
+    "termynal>=0.13.0",
+]
 
 [tool.coverage.run]
 branch = true
