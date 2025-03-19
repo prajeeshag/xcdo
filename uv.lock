@@ -1560,7 +1560,7 @@ wheels = [
 
 [[package]]
 name = "xcdo"
-version = "0.1.dev25+g0bbb3bc.d20250303"
+version = "0.1.dev26+g3579f66.d20250318"
 source = { editable = "." }
 dependencies = [
     { name = "cartopy" },

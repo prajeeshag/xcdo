@@ -1,3 +1,5 @@
+import cf_xarray
+
 from xcdo import DatasetIn
 
 from . import operator
@@ -13,9 +15,10 @@ def showtimestamp(
     operator examples:
         xcdo -showtimestamp infile.nc
     """
-    time_coord = input.cf.get("time", None)
 
-    if time_coord is not None:
-        print(time_coord.values)
-    else:
+    try:
+        time_coord = input.cf["time"]
+    except KeyError:
         raise ValueError("No 'time' coordinate found in the dataset")
+
+    print(time_coord.values)

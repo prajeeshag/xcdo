@@ -1,3 +1,4 @@
+import cf_xarray as cf_xarray
 import xarray as xarray
 
 
@@ -19,3 +20,11 @@ class GetDataArray:
             len(self._dataset.data_vars) == 1
         ), f"Dataset should have a single data variable, Got {self._dataset.data_vars}"
         return self._dataset.to_array()
+
+
+custom_criteria = {
+    "time": {
+        "name": "Time|time|times|Times",
+    }
+}
+cf_xarray.set_options(custom_criteria=custom_criteria)  # type: ignore
