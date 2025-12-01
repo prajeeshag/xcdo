@@ -46,3 +46,5 @@ As it mimics the CDO interface, using XCDO is generally the same as using CDO. f
 $ xcdo -selvar,var1 indata.nc outdata.nc
 $ xcdo -timemean -zonmean in.nc out.nc
 ```
+
+For a more complete example including more features, see the Tutorial - User Guide.

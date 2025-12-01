@@ -16,10 +16,11 @@ class GetDataArray:
         Raises:
             AssertionError: if the Dataset has multiple data variables
         """
-        assert (
-            len(self._dataset.data_vars) == 1
-        ), f"Dataset should have a single data variable, Got {self._dataset.data_vars}"
-        return self._dataset.to_array()
+        assert len(self._dataset.data_vars) == 1, (
+            f"Dataset should have a single data variable, Got {self._dataset.data_vars}"
+        )
+        da_name: str = list(self._dataset.data_vars)[0]
+        return self._dataset[da_name]
 
 
 custom_criteria = {
