@@ -36,7 +36,7 @@ $ xcdo --list
 To get detailed information about a specific operator, use:
 <!--termynal--->
 ```
-# xcdo --show <operator>
+$ xcdo --show <operator>
 $ xcdo --show selvar
 ```
 
