@@ -57,4 +57,6 @@ def settomiss(
         case SetMissExpr.le:
             for var in input.data_vars:
                 input[var] = input[var].where(input[var] > value)
+        case _:
+            raise ValueError(f"Unknown expression: {expr}")
     return input

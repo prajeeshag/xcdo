@@ -32,6 +32,7 @@ def rename(
     Rename a variable in a dataset.
 
     operator examples:
-        xcdo -renamecoord,lon,longitude infile.nc outfile.nc
+        xcdo -rename,lon,longitude infile.nc outfile.nc
+        xcdo -rename,tas,temp infile.nc outfile.nc
     """
     return input.rename_vars({oldname: newname})

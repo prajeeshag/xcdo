@@ -1,5 +1,3 @@
-import cf_xarray
-
 from xcdo import DatasetIn
 
 from . import operator
@@ -21,4 +19,4 @@ def showtimestamp(
     except KeyError:
         raise ValueError("No 'time' coordinate found in the dataset")
 
-    print(time_coord.values)
+    print(time_coord.values)  # noqa: T201
