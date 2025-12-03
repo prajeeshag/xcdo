@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 
 from xcdo import xarray as xr
-from xcdo.utils import open_dataset
+from xcdo.io_utils import open_dataset
 
 from . import operator
 

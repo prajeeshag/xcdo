@@ -2,7 +2,7 @@ import typing as t
 from pathlib import Path
 
 from .exceptions import XcdoError
-from .utils import open_dataset
+from .io_utils import open_dataset
 
 
 def input_file_validator(path: str) -> str:

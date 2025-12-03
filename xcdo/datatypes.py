@@ -3,7 +3,7 @@ import typing as t
 import xarray as xr
 from clios import Input, Output, Param
 
-from .utils import save_dataset
+from .io_utils import save_dataset
 from .validators import input_file_validator, path_to_dataset_validator
 
 StrParam = t.Annotated[str, Param()]
