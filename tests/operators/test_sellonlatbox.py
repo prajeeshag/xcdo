@@ -8,7 +8,7 @@ from xcdo import XcdoError
 from xcdo.operators.selecting import sellonlatbox
 
 
-def simple_xrdset():
+def simple_xrdset180():
     lon = range(-180, 180, 10)
     lat = range(-90, 100, 10)
     varx, vary = np.meshgrid(lon, lat)
@@ -117,7 +117,7 @@ def test_mixed_longitude_formats():
 
 
 def test_sellonlatbox_simple():
-    data = simple_xrdset()
+    data = simple_xrdset180()
     result = sellonlatbox(data, -50, 50, -20, 20)
     assert result["varx"].shape == (5, 11)
     assert result["vary"].shape == (5, 11)
@@ -133,7 +133,7 @@ def test_sellonlatbox_simple():
 
 
 def test_sellonlatbox_wraparound180():
-    data = simple_xrdset()
+    data = simple_xrdset180()
     result = sellonlatbox(data, 170, 210, -20, 20)
     assert result["varx"].shape == (5, 5)
     assert result["vary"].shape == (5, 5)
@@ -141,6 +141,17 @@ def test_sellonlatbox_wraparound180():
     assert (result["vary"].lat == np.array([-20, -10, 0, 10, 20])).all()
     assert (result["vary"][:, 0] == np.array([-20, -10, 0, 10, 20])).all()
     assert (result["varx"][0, :] == np.array([170, -180, -170, -160, -150])).all()
+
+
+def test_sellonlatbox_180_lon180():
+    data = simple_xrdset180()
+    result = sellonlatbox(data, 190, 210, -20, 20)
+    assert result["varx"].shape == (5, 3)
+    assert result["vary"].shape == (5, 3)
+    assert (result["vary"].lon == np.array([190, 200, 210])).all()
+    assert (result["vary"].lat == np.array([-20, -10, 0, 10, 20])).all()
+    assert (result["vary"][:, 0] == np.array([-20, -10, 0, 10, 20])).all()
+    assert (result["varx"][0, :] == np.array([-170, -160, -150])).all()
 
 
 def test_sellonlatbox_2grid():
@@ -160,6 +171,28 @@ def test_sellonlatbox_wraparound360():
     assert (result["vary"].lat == np.array([-20, -10, 0, 10, 20])).all()
     assert (result["vary"][:, 0] == np.array([-20, -10, 0, 10, 20])).all()
     assert (result["varx"][0, :] == np.array([340, 350, 0, 10, 20])).all()
+
+
+def test_sellonlatbox_360_negativelon():
+    data = simple_xrdset360()
+    result = sellonlatbox(data, -20, -10, -20, 20)
+    assert result["varx"].shape == (5, 2)
+    assert result["vary"].shape == (5, 2)
+    assert (result["vary"].lon == np.array([-20, -10])).all()
+    assert (result["vary"].lat == np.array([-20, -10, 0, 10, 20])).all()
+    assert (result["vary"][:, 0] == np.array([-20, -10, 0, 10, 20])).all()
+    assert (result["varx"][0, :] == np.array([340, 350])).all()
+
+
+def test_sellonlatbox_360_positivelon():
+    data = simple_xrdset360()
+    result = sellonlatbox(data, 10, 20, -20, 20)
+    assert result["varx"].shape == (5, 2)
+    assert result["vary"].shape == (5, 2)
+    assert (result["vary"].lon == np.array([10, 20])).all()
+    assert (result["vary"].lat == np.array([-20, -10, 0, 10, 20])).all()
+    assert (result["vary"][:, 0] == np.array([-20, -10, 0, 10, 20])).all()
+    assert (result["varx"][0, :] == np.array([10, 20])).all()
 
 
 def test_sellonlatbox_curvilinear_simple():

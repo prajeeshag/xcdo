@@ -1,4 +1,5 @@
 from xcdo import DatasetIn
+from xcdo.exceptions import XcdoError
 
 from . import operator
 
@@ -18,7 +19,7 @@ def plot(input: DatasetIn) -> None:
     try:
         import matplotlib.pyplot as plt
     except ImportError:
-        raise ImportError("`matplotlib` is required for plotting")
+        raise XcdoError("`matplotlib` is not installed")
     darray = input.get_dataarray()
     darray.plot()
     plt.show()

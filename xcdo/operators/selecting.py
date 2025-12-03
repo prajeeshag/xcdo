@@ -136,16 +136,20 @@ def sellonlatbox(
 
     is_0360 = min_lon >= 0 and max_lon <= 360
 
+    flip = False
     if is_0360:
-        # convert -180..180 → 0..360
         if wlon < 0:
-            wlon = wlon % 360
+            flip = True
+            wlon = wlon + 360
         if elon < 0:
-            elon = elon % 360
+            flip = True
+            elon = elon + 360
     else:
         if wlon > 180:
+            flip = True
             wlon = ((wlon + 180) % 360) - 180
         if elon > 180:
+            flip = True
             elon = ((elon + 180) % 360) - 180
 
     if wlon > elon:
@@ -156,4 +160,11 @@ def sellonlatbox(
         else:
             part2 = part2.assign_coords({lon_name: part2[lon_name] + 360.0})
         return xr.concat([part1, part2], dim=lon_name)
-    return input.sel({lon_name: slice(wlon, elon), lat_name: slice(slat, nlat)})
+    else:
+        part = input.sel({lon_name: slice(wlon, elon), lat_name: slice(slat, nlat)})
+        if flip:
+            if is_0360:
+                part = part.assign_coords({lon_name: part[lon_name] - 360.0})
+            else:
+                part = part.assign_coords({lon_name: part[lon_name] + 360.0})
+        return part
