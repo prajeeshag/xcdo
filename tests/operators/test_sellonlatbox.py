@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
+from xcdo import XcdoError
 from xcdo.operators.selecting import sellonlatbox
 
 
@@ -81,37 +82,37 @@ def ds():
 
 
 def test_wlon_greater_than_elon():
-    with pytest.raises(ValueError, match="Western longitude should be smaller"):
+    with pytest.raises(XcdoError, match="Western longitude should be smaller"):
         sellonlatbox(ds(), 10, -5, -10, 10)
 
 
 def test_slat_greater_than_nlat():
-    with pytest.raises(ValueError, match="Southern latitude should be smaller"):
+    with pytest.raises(XcdoError, match="Southern latitude should be smaller"):
         sellonlatbox(ds(), -10, 10, 20, 10)
 
 
 def test_wlon_less_than_minus_180():
-    with pytest.raises(ValueError, match="larger than -180"):
+    with pytest.raises(XcdoError, match="larger than -180"):
         sellonlatbox(ds(), -181, 10, -10, 10)
 
 
 def test_elon_greater_than_360():
-    with pytest.raises(ValueError, match="smaller than 360"):
+    with pytest.raises(XcdoError, match="smaller than 360"):
         sellonlatbox(ds(), 10, 361, -10, 10)
 
 
 def test_slat_less_than_minus_90():
-    with pytest.raises(ValueError, match="larger than -90"):
+    with pytest.raises(XcdoError, match="larger than -90"):
         sellonlatbox(ds(), -10, 10, -91, 10)
 
 
 def test_nlat_greater_than_90():
-    with pytest.raises(ValueError, match="smaller than 90"):
+    with pytest.raises(XcdoError, match="smaller than 90"):
         sellonlatbox(ds(), -10, 10, -10, 91)
 
 
 def test_mixed_longitude_formats():
-    with pytest.raises(ValueError, match="either"):
+    with pytest.raises(XcdoError, match="either"):
         sellonlatbox(ds(), -10, 200, -10, 10)
 
 
@@ -145,7 +146,7 @@ def test_sellonlatbox_wraparound180():
 def test_sellonlatbox_2grid():
     data = two_grid_xrdset()
     with pytest.raises(
-        ValueError, match="Cannot handle selection for datasets with multiple grids"
+        XcdoError, match="Cannot handle selection for datasets with multiple grids"
     ):
         sellonlatbox(data, -50, 50, -20, 20)
 
@@ -184,7 +185,7 @@ def test_sellonlatbox_curvilinear_rot():
 
 def test_sellonlatbox_curvilinear_empty():
     data = create_integer_grid()
-    with pytest.raises(ValueError, match="Selection is empty"):
+    with pytest.raises(XcdoError, match="Selection is empty"):
         sellonlatbox(data, 20, 25, 20, 25)
 
 
@@ -197,7 +198,7 @@ def test_sellonlatbox_empty():
             "lat": (("y", "x"), lat, {"units": "degrees_north"}),
         },
     )
-    with pytest.raises(ValueError, match="Selection is empty"):
+    with pytest.raises(XcdoError, match="Selection is empty"):
         sellonlatbox(data, 10, 20, -30, -20)
 
 
@@ -236,7 +237,7 @@ def test_sellonlatbox_no_longitude():
             ),
         },
     )
-    with pytest.raises(ValueError, match="Longitude not found in coordinates"):
+    with pytest.raises(XcdoError, match="Longitude not found in coordinates"):
         sellonlatbox(data, -50, 50, -20, 20)
 
 
@@ -255,5 +256,5 @@ def test_sellonlatbox_no_latitude():
             ),
         },
     )
-    with pytest.raises(ValueError, match="Latitude not found in coordinates"):
+    with pytest.raises(XcdoError, match="Latitude not found in coordinates"):
         sellonlatbox(data, -50, 50, -20, 20)

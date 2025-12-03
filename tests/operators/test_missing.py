@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from xcdo import DatasetIn
+from xcdo import DatasetIn, XcdoError
 from xcdo.operators.missing_values import SetMissExpr, settomiss  # adjust import
 
 
@@ -92,5 +92,5 @@ def test_settomiss_le(sample_ds):
 
 
 def test_settomiss_unknown(sample_ds):
-    with pytest.raises(ValueError, match="Unknown expression"):
+    with pytest.raises(XcdoError, match="Unknown expression"):
         settomiss(sample_ds, 1.0, "unknown")

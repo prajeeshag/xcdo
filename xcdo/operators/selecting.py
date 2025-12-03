@@ -4,7 +4,7 @@ import numpy as np
 import xarray as xr
 from typing_extensions import Doc
 
-from xcdo import DatasetIn, DatasetOut, FloatParam, IntParam, StrParam
+from xcdo import DatasetIn, DatasetOut, FloatParam, IntParam, StrParam, XcdoError
 
 from . import operator
 
@@ -25,7 +25,7 @@ def selvar(
     try:
         return input.data_vars[name].to_dataset()
     except KeyError:
-        raise ValueError(
+        raise XcdoError(
             f"`{name}` is not a data variable! Available data variables: {input.data_vars}"
         )
 
@@ -59,7 +59,7 @@ def _sellonlatbox_curvilinear(
     lat = ds[lat_name]
     mask = (lon >= wlon) & (lon <= elon) & (lat >= slat) & (lat <= nlat)
     if not mask.any():
-        raise ValueError("Selection is empty")
+        raise XcdoError("Selection is empty")
     # Get the indices of all True values
     y_idx, x_idx = np.where(mask.values)
     # Rectangular bounding box in index space
@@ -95,31 +95,31 @@ def sellonlatbox(
         xcdo -sellonlatbox,-10,50,-50,60 infile.nc outfile.nc
     """
     if wlon > elon:
-        raise ValueError("Western longitude should be smaller than Eastern longitude")
+        raise XcdoError("Western longitude should be smaller than Eastern longitude")
     if slat > nlat:
-        raise ValueError("Southern latitude should be smaller than Northern latitude")
+        raise XcdoError("Southern latitude should be smaller than Northern latitude")
     if wlon < -180:
-        raise ValueError("Western longitude should be larger than -180")
+        raise XcdoError("Western longitude should be larger than -180")
     if elon > 360:
-        raise ValueError("Eastern longitude should be smaller than 360")
+        raise XcdoError("Eastern longitude should be smaller than 360")
     if slat < -90:
-        raise ValueError("Southern latitude should be larger than -90")
+        raise XcdoError("Southern latitude should be larger than -90")
     if nlat > 90:
-        raise ValueError("Northern latitude should be smaller than 90")
+        raise XcdoError("Northern latitude should be smaller than 90")
     if wlon < 0 and elon > 180:
-        raise ValueError("Longitude should be either [-180, 180] or [0, 360] format")
+        raise XcdoError("Longitude should be either [-180, 180] or [0, 360] format")
 
     if "longitude" not in input.cf.coordinates:
-        raise ValueError("Longitude not found in coordinates")
+        raise XcdoError("Longitude not found in coordinates")
 
     if "latitude" not in input.cf.coordinates:
-        raise ValueError("Latitude not found in coordinates")
+        raise XcdoError("Latitude not found in coordinates")
 
     if (
         len(input.cf.coordinates["longitude"]) != 1
         or len(input.cf.coordinates["latitude"]) != 1
     ):
-        raise ValueError("Cannot handle selection for datasets with multiple grids")
+        raise XcdoError("Cannot handle selection for datasets with multiple grids")
 
     lon_name, lat_name = (
         input.cf.coordinates["longitude"][0],

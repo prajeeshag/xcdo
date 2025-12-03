@@ -1,4 +1,4 @@
-from xcdo import DatasetIn
+from xcdo import DatasetIn, XcdoError
 
 from . import operator
 
@@ -17,6 +17,6 @@ def showtimestamp(
     try:
         time_coord = input.cf["time"]
     except KeyError:
-        raise ValueError("No 'time' coordinate found in the dataset")
+        raise XcdoError("No 'time' coordinate found in the dataset")
 
     print(time_coord.values)  # noqa: T201

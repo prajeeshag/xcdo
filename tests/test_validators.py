@@ -4,6 +4,7 @@ import pytest
 import xarray as xr
 from cdo import Cdo
 
+from xcdo import XcdoError
 from xcdo.validators import input_file_validator, open_dataset, output_file_validator
 
 
@@ -19,7 +20,7 @@ def test_input_file_validator_existing_file(tmp_path):
 
 
 def test_input_file_validator_non_existing_file():
-    with pytest.raises(AssertionError, match="File .* does not exist"):
+    with pytest.raises(XcdoError, match="File .* does not exist"):
         input_file_validator("non_existing_file.nc")
 
 
@@ -36,7 +37,7 @@ def test_output_file_validator_existing_parent(tmp_path):
 
 def test_output_file_validator_non_existing_parent(tmp_path):
     dir_path = tmp_path / "some_non_existing_dir/temp_file"
-    with pytest.raises(AssertionError, match="Directory .* does not exist"):
+    with pytest.raises(XcdoError, match="Directory .* does not exist"):
         output_file_validator(str(dir_path))
 
 

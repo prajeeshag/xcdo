@@ -3,7 +3,7 @@ import typing as t
 
 from typing_extensions import Doc
 
-from xcdo import DatasetIn, DatasetOut, FloatParam, Param
+from xcdo import DatasetIn, DatasetOut, FloatParam, Param, XcdoError
 
 from . import operator
 
@@ -58,5 +58,5 @@ def settomiss(
             for var in input.data_vars:
                 input[var] = input[var].where(input[var] > value)
         case _:
-            raise ValueError(f"Unknown expression: {expr}")
+            raise XcdoError(f"Unknown expression: {expr}")
     return input

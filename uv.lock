@@ -282,8 +282,8 @@ wheels = [
 
 [[package]]
 name = "clios"
-version = "0.3.1.dev4+gefe79c2"
-source = { git = "https://github.com/prajeeshag/clios?branch=main#efe79c2b81e477998e4b9b7dee7d208351253688" }
+version = "0.3.1.dev5+g6a990a5"
+source = { git = "https://github.com/prajeeshag/clios?branch=main#6a990a502aeb30ced09e9b4193ce18d018c90bbb" }
 dependencies = [
     { name = "click" },
     { name = "griffe" },

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from xcdo import DatasetIn
+from xcdo import DatasetIn, XcdoError
 from xcdo.operators.info import showtimestamp  # adjust import
 
 
@@ -48,5 +48,5 @@ def test_showtimestamp_no_time():
     )
     ds = DatasetIn(data.to_dataset())
 
-    with pytest.raises(ValueError, match="No 'time' coordinate"):
+    with pytest.raises(XcdoError, match="No 'time' coordinate"):
         showtimestamp(ds)
