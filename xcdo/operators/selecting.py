@@ -16,7 +16,7 @@ def selvar(
     name: t.Annotated[StrParam, Doc("Name of the variable")],
 ) -> DatasetOut:
     """
-    Select a data variable from a dataset.
+    Select a data variable by name.
 
     operator examples:
         xcdo -selvar,tas infile.nc outfile.nc

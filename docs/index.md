@@ -8,17 +8,19 @@
 [![codecov](https://codecov.io/gh/prajeeshag/xcdo/graph/badge.svg?token=UNNUW30IQL)](https://codecov.io/gh/prajeeshag/xcdo)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
-
-## What is XCDO?
-Hey there! If you've ever worked with climate or NWP model data, you probably know about [CDO](https://code.mpimet.mpg.de/projects/cdo) (Climate Data Operators). It's a super useful tool—fast, efficient, and written in C/C++ (I guess 🤨). I built XCDO as a Python-based alternative that mimics CDO while making it easier to extend, script, and integrate seamlessly with the original CDO. Under the hood, XCDO is powered by another Python library called [Clios](https://github.com/prajeeshag/clios) (again created by me 🤓), and all the heavy lifting for data handling is done using [Xarray](https://docs.xarray.dev/en/stable/).
+**XCDO** is a Python-based command-line tool built around [Xarray](https://docs.xarray.dev/en/stable/). It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar [CDO](https://code.mpimet.mpg.de/projects/cdo/)-style interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.
 
 ## Why XCDO?
-One might ask so why another CDO like tool which is ofcourse will be slugish than the superfast CDO? And actually you are kind of right, it might not be very useful and infact this was just a fun project I came up with to learn serious software development using Python. However, there are some features which might make this tool relevant and those are:
+Why build another CDO-style tool—even if it won’t be as fast as the original CDO? Because XCDO offers a different kind of power:
 
-- Written in python and uses existing capabilities of Xarray. Extending and writting new operators are much easier in python. Potential for open source community development.
-- You can write a simple python function and use it as a custom operator of XCDO and can be used just like a operator which comes a long with XCDO. This enables you to write clean, organised and reusable analysis codes without leaving the intuitive CDO interface. Everything can be just an XCDO operator which can be mixed-matched to create any complex analysis.
-- As it also integrates to the original CDO using the “-cdo” operator, you can make use of the efficient CDO operators whenever possible and integrate it to the XCDO operators or your custom operators seamlessly.
-- CDO currently doesn’t support Zarr files, but since Xarray does, specifically for NetCDF data in Zarr format, XCDO—built on Xarray—naturally supports Zarr as well. In fact, this is where I primarily use XCDO, as it allows me to quickly check Zarr data from the command line, which is especially useful when working with a lot of Zarr files.
+- Write operators as simple Python functions. If you know Python, you can create new operators instantly. This opens the door for real community-driven development.
+- As these operators are Python functions, it can be called from Python scripts as well.
+- Use your own code as operators. Drop a Python function into a file and call it like any other XCDO operator. This keeps workflows clean, modular, and easy to reuse.
+- Full Zarr support. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.
+- Smooth CDO integration. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.
+
+With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.
+
 
 ## Installation
 <!--termynal-->
@@ -26,19 +28,66 @@ One might ask so why another CDO like tool which is ofcourse will be slugish tha
 $ pip install xcdo
 ```
 
+You may want to install `xcdo` to an isolated virtual environment to avoid conflicts with other packages. Use any virtual environment manager such as [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html) or [conda](https://docs.conda.io/en/latest/) or [virtualenv](https://virtualenv.pypa.io/en/latest/) or [venv](https://docs.python.org/3/library/venv.html)
+
+Optionaly, you may also install `cdo` for using the `-cdo`.
+
 ## Usage
 To get a list of all available operators and their short descriptions, use:
-<!--termynal--->
-```
+
+```bash
 $ xcdo --list
 ```
 
-To get detailed information about a specific operator, use:
 <!--termynal--->
 ```
-$ xcdo --show <operator>
-$ xcdo --show selvar
+$ xcdo --list
+
+                            Available Operators
+┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Operator      ┃ Description                                   ┃
+┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ cdo           │ Operator to run CDO commands                  │
+│ showtimestamp │ Show time stamp                               │
+│ mermean       │ Meridional mean                               │
+│ mermin        │ Meridional minimum                            │
+│ mermax        │ Meridional maximum                            │
+│ merstd        │ Meridional standard deviation                 │
+│ mersum        │ Meridional sum                                │
 ```
+
+
+To get detailed information and the synopsis (or signature) about a specific operator, use:
+```
+$ xcdo --show <operator>
+```
+<!--termynal--->
+```
+$ xcdo --show selvar
+╭─ Synopsis ──────────────────────────────────────────────────╮
+│                                                             │
+│  xcdo -selvar,name input output                             │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+╭─ Description ───────────────────────────────────────────────╮
+│                                                             │
+│  Select a data variable by name.                            │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+                 Positional Arguments
+┏━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Parameter ┃ Type ┃ Required ┃ Description          ┃
+┡━━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+│ name      │ TEXT │ Required │ Name of the variable │
+└───────────┴──────┴──────────┴──────────────────────┘
+╭─ Examples ──────────────────────────────────────────────────╮
+│                                                             │
+│  xcdo -selvar,tas infile.nc outfile.nc                      │
+│  xcdo -selname,tas infile.nc outfile.nc                     │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+```
+
 
 As it mimics the CDO interface, using XCDO is generally the same as using CDO. for e.g:
 <!--termynal--->
@@ -47,4 +96,38 @@ $ xcdo -selvar,var1 indata.nc outdata.nc
 $ xcdo -timemean -zonmean in.nc out.nc
 ```
 
-For a more complete example including more features, see the Tutorial - User Guide.
+## Custom Operators
+A simple python function can be used as a custom operator of XCDO.
+For example: a simple operator to print the dataset to terminal can be defined as follows in file a `dump.py`:
+
+```python
+# dump.py
+from xcdo import operator, DatasetIn
+
+@operator()
+def main(input: DatasetIn):
+    print(input)
+```
+
+And this can be used as follows in `xcdo`:
+
+```bash
+$ xcdo -dump.py in.nc
+```
+
+Notice the ".py" extension for the custom operator? Yes, basically the operator name is just the path of the python file.
+
+You can see the signature and documentation of the custom operator by running:
+
+```bash
+$ xcdo --show dump.py
+
+╭─ Synopsis ──────────────────────────────────────────────────╮
+│                                                             │
+│  xcdo -dump.py input                                        │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+
+```
+
+<!--For a more complete example including more features, see the Tutorial - User Guide.-->
