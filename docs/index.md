@@ -31,11 +31,8 @@ With community support, XCDO can grow into a unified library of reusable and wel
 <!--/only-mkdocs-->
 
 ## Installation
-<!--termynal-->
-```
+```bash
 $ pip install xcdo
----> 100%
-Done
 ```
 <br>
 You may want to install `xcdo` to an isolated virtual environment to avoid conflicts with other packages.
@@ -43,7 +40,6 @@ Below are examples using common environment managers:
 
 ### [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html)/[mamba](https://mamba.readthedocs.io/en/latest/)/[conda](https://docs.conda.io/en/latest/)
 
-<!--termynal--->
 ```bash
 # Choose any of: micromamba, mamba, or conda
 $ micromamba create -n xcdo python=3.13
@@ -53,7 +49,6 @@ $ micromamba activate xcdo
 
 ### [uv](https://docs.astral.sh/uv/)
 
-<!--termynal--->
 ```bash
 $ uv venv --python 3.13 .venv
 $ source .venv/bin/activate
@@ -63,7 +58,6 @@ $ source .venv/bin/activate
 ## Usage
 
 Generally, XCDO works much like [CDO](https://code.mpimet.mpg.de/projects/cdo/wiki). For example:
-<!--termynal--->
 ```bash
 $ xcdo -selvar,var1 indata.nc outdata.nc
 $ xcdo -timemean -zonmean in.nc out.nc
