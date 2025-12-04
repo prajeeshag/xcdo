@@ -282,13 +282,17 @@ wheels = [
 
 [[package]]
 name = "clios"
-version = "0.3.1.dev6+gc1f7743"
-source = { git = "https://github.com/prajeeshag/clios?branch=main#c1f77431114ddf1eba195abdb8b184af7899db64" }
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "griffe" },
     { name = "pydantic" },
     { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/33/5e/c96ac72488ac26cc052342dff7725157e3a99b308c75579dbd4a05b04f70/clios-0.4.0.tar.gz", hash = "sha256:d385d7398c8d3f0f0129d80f4a39cb14337b3f8fada63ed4787c43c7755af50c", size = 17251, upload-time = "2025-12-04T00:14:38.197Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/c2/2cf729261edb6fa775eff02edb31bfdcde009d9a8d1107c70eb6b04259a2/clios-0.4.0-py3-none-any.whl", hash = "sha256:cd9137c38a61a737ed31ec95a89b43a3348169e5cadb8b7e03b5b311ec4e5a67", size = 22613, upload-time = "2025-12-04T00:14:36.907Z" },
 ]
 
 [[package]]
@@ -2128,7 +2132,7 @@ requires-dist = [
     { name = "cf-xarray", specifier = ">=0.10.0,<1.0.0" },
     { name = "cfgrib", specifier = ">=0.9.14.1,<1.0.0" },
     { name = "cftime", specifier = ">=1.6.4.post1,<2.0.0" },
-    { name = "clios", git = "https://github.com/prajeeshag/clios?branch=main" },
+    { name = "clios", specifier = "==0.4.0" },
     { name = "dask", extras = ["array", "distributed"], specifier = ">=2024.11.2,<2025.0.0" },
     { name = "eccodes", specifier = ">=2.39.0,<3.0.0" },
     { name = "nc-time-axis", specifier = ">=1.4.1,<2.0.0" },
