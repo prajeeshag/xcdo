@@ -257,6 +257,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#micromambamambaconda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        micromamba/mamba/conda
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -268,9 +296,32 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-of-available-operators" class="md-nav__link">
+    <span class="md-ellipsis">
       
-        <li class="md-nav__item">
+        List of available Operators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help-information-about-a-specific-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Help information about a specific operator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#custom-operators" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -278,6 +329,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -362,6 +418,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#micromambamambaconda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        micromamba/mamba/conda
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -373,9 +457,32 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-of-available-operators" class="md-nav__link">
+    <span class="md-ellipsis">
       
-        <li class="md-nav__item">
+        List of available Operators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help-information-about-a-specific-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Help information about a specific operator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#custom-operators" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -383,6 +490,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -410,44 +522,59 @@
 </style>
 <h1 id="xcdo">XCDO<a class="headerlink" href="#xcdo" title="Permanent link">&para;</a></h1>
 <p><img alt="Test" src="https://github.com/prajeeshag/xcdo/actions/workflows/test.yml/badge.svg" />
-<img alt="Doc" src="https://github.com/prajeeshag/xcdo/actions/workflows/build-docs.yml/badge.svg" />
-<img alt="PyPI - Version" src="https://img.shields.io/pypi/v/xcdo" />
 <a href="https://codecov.io/gh/prajeeshag/xcdo"><img alt="codecov" src="https://codecov.io/gh/prajeeshag/xcdo/graph/badge.svg?token=UNNUW30IQL" /></a>
+<img alt="PyPI - Version" src="https://img.shields.io/pypi/v/xcdo" />
+<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/clios" />
+<img alt="Doc" src="https://github.com/prajeeshag/xcdo/actions/workflows/build-docs.yml/badge.svg" />
 <a href="https://github.com/pre-commit/pre-commit"><img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit" /></a></p>
 <p><strong>XCDO</strong> is a Python-based command-line tool built around <a href="https://docs.xarray.dev/en/stable/">Xarray</a>. It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar <a href="https://code.mpimet.mpg.de/projects/cdo/">CDO</a>-style interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.</p>
 <h2 id="why-xcdo">Why XCDO?<a class="headerlink" href="#why-xcdo" title="Permanent link">&para;</a></h2>
 <p>Why build another CDO-style tool—even if it won’t be as fast as the original CDO? Because XCDO offers a different kind of power:</p>
 <ul>
-<li>Write operators as simple Python functions. If you know Python, you can create new operators instantly. This opens the door for real community-driven development.</li>
-<li>As these operators are Python functions, it can be called from Python scripts as well.</li>
-<li>Use your own code as operators. Drop a Python function into a file and call it like any other XCDO operator. This keeps workflows clean, modular, and easy to reuse.</li>
-<li>Full Zarr support. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.</li>
-<li>Smooth CDO integration. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.</li>
+<li><strong>Simple Python functions</strong>. If you know Python, you can create new operators instantly. This opens the door for real community-driven development.</li>
+<li><strong>Automatic help and documentation</strong>. XCDO automatically generates help and documentation for your operators, making it easy to share and reuse them.</li>
+<li><strong>CLI and Library</strong>. As these operators are Python functions, it can be called from Python scripts as well.</li>
+<li><strong>Custom operators</strong>. Drop a Python function into a file and call it like any other XCDO operator. This keeps your analysis workflows clean, modular, and easy to reuse.</li>
+<li><strong>Zarr support</strong>. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.</li>
+<li><strong>CDO integration</strong>. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.</li>
 </ul>
-<p>With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.</p>
+<p><mark class="critic">
+With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.
+</mark></p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">pip install xcdo</span><span data-ty></span></div>
+<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">pip install xcdo</span><span data-ty="progress"></span><span data-ty>Done<br></span></div>
 
-<p>You may want to install <code>xcdo</code> to an isolated virtual environment to avoid conflicts with other packages. Use any virtual environment manager such as <a href="https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html">micromamba</a> or <a href="https://docs.conda.io/en/latest/">conda</a> or <a href="https://virtualenv.pypa.io/en/latest/">virtualenv</a> or <a href="https://docs.python.org/3/library/venv.html">venv</a></p>
-<p>Optionaly, you may also install <code>cdo</code> for using the <code>-cdo</code>.</p>
+<p><br>
+You may want to install <code>xcdo</code> to an isolated virtual environment to avoid conflicts with other packages.
+Below are examples using common environment managers:</p>
+<h3 id="micromambamambaconda"><a href="https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html">micromamba</a>/<a href="https://mamba.readthedocs.io/en/latest/">mamba</a>/<a href="https://docs.conda.io/en/latest/">conda</a><a class="headerlink" href="#micromambamambaconda" title="Permanent link">&para;</a></h3>
+<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span class="termynal-comment" data-ty># Choose any of: micromamba, mamba, or conda</span><span data-ty="input" data-ty-prompt="$">micromamba create -n xcdo python=3.13</span><span data-ty="input" data-ty-prompt="$">micromamba activate xcdo</span><span data-ty="input" data-ty-prompt="(xcdo)$">pip install xcdo</span><span data-ty></span></div>
+
+<h3 id="uv"><a href="https://docs.astral.sh/uv/">uv</a><a class="headerlink" href="#uv" title="Permanent link">&para;</a></h3>
+<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">uv venv --python 3.13 .venv</span><span data-ty="input" data-ty-prompt="$">source .venv/bin/activate</span><span data-ty="input" data-ty-prompt="(.venv)$">pip install xcdo</span><span data-ty></span></div>
+
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<p>To get a list of all available operators and their short descriptions, use:</p>
+<p>Generally, XCDO works much like <a href="https://code.mpimet.mpg.de/projects/cdo/wiki">CDO</a>. For example:</p>
+<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">xcdo -selvar,var1 indata.nc outdata.nc</span><span data-ty="input" data-ty-prompt="$">xcdo -timemean -zonmean in.nc out.nc</span><span data-ty></span></div>
+
+<p><br></p>
+<h3 id="list-of-available-operators">List of available Operators<a class="headerlink" href="#list-of-available-operators" title="Permanent link">&para;</a></h3>
+<p>To get a list of all available operators and their short descriptions, use:
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>--list
-</code></pre></div>
+</code></pre></div></p>
 <div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">xcdo --list</span><span data-ty><br>                            Available Operators<br>┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓<br>┃ Operator      ┃ Description                                   ┃<br>┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩<br>│ cdo           │ Operator to run CDO commands                  │<br>│ showtimestamp │ Show time stamp                               │<br>│ mermean       │ Meridional mean                               │<br>│ mermin        │ Meridional minimum                            │<br>│ mermax        │ Meridional maximum                            │<br>│ merstd        │ Meridional standard deviation                 │<br>│ mersum        │ Meridional sum                                │<br></span></div>
 
+<p><br></p>
+<h3 id="help-information-about-a-specific-operator">Help information about a specific operator<a class="headerlink" href="#help-information-about-a-specific-operator" title="Permanent link">&para;</a></h3>
 <p>To get detailed information and the synopsis (or signature) about a specific operator, use:
-<div class="highlight"><pre><span></span><code>$ xcdo --show &lt;operator&gt;
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>--show<span class="w"> </span>&lt;operator&gt;
 </code></pre></div></p>
 <div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">xcdo --show selvar</span><span data-ty>╭─ Synopsis ──────────────────────────────────────────────────╮<br>│                                                             │<br>│  xcdo -selvar,name input output                             │<br>│                                                             │<br>╰─────────────────────────────────────────────────────────────╯<br>╭─ Description ───────────────────────────────────────────────╮<br>│                                                             │<br>│  Select a data variable by name.                            │<br>│                                                             │<br>╰─────────────────────────────────────────────────────────────╯<br>                 Positional Arguments<br>┏━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓<br>┃ Parameter ┃ Type ┃ Required ┃ Description          ┃<br>┡━━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩<br>│ name      │ TEXT │ Required │ Name of the variable │<br>└───────────┴──────┴──────────┴──────────────────────┘<br>╭─ Examples ──────────────────────────────────────────────────╮<br>│                                                             │<br>│  xcdo -selvar,tas infile.nc outfile.nc                      │<br>│  xcdo -selname,tas infile.nc outfile.nc                     │<br>│                                                             │<br>╰─────────────────────────────────────────────────────────────╯<br></span></div>
 
-<p>As it mimics the CDO interface, using XCDO is generally the same as using CDO. for e.g:</p>
-<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">xcdo -selvar,var1 indata.nc outdata.nc</span><span data-ty="input" data-ty-prompt="$">xcdo -timemean -zonmean in.nc out.nc</span><span data-ty></span></div>
-
-<h2 id="custom-operators">Custom Operators<a class="headerlink" href="#custom-operators" title="Permanent link">&para;</a></h2>
-<p>A simple python function can be used as a custom operator of XCDO.
-For example: a simple operator to print the dataset to terminal can be defined as follows in file a <code>dump.py</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># dump.py</span>
+<p><br></p>
+<h3 id="custom-operators">Custom Operators<a class="headerlink" href="#custom-operators" title="Permanent link">&para;</a></h3>
+<p>You can easily turn a regular Python function into your own XCDO operator. For example, here’s a small operator in a file named dump.py that simply prints a dataset to the terminal:</p>
+<div class="highlight"><span class="filename">dump.py</span><pre><span></span><code><span class="c1"># dump.py</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xcdo</span><span class="w"> </span><span class="kn">import</span> <span class="n">operator</span><span class="p">,</span> <span class="n">DatasetIn</span>
 
 <span class="nd">@operator</span><span class="p">()</span>
@@ -457,7 +584,10 @@ For example: a simple operator to print the dataset to terminal can be defined a
 <p>And this can be used as follows in <code>xcdo</code>:</p>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-dump.py<span class="w"> </span><span class="k">in</span>.nc
 </code></pre></div>
-<p>Notice the ".py" extension for the custom operator? Yes, basically the operator name is just the path of the python file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice the .py extension on the custom operator? That’s because the operator name simply comes from the Python file’s name.</p>
+</div>
 <p>You can see the signature and documentation of the custom operator by running:</p>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>--show<span class="w"> </span>dump.py
 
