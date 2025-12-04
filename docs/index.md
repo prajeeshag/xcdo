@@ -3,10 +3,12 @@
 # XCDO
 
 ![Test](https://github.com/prajeeshag/xcdo/actions/workflows/test.yml/badge.svg)
-![Doc](https://github.com/prajeeshag/xcdo/actions/workflows/build-docs.yml/badge.svg)
-![PyPI - Version](https://img.shields.io/pypi/v/xcdo)
 [![codecov](https://codecov.io/gh/prajeeshag/xcdo/graph/badge.svg?token=UNNUW30IQL)](https://codecov.io/gh/prajeeshag/xcdo)
+![PyPI - Version](https://img.shields.io/pypi/v/xcdo)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/clios)
+![Doc](https://github.com/prajeeshag/xcdo/actions/workflows/build-docs.yml/badge.svg)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+
 
 **XCDO** is a Python-based command-line tool built around [Xarray](https://docs.xarray.dev/en/stable/). It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar [CDO](https://code.mpimet.mpg.de/projects/cdo/)-style interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.
 
