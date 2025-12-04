@@ -6,6 +6,8 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
+        <meta name="description" content="A collection of command line Operators to manipulate and analyse Climate and NWP model Data.">
+      
       
       
       
@@ -538,26 +540,37 @@
 <li><strong>Zarr support</strong>. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.</li>
 <li><strong>CDO integration</strong>. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.</li>
 </ul>
-<p><mark class="critic">
-With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.
-</mark></p>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">pip install xcdo</span><span data-ty="progress"></span><span data-ty>Done<br></span></div>
+<!--only-mkdocs-->
+<mark class="critic block">
+<!--/only-mkdocs-->
+<p>With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.</p>
+<!--only-mkdocs-->
+</mark>
+<!--/only-mkdocs-->
 
-<p><br>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p><div class="highlight"><pre><span></span><code>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>xcdo
+</code></pre></div>
+<br>
 You may want to install <code>xcdo</code> to an isolated virtual environment to avoid conflicts with other packages.
 Below are examples using common environment managers:</p>
 <h3 id="micromambamambaconda"><a href="https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html">micromamba</a>/<a href="https://mamba.readthedocs.io/en/latest/">mamba</a>/<a href="https://docs.conda.io/en/latest/">conda</a><a class="headerlink" href="#micromambamambaconda" title="Permanent link">&para;</a></h3>
-<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span class="termynal-comment" data-ty># Choose any of: micromamba, mamba, or conda</span><span data-ty="input" data-ty-prompt="$">micromamba create -n xcdo python=3.13</span><span data-ty="input" data-ty-prompt="$">micromamba activate xcdo</span><span data-ty="input" data-ty-prompt="(xcdo)$">pip install xcdo</span><span data-ty></span></div>
-
+<div class="highlight"><pre><span></span><code><span class="c1"># Choose any of: micromamba, mamba, or conda</span>
+$<span class="w"> </span>micromamba<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>xcdo<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.13
+$<span class="w"> </span>micromamba<span class="w"> </span>activate<span class="w"> </span>xcdo
+<span class="o">(</span>xcdo<span class="o">)</span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>xcdo
+</code></pre></div>
 <h3 id="uv"><a href="https://docs.astral.sh/uv/">uv</a><a class="headerlink" href="#uv" title="Permanent link">&para;</a></h3>
-<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">uv venv --python 3.13 .venv</span><span data-ty="input" data-ty-prompt="$">source .venv/bin/activate</span><span data-ty="input" data-ty-prompt="(.venv)$">pip install xcdo</span><span data-ty></span></div>
-
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>uv<span class="w"> </span>venv<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.13<span class="w"> </span>.venv
+$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+<span class="o">(</span>.venv<span class="o">)</span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>xcdo
+</code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<p>Generally, XCDO works much like <a href="https://code.mpimet.mpg.de/projects/cdo/wiki">CDO</a>. For example:</p>
-<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">xcdo -selvar,var1 indata.nc outdata.nc</span><span data-ty="input" data-ty-prompt="$">xcdo -timemean -zonmean in.nc out.nc</span><span data-ty></span></div>
-
-<p><br></p>
+<p>Generally, XCDO works much like <a href="https://code.mpimet.mpg.de/projects/cdo/wiki">CDO</a>. For example:
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-selvar,var1<span class="w"> </span>indata.nc<span class="w"> </span>outdata.nc
+$<span class="w"> </span>xcdo<span class="w"> </span>-timemean<span class="w"> </span>-zonmean<span class="w"> </span><span class="k">in</span>.nc<span class="w"> </span>out.nc
+</code></pre></div>
+<br></p>
 <h3 id="list-of-available-operators">List of available Operators<a class="headerlink" href="#list-of-available-operators" title="Permanent link">&para;</a></h3>
 <p>To get a list of all available operators and their short descriptions, use:
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>--list
