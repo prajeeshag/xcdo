@@ -595,13 +595,9 @@ $<span class="w"> </span>xcdo<span class="w"> </span>-timemean<span class="w"> <
     <span class="nb">print</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
 </code></pre></div>
 <p>And this can be used as follows in <code>xcdo</code>:</p>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-dump.py<span class="w"> </span><span class="k">in</span>.nc
+<p><div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-dump.py<span class="w"> </span><span class="k">in</span>.nc
 </code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Notice the .py extension on the custom operator? That’s because the operator name simply comes from the Python file’s name.</p>
-</div>
-<p>You can see the signature and documentation of the custom operator by running:</p>
+You can see the signature and documentation of the custom operator by running:</p>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>--show<span class="w"> </span>dump.py
 
 ╭─<span class="w"> </span>Synopsis<span class="w"> </span>──────────────────────────────────────────────────╮
@@ -610,6 +606,10 @@ $<span class="w"> </span>xcdo<span class="w"> </span>-timemean<span class="w"> <
 │<span class="w">                                                             </span>│
 ╰─────────────────────────────────────────────────────────────╯
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice the <code>.py</code> extension on the custom operator? That’s because the operator name simply comes from the Python file’s name.</p>
+</div>
 <!--For a more complete example including more features, see the Tutorial - User Guide.-->
 
 
