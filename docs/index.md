@@ -15,34 +15,65 @@
 ## Why XCDO?
 Why build another CDO-style tool—even if it won’t be as fast as the original CDO? Because XCDO offers a different kind of power:
 
-- Write operators as simple Python functions. If you know Python, you can create new operators instantly. This opens the door for real community-driven development.
-- As these operators are Python functions, it can be called from Python scripts as well.
-- Use your own code as operators. Drop a Python function into a file and call it like any other XCDO operator. This keeps workflows clean, modular, and easy to reuse.
-- Full Zarr support. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.
-- Smooth CDO integration. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.
+- **Simple Python functions**. If you know Python, you can create new operators instantly. This opens the door for real community-driven development.
+- **Automatic help and documentation**. XCDO automatically generates help and documentation for your operators, making it easy to share and reuse them.
+- **CLI and Library**. As these operators are Python functions, it can be called from Python scripts as well.
+- **Custom operators**. Drop a Python function into a file and call it like any other XCDO operator. This keeps your analysis workflows clean, modular, and easy to reuse.
+- **Zarr support**. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.
+- **CDO integration**. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.
 
+{==
 With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.
-
+==}
 
 ## Installation
 <!--termynal-->
 ```
 $ pip install xcdo
+---> 100%
+Done
+```
+<br>
+You may want to install `xcdo` to an isolated virtual environment to avoid conflicts with other packages.
+Below are examples using common environment managers:
+
+### [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html)/[mamba](https://mamba.readthedocs.io/en/latest/)/[conda](https://docs.conda.io/en/latest/)
+
+<!--termynal--->
+```bash
+# Choose any of: micromamba, mamba, or conda
+$ micromamba create -n xcdo python=3.13
+$ micromamba activate xcdo
+(xcdo)$ pip install xcdo
 ```
 
-You may want to install `xcdo` to an isolated virtual environment to avoid conflicts with other packages. Use any virtual environment manager such as [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html) or [conda](https://docs.conda.io/en/latest/) or [virtualenv](https://virtualenv.pypa.io/en/latest/) or [venv](https://docs.python.org/3/library/venv.html)
+### [uv](https://docs.astral.sh/uv/)
 
-Optionaly, you may also install `cdo` for using the `-cdo`.
+<!--termynal--->
+```bash
+$ uv venv --python 3.13 .venv
+$ source .venv/bin/activate
+(.venv)$ pip install xcdo
+```
 
 ## Usage
-To get a list of all available operators and their short descriptions, use:
 
+Generally, XCDO works much like [CDO](https://code.mpimet.mpg.de/projects/cdo/wiki). For example:
+<!--termynal--->
+```bash
+$ xcdo -selvar,var1 indata.nc outdata.nc
+$ xcdo -timemean -zonmean in.nc out.nc
+```
+<br>
+### List of available Operators
+
+To get a list of all available operators and their short descriptions, use:
 ```bash
 $ xcdo --list
 ```
 
 <!--termynal--->
-```
+```bash
 $ xcdo --list
 
                             Available Operators
@@ -57,14 +88,16 @@ $ xcdo --list
 │ merstd        │ Meridional standard deviation                 │
 │ mersum        │ Meridional sum                                │
 ```
+<br>
 
+### Help information about a specific operator
 
 To get detailed information and the synopsis (or signature) about a specific operator, use:
-```
+```bash
 $ xcdo --show <operator>
 ```
 <!--termynal--->
-```
+```bash
 $ xcdo --show selvar
 ╭─ Synopsis ──────────────────────────────────────────────────╮
 │                                                             │
@@ -89,20 +122,12 @@ $ xcdo --show selvar
 │                                                             │
 ╰─────────────────────────────────────────────────────────────╯
 ```
+<br>
 
+### Custom Operators
+You can easily turn a regular Python function into your own XCDO operator. For example, here’s a small operator in a file named dump.py that simply prints a dataset to the terminal:
 
-As it mimics the CDO interface, using XCDO is generally the same as using CDO. for e.g:
-<!--termynal--->
-```
-$ xcdo -selvar,var1 indata.nc outdata.nc
-$ xcdo -timemean -zonmean in.nc out.nc
-```
-
-## Custom Operators
-A simple python function can be used as a custom operator of XCDO.
-For example: a simple operator to print the dataset to terminal can be defined as follows in file a `dump.py`:
-
-```python
+```py title="dump.py"
 # dump.py
 from xcdo import operator, DatasetIn
 
@@ -116,8 +141,8 @@ And this can be used as follows in `xcdo`:
 ```bash
 $ xcdo -dump.py in.nc
 ```
-
-Notice the ".py" extension for the custom operator? Yes, basically the operator name is just the path of the python file.
+!!! Note
+    Notice the .py extension on the custom operator? That’s because the operator name simply comes from the Python file’s name.
 
 You can see the signature and documentation of the custom operator by running:
 
