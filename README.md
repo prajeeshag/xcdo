@@ -21,9 +21,9 @@ Why build another CDO-style tool—even if it won’t be as fast as the original
 - **Zarr support**. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.
 - **CDO integration**. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.
 
-{==
+
 With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.
-==}
+
 
 ## Installation
 <!--termynal-->

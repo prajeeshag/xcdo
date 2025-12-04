@@ -1,4 +1,5 @@
 site_name: XCDO
+site_description: A collection of command line Operators to manipulate and analyse Climate and NWP model Data.
 repo_name: prajeeshag/xcdo
 repo_url: https://github.com/prajeeshag/xcdo
 theme:
