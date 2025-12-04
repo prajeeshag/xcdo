@@ -134,9 +134,6 @@ And this can be used as follows in `xcdo`:
 ```bash
 $ xcdo -dump.py in.nc
 ```
-!!! Note
-    Notice the .py extension on the custom operator? That’s because the operator name simply comes from the Python file’s name.
-
 You can see the signature and documentation of the custom operator by running:
 
 ```bash
@@ -149,5 +146,8 @@ $ xcdo --show dump.py
 ╰─────────────────────────────────────────────────────────────╯
 
 ```
+!!! Note
+    Notice the `.py` extension on the custom operator? That’s because the operator name simply comes from the Python file’s name.
+
 
 <!--For a more complete example including more features, see the Tutorial - User Guide.-->
