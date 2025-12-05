@@ -58,14 +58,9 @@ $ xcdo -selvar,var1 indata.nc outdata.nc
 $ xcdo -timemean -zonmean in.nc out.nc
 ```
 <br>
-### List of available Operators
 
-To get a list of all available operators and their short descriptions, use:
-```bash
-$ xcdo --list
-```
-
-<!--termynal--->
+You can find a list of all available operators [here](operators/index.md).
+or run `xcdo --list` on the command line.
 ```bash
 $ xcdo --list
 
@@ -83,13 +78,10 @@ $ xcdo --list
 ```
 <br>
 
-### Help information about a specific operator
-
 To get detailed information and the synopsis (or signature) about a specific operator, use:
 ```bash
 $ xcdo --show <operator>
 ```
-<!--termynal--->
 ```bash
 $ xcdo --show selvar
 ╭─ Synopsis ──────────────────────────────────────────────────╮
@@ -117,7 +109,7 @@ $ xcdo --show selvar
 ```
 <br>
 
-### Custom Operators
+## Writing custom operators
 You can easily turn a regular Python function into your own XCDO operator. For example, here’s a small operator in a file named dump.py that simply prints a dataset to the terminal:
 
 ```py title="dump.py"

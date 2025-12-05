@@ -840,27 +840,10 @@ wheels = [
 
 [[package]]
 name = "mkdocs-clios"
-source = { editable = "../mkdocs_clios" }
+version = "0.1.dev11+gfd4ae93"
+source = { git = "https://github.com/prajeeshag/mkdocs_clios?rev=main#fd4ae939ae1b88e134a6f645987a91ee0e44ffe3" }
 dependencies = [
     { name = "mkdocs" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "mkdocs", specifier = ">=1.6.1" }]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "clios", specifier = ">=0.5.0" },
-    { name = "mypy", specifier = ">=1.13.0" },
-    { name = "pytest", specifier = ">=8.3.3" },
-    { name = "pytest-cov", specifier = ">=6.0.0" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
-    { name = "pytest-sugar", specifier = ">=1.0.0" },
-    { name = "ruff", specifier = ">=0.8.0" },
-]
-docs = [
-    { name = "mkdocs", specifier = ">=1.6.1" },
-    { name = "mkdocs-material", specifier = ">=9.5.44" },
 ]
 
 [[package]]
@@ -1183,11 +1166,11 @@ wheels = [
 
 [[package]]
 name = "platformdirs"
-version = "4.5.0"
+version = "4.5.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/61/33/9611380c2bdb1225fdef633e2a9610622310fed35ab11dac9620972ee088/platformdirs-4.5.0.tar.gz", hash = "sha256:70ddccdd7c99fc5942e9fc25636a8b34d04c24b335100223152c2803e4063312", size = 21632, upload-time = "2025-10-08T17:44:48.791Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cf/86/0248f086a84f01b37aaec0fa567b397df1a119f73c16f6c7a9aac73ea309/platformdirs-4.5.1.tar.gz", hash = "sha256:61d5cdcc6065745cdd94f0f878977f8de9437be93de97c1c12f853c9c0cdcbda", size = 21715, upload-time = "2025-12-05T13:52:58.638Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/cb/ac7874b3e5d58441674fb70742e6c374b28b0c7cb988d37d991cde47166c/platformdirs-4.5.0-py3-none-any.whl", hash = "sha256:e578a81bb873cbb89a41fcc904c7ef523cc18284b7e3b3ccf06aca1403b7ebd3", size = 18651, upload-time = "2025-10-08T17:44:47.223Z" },
+    { url = "https://files.pythonhosted.org/packages/cb/28/3bfe2fa5a7b9c46fe7e13c97bda14c895fb10fa2ebf1d0abb90e0cea7ee1/platformdirs-4.5.1-py3-none-any.whl", hash = "sha256:d03afa3963c806a9bed9d5125c8f4cb2fdaf74a55ab60e5d59b3fde758104d31", size = 18731, upload-time = "2025-12-05T13:52:56.823Z" },
 ]
 
 [[package]]
@@ -1757,7 +1740,6 @@ dependencies = [
     { name = "clios" },
     { name = "dask", extra = ["array", "distributed"] },
     { name = "eccodes" },
-    { name = "mkdocs-clios" },
     { name = "nc-time-axis" },
     { name = "netcdf4" },
     { name = "numpy" },
@@ -1768,6 +1750,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "cdo" },
+    { name = "mkdocs-clios" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -1791,7 +1774,6 @@ requires-dist = [
     { name = "clios", specifier = ">=0.5,<0.6" },
     { name = "dask", extras = ["array", "distributed"], specifier = ">=2024.11.2,<2025.0.0" },
     { name = "eccodes", specifier = ">=2.39.0,<3.0.0" },
-    { name = "mkdocs-clios", editable = "../mkdocs_clios" },
     { name = "nc-time-axis", specifier = ">=1.4.1,<2.0.0" },
     { name = "netcdf4", specifier = ">=1.7.2,<2.0.0" },
     { name = "numpy", specifier = ">=2.1.3,<3.0.0" },
@@ -1802,6 +1784,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "cdo", specifier = ">=1.6.1" },
+    { name = "mkdocs-clios", git = "https://github.com/prajeeshag/mkdocs_clios?rev=main" },
     { name = "mypy", specifier = ">=1.13.0" },
     { name = "pytest", specifier = ">=8.3.0" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
@@ -1811,7 +1794,7 @@ dev = [
 ]
 docs = [
     { name = "mkdocs", specifier = ">=1.6.1" },
-    { name = "mkdocs-clios", editable = "../mkdocs_clios" },
+    { name = "mkdocs-clios", git = "https://github.com/prajeeshag/mkdocs_clios?rev=main" },
     { name = "mkdocs-material", specifier = ">=9.5.46" },
     { name = "termynal", specifier = ">=0.13.0" },
 ]

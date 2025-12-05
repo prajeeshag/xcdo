@@ -33,9 +33,9 @@ def settomiss(
     Set values in a dataset to missing values.
 
     description:
-        Set values in a dataset to missing values based on the given expression. i.e.,
-        Default expression is `eq` (equal to), which means that values equal to the given value will be set to missing.
-        Similarly, for other available expressions, values will be set to missing based on the expression.
+        Set values in a dataset to missing values based on the given expression.
+        For example, if the expression is `gt` (greater than), then all points with values greater than the given value will be set to missing.
+        Default expression is `eq` (equal to).
 
     operator examples:
         xcdo -settomiss,0 infile.nc outfile.nc
