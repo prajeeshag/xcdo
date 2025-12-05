@@ -4,10 +4,12 @@ repo_name: prajeeshag/xcdo
 repo_url: https://github.com/prajeeshag/xcdo
 theme:
   name: material
+  features:
+    - navigation.indexes
+    - navigation.expand
 
 nav:
-  - XCDO: index.md
-  - User Guide: user_guide.md
+  - Getting Started: index.md
 
 plugins:
   - termynal:
@@ -15,6 +17,9 @@ plugins:
         - "$"
         - "(xcdo)$"
         - "(.venv)$"
+  - mkdocs_clios:
+      app: xcdo.main:app
+  - search
 
 markdown_extensions:
   # Python Markdown

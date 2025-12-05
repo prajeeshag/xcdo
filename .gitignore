@@ -133,3 +133,4 @@ dmypy.json
 .ruff_cache
 .conda_env/
 *.nc
+.mkdocs_clios_cache/
