@@ -63,7 +63,7 @@ from xcdo import operator, DatasetIn, DatasetOut
 
 @operator()
 def selvar(ds_in: DatasetIn, name: str) -> DatasetOut:
-    return ds_in[name].to_dataset() # (1)
+    return ds_in[name].to_dataset() # (1)!
 ```
 
 1. The `.to_dataset()` is necessary because, `ds_in[name]` is a `xarray.DataArray` and `selvar` returns a `xarray.Dataset`
@@ -131,6 +131,7 @@ $ xcdo -example.py infile1.nc infile2.nc infile3.nc infile4.nc outfile.nc
 ## More on parameters
 
 Suppported parameter types are:
+
 - `str`
 - `int`
 - `float`
@@ -143,12 +144,13 @@ Suppported parameter types are:
 
 !!! Note
     For `date`, `datetime` and `timedelta`, XCDO expects strings in the [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339) format, such as:
-    Date: YYYY-MM-DD
-    Time: HH:MM:SS
-    DateTime: YYYY-MM-DDTHH:MM:SS
-    Duration: PnYnMnDTnHnMnS
-    and more.
-    see the [speedate](https://docs.rs/speedate/latest/speedate/) documentation for more full details.
+
+    - Date: YYYY-MM-DD
+    - Time: HH:MM:SS
+    - DateTime: YYYY-MM-DDTHH:MM:SS
+    - timedelta: PnYnMnDTnHnMnS
+
+    see the [speedate](https://docs.rs/speedate/latest/speedate/) documentation for full details.
 
 
 lets look at an example:
