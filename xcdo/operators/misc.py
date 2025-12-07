@@ -1,5 +1,6 @@
 import typing as t
 
+import numpy as np
 import rich
 
 from xcdo import DatasetIn, DatasetOut, Doc, XcdoError
@@ -21,7 +22,7 @@ def print_dataset(input: DatasetIn) -> None:
         xcdo -print infile.nc
         xcdo -print -selvar,var infile.nc
     """
-    rich.print(input)
+    rich.print(input)  # pragma: no cover
 
 
 @operator(implicit="param")
@@ -72,3 +73,56 @@ def setchunk(
         return inputs.chunk(chunks)
     except ValueError as e:
         raise XcdoError(str(e))
+
+
+@operator(name="float2int16")
+@operator()
+def float2short(input: DatasetIn) -> DatasetOut:
+    """
+    Convert float variables to int16
+
+    description:
+        This operator converts all float variables in the given dataset to int16 (short).
+        Note: Conversion happens only when the dataset is written to disk.
+
+    operator examples:
+        xcdo -float2short infile.nc outfile.nc
+    """
+    out = input.copy()
+    for var in out.data_vars:
+        da = out[var]
+        if da.dtype not in (np.float32, np.float64):
+            continue  # pragma: no cover
+
+        # ignore NaNs in scaling
+        vmin = float(np.nanmin(da.values))
+        vmax = float(np.nanmax(da.values))
+
+        info = np.iinfo(np.int16)
+        max_range = info.max - info.min
+
+        if (vmax - vmin) > max_range:
+            raise XcdoError(
+                f"Variable '{var}' range [{vmin}, {vmax}] too large for int16."
+            )
+
+        scale_factor = (vmax - vmin) / max_range
+        add_offset = vmin - scale_factor * info.min
+        fill = np.int16(-32767)
+
+        # write encoding (THIS controls final disk storage)
+        out[var].encoding.update(
+            {
+                "dtype": "int16",
+                "scale_factor": scale_factor,
+                "add_offset": add_offset,
+                "_FillValue": fill,
+                "missing_value": fill,
+            }
+        )
+        if "missing_value" in out[var].attrs:
+            del out[var].attrs["missing_value"]
+        if "_FillValue" in out[var].attrs:
+            del out[var].attrs["_FillValue"]
+
+    return out
