@@ -2,13 +2,13 @@ import typing as t
 
 import rich
 
-from xcdo import DatasetIn, DatasetOut
+from xcdo import DatasetIn, DatasetOut, Doc, XcdoError
 from xcdo import xarray as xr
 
 from . import operator
 
 
-@operator(implicit="param", name="print")
+@operator(name="print")
 def print_dataset(input: DatasetIn) -> None:
     """
     Simply print the given dataset.
@@ -47,3 +47,28 @@ def merge(
         xcdo -merge infile1.nc infile2.nc infile2.nc outfile.nc
     """
     return xr.merge(inputs, compat=compat, join=join, combine_attrs=combine_attrs)
+
+
+@operator()
+def setchunk(
+    inputs: DatasetIn,
+    **chunks: t.Annotated[
+        int, Doc("Chunk size for each dimension, e.g. -setchunk,time=10,lon=20")
+    ],
+) -> DatasetOut:
+    """
+    Set the chunk size of a dataset.
+
+    description:
+        Use xarray's `chunk` method to set the chunk size of a dataset.
+        Refer to xarray's documentation for more information:
+        https://docs.xarray.dev/en/stable/generated/xarray.Dataset.chunk.html
+
+    operator examples:
+        xcdo -setchunk,time=10 infile.nc outfile.nc
+        xcdo -setchunk,time=10,lon=20,lat=10 infile.nc outfile.nc
+    """
+    try:
+        return inputs.chunk(chunks)
+    except ValueError as e:
+        raise XcdoError(str(e))
