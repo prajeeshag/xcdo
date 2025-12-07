@@ -113,7 +113,7 @@ def float2short(input: DatasetIn) -> DatasetOut:
         # write encoding (THIS controls final disk storage)
         out[var].encoding.update(
             {
-                "dtype": "int16",
+                "dtype": np.int16,
                 "scale_factor": scale_factor,
                 "add_offset": add_offset,
                 "_FillValue": fill,

@@ -56,14 +56,14 @@ def test_open_dataset_no_engine(mocker):
 
 
 def test_save_dataset_zarr(mocker):
-    mock_to_zarr = mocker.patch("xarray.Dataset.to_zarr")
+    mock_to_zarr = mocker.patch("xcdo.io_utils.write_to_zarr")
     mock_to_nc = mocker.patch("xarray.Dataset.to_netcdf")
 
     ds = xr.Dataset()
 
     save_dataset(ds, "out.zarr")
 
-    mock_to_zarr.assert_called_once_with("out.zarr", mode="w")
+    mock_to_zarr.assert_called_once_with(ds, "out.zarr")
     mock_to_nc.assert_not_called()
 
 

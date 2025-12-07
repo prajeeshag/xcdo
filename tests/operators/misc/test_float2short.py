@@ -18,7 +18,7 @@ def test_float2short_basic():
     encoding = out["a"].encoding
 
     assert out["a"].dtype == np.float32
-    assert encoding["dtype"] == "int16"
+    assert encoding["dtype"] == np.int16
     np.testing.assert_allclose(
         encoding["scale_factor"], scale_factor, rtol=1e-6, atol=1e-12
     )

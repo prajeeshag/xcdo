@@ -29,9 +29,41 @@ def open_dataset(path: str) -> xr.Dataset:
     )
 
 
+def write_to_zarr(dataset: xr.Dataset, path: str) -> None:
+    for name, da in dataset.data_vars.items():
+        enc = da.encoding
+
+        # packing only if dtype and at least one of scale/add_offset exist
+        target_dtype = enc.get("dtype")
+        if target_dtype is None:
+            continue
+
+        scale = enc.get("scale_factor")
+        offset = enc.get("add_offset")
+
+        if scale is None and offset is None:
+            continue
+
+        # default scale/offset if only one is provided
+        scale = 1.0 if scale is None else scale
+        offset = 0.0 if offset is None else offset
+
+        packed = ((da.data - offset) / scale).astype(target_dtype)
+
+        dataset[name] = xr.DataArray(
+            packed,
+            coords=da.coords,
+            dims=da.dims,
+            attrs=da.attrs,
+        )
+        dataset[name].encoding = da.encoding
+    dataset.to_zarr(path, mode="w", consolidated=False)
+
+
 def save_dataset(dataset: xr.Dataset, path: str) -> None:
     format = _guess_output_format(path)
     if format == "zarr":
-        dataset.to_zarr(path, mode="w")  # pyright: ignore
+        write_to_zarr(dataset, path)
+        # dataset.to_zarr(path, mode="w")  # pyright: ignore
         return
     dataset.to_netcdf(path)  # pyright: ignore
