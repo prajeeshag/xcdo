@@ -11,6 +11,8 @@
       
       
       
+        <link rel="prev" href="../../user_defined_operators/">
+      
       
       
         
@@ -21,7 +23,7 @@
     
     
       
-        <title>plot - XCDO</title>
+        <title>Quick plotting - XCDO</title>
       
     
     
@@ -64,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#plot" class="md-skip">
+        <a href="#example-quick-plotting" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              plot
+              Quick plotting
             
           </span>
         </div>
@@ -271,8 +273,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -282,11 +286,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -307,7 +311,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -322,10 +326,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../examples/quick_plotting/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick plotting
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -341,6 +372,70 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dataset-with-multiple-data-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dataset with multiple data variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plotting-a-single-time-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plotting a single time step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plotting-the-fldmean-using-cdo-fldmean-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plotting the fldmean using CDO fldmean operator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saving-the-plot-to-a-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Saving the plot to a file
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -438,7 +533,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../operators/" class="md-nav__link ">
               
   
   
@@ -482,7 +577,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../cdo/" class="md-nav__link">
+      <a href="../../operators/cdo/" class="md-nav__link">
         
   
   
@@ -510,7 +605,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../showtimestamp/" class="md-nav__link">
+      <a href="../../operators/showtimestamp/" class="md-nav__link">
         
   
   
@@ -538,7 +633,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mermean/" class="md-nav__link">
+      <a href="../../operators/mermean/" class="md-nav__link">
         
   
   
@@ -566,7 +661,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mermin/" class="md-nav__link">
+      <a href="../../operators/mermin/" class="md-nav__link">
         
   
   
@@ -594,7 +689,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mermax/" class="md-nav__link">
+      <a href="../../operators/mermax/" class="md-nav__link">
         
   
   
@@ -622,7 +717,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../merstd/" class="md-nav__link">
+      <a href="../../operators/merstd/" class="md-nav__link">
         
   
   
@@ -650,7 +745,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mersum/" class="md-nav__link">
+      <a href="../../operators/mersum/" class="md-nav__link">
         
   
   
@@ -678,7 +773,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../print/" class="md-nav__link">
+      <a href="../../operators/print/" class="md-nav__link">
         
   
   
@@ -706,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../merge/" class="md-nav__link">
+      <a href="../../operators/merge/" class="md-nav__link">
         
   
   
@@ -734,7 +829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setchunk/" class="md-nav__link">
+      <a href="../../operators/setchunk/" class="md-nav__link">
         
   
   
@@ -762,7 +857,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../float2short/" class="md-nav__link">
+      <a href="../../operators/float2short/" class="md-nav__link">
         
   
   
@@ -790,7 +885,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../float2int16/" class="md-nav__link">
+      <a href="../../operators/float2int16/" class="md-nav__link">
         
   
   
@@ -818,7 +913,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../settomiss/" class="md-nav__link">
+      <a href="../../operators/settomiss/" class="md-nav__link">
         
   
   
@@ -843,37 +938,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    plot
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../operators/plot/" class="md-nav__link">
         
   
   
@@ -889,70 +957,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#synopsis" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Synopsis
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#description" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Description
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#positional-arguments" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Positional Arguments
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -965,7 +969,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../renamedim/" class="md-nav__link">
+      <a href="../../operators/renamedim/" class="md-nav__link">
         
   
   
@@ -993,7 +997,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rename/" class="md-nav__link">
+      <a href="../../operators/rename/" class="md-nav__link">
         
   
   
@@ -1021,7 +1025,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../selvar/" class="md-nav__link">
+      <a href="../../operators/selvar/" class="md-nav__link">
         
   
   
@@ -1049,7 +1053,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../selname/" class="md-nav__link">
+      <a href="../../operators/selname/" class="md-nav__link">
         
   
   
@@ -1077,7 +1081,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../isel/" class="md-nav__link">
+      <a href="../../operators/isel/" class="md-nav__link">
         
   
   
@@ -1105,7 +1109,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sellonlatbox/" class="md-nav__link">
+      <a href="../../operators/sellonlatbox/" class="md-nav__link">
         
   
   
@@ -1133,7 +1137,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../timemean/" class="md-nav__link">
+      <a href="../../operators/timemean/" class="md-nav__link">
         
   
   
@@ -1161,7 +1165,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../timemin/" class="md-nav__link">
+      <a href="../../operators/timemin/" class="md-nav__link">
         
   
   
@@ -1189,7 +1193,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../timemax/" class="md-nav__link">
+      <a href="../../operators/timemax/" class="md-nav__link">
         
   
   
@@ -1217,7 +1221,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../timestd/" class="md-nav__link">
+      <a href="../../operators/timestd/" class="md-nav__link">
         
   
   
@@ -1245,7 +1249,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../timesum/" class="md-nav__link">
+      <a href="../../operators/timesum/" class="md-nav__link">
         
   
   
@@ -1273,7 +1277,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../zonmean/" class="md-nav__link">
+      <a href="../../operators/zonmean/" class="md-nav__link">
         
   
   
@@ -1301,7 +1305,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../zonmin/" class="md-nav__link">
+      <a href="../../operators/zonmin/" class="md-nav__link">
         
   
   
@@ -1329,7 +1333,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../zonmax/" class="md-nav__link">
+      <a href="../../operators/zonmax/" class="md-nav__link">
         
   
   
@@ -1357,7 +1361,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../zonstd/" class="md-nav__link">
+      <a href="../../operators/zonstd/" class="md-nav__link">
         
   
   
@@ -1385,7 +1389,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../zonsum/" class="md-nav__link">
+      <a href="../../operators/zonsum/" class="md-nav__link">
         
   
   
@@ -1440,10 +1444,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#synopsis" class="md-nav__link">
+  <a href="#dataset-with-multiple-data-variables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Synopsis
+        Dataset with multiple data variables
       
     </span>
   </a>
@@ -1451,10 +1455,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#description" class="md-nav__link">
+  <a href="#plotting-a-single-time-step" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Description
+        Plotting a single time step
       
     </span>
   </a>
@@ -1462,10 +1466,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#positional-arguments" class="md-nav__link">
+  <a href="#plotting-the-fldmean-using-cdo-fldmean-operator" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Positional Arguments
+        Plotting the fldmean using CDO fldmean operator
       
     </span>
   </a>
@@ -1473,10 +1477,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#saving-the-plot-to-a-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
+        Saving the plot to a file
       
     </span>
   </a>
@@ -1503,35 +1507,39 @@
   
 
 
-<h1 id="plot"><code>plot</code><a class="headerlink" href="#plot" title="Permanent link">&para;</a></h1>
-<h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>xcdo<span class="w"> </span>-plot<span class="o">[</span>,filename<span class="o">]</span><span class="w"> </span>input
+<h1 id="example-quick-plotting">Example: quick plotting<a class="headerlink" href="#example-quick-plotting" title="Permanent link">&para;</a></h1>
+<p>Use the <a href="operators/plot.md"><code>-plot</code></a> operator to quickly plot a dataset, like so:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>infile.nc
 </code></pre></div>
-<h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p><strong>A simple plot function for xarray DataArray.</strong></p>
-<p>This function uses xarray.DataArray's <code>plot</code> method to plot the given dataset.
-It opens a interactive matplotlib window if <code>filename</code> is not provided.</p>
-<h2 id="positional-arguments">Positional Arguments<a class="headerlink" href="#positional-arguments" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>filename</code></td>
-<td>TEXT</td>
-<td>Optional</td>
-<td>Filename to save the plot<br> (default value: '')</td>
-</tr>
-</tbody>
-</table>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>xcdo<span class="w"> </span>-plot<span class="w"> </span>infile.nc
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This is give an error if the dataset has multiple data variables.
+Use the <a href="operators/selvar.md"><code>-selvar</code></a> operator to select a single data variable</p>
+</div>
+<h3 id="dataset-with-multiple-data-variables">Dataset with multiple data variables<a class="headerlink" href="#dataset-with-multiple-data-variables" title="Permanent link">&para;</a></h3>
+<p>If the dataset has multiple data variables, use the <a href="operators/selvar.md"><code>-selvar</code></a> operator to select a single data variable, like so:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
+</code></pre></div>
+<h3 id="plotting-a-single-time-step">Plotting a single time step<a class="headerlink" href="#plotting-a-single-time-step" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-isel,time<span class="o">=</span><span class="m">0</span><span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a href="operators/plot.md"><code>-plot</code></a> operator interally use xarray's <code>plot</code> method, which plots line plots for 1D data, pcolormesh plots for 2D data, and histograms for 3D and above data.</p>
+</div>
+<h3 id="plotting-the-fldmean-using-cdo-fldmean-operator">Plotting the fldmean using CDO fldmean operator<a class="headerlink" href="#plotting-the-fldmean-using-cdo-fldmean-operator" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-cdo<span class="w"> </span>-fldmean<span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">cdo should be installed</p>
+<p>The <a href="operators/cdo.md"><code>-cdo</code></a> operator requires the CDO executable to be installed and available in your PATH.</p>
+</div>
+<p>You can basically chain any number of operators together and give it to the <a href="operators/plot.md"><code>-plot</code></a> operator and it will plot the result, for example:
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-isel,lon<span class="o">=</span><span class="m">50</span><span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
+$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-cdo<span class="w"> </span>-fldmean<span class="w"> </span>-ymonmean<span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
+</code></pre></div></p>
+<h3 id="saving-the-plot-to-a-file">Saving the plot to a file<a class="headerlink" href="#saving-the-plot-to-a-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot,figure.png<span class="w"> </span>-cdo<span class="w"> </span>-fldmean<span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
 </code></pre></div>
 
 
