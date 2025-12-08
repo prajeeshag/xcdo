@@ -11,20 +11,6 @@
 
 **XCDO** is a Python-based command-line tool built around [Xarray](https://docs.xarray.dev/en/stable/). It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar [CDO](https://code.mpimet.mpg.de/projects/cdo/)-style interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.
 
-## Why XCDO?
-Why build another CDO-style tool—even if it won’t be as fast as the original CDO? Because XCDO offers a different kind of power:
-
-- **Simple Python functions**. If you know Python, you can create new operators instantly. This opens the door for real community-driven development.
-- **Automatic help and documentation**. XCDO automatically generates help and documentation for your operators, making it easy to share and reuse them.
-- **CLI and Library**. As these operators are Python functions, it can be called from Python scripts as well.
-- **Custom operators**. Drop a Python function into a file and call it like any other XCDO operator. This keeps your analysis workflows clean, modular, and easy to reuse.
-- **Zarr support**. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.
-- **CDO integration**. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.
-
-
-With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.
-
-
 ## Installation
 ```bash
 $ pip install xcdo
@@ -109,7 +95,7 @@ $ xcdo --show selvar
 ```
 <br>
 
-## Writing custom operators
+## User-defined operators
 You can easily turn a regular Python function into your own XCDO operator. For example, here’s a small operator in a file named dump.py that simply prints a dataset to the terminal:
 
 ```py title="dump.py"
@@ -141,5 +127,29 @@ $ xcdo --show dump.py
 !!! Note
     Notice the `.py` extension on the custom operator? That’s because the operator name simply comes from the Python file’s name.
 
+See [Writing your own operators](user_defined_operators.md) for more details.
+
+## Why XCDO?
+- **Simple Python functions**. If you know Python, you can create new operators instantly. This opens the door for real community-driven development.
+- **Automatic help and documentation**. XCDO automatically generates help and documentation for your operators, making it easy to share and reuse them.
+- **CLI and Library**. As these operators are Python functions, it can be called from Python scripts as well.
+- **Custom operators**. Drop a Python function into a file and call it like any other XCDO operator. This keeps your analysis workflows clean, modular, and easy to reuse.
+- **Zarr support**. Since XCDO builds on Xarray, it naturally supports modern formats like Zarr, which CDO doesn’t handle yet.
+- **CDO integration**. When you need the performance of CDO, you can call it directly with the “-cdo” operator and combine it with XCDO or custom operators in one chain.
+
+
+With community support, XCDO can grow into a unified library of reusable and well-structured tools for climate and weather analysis.
+
+
+## Issues
+Please report any issues [here](https://github.com/prajeeshag/xcdo/issues).
+
+## Contributing
+Fork the [repository](https://github.com/prajeeshag/xcdo) and make your changes and submit a pull request.
+
+Please contact me at [prajeeshag@gmail.com](mailto:prajeeshag@gmail.com) for any questions or start a discussion on [GitHub Discussions](https://github.com/prajeeshag/xcdo/discussions).
+
+!!! warning "Under active development"
+    XCDO is under active development. Although everything will work as expected, many features are not documented well yet.
 
 <!--For a more complete example including more features, see the Tutorial - User Guide.-->

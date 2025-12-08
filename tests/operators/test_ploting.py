@@ -34,3 +34,21 @@ def test_plot_calls(monkeypatch):
     mock_input.get_dataarray.assert_called_once()
     mock_darray.plot.assert_called_once()
     mock_show.assert_called_once()
+
+
+def test_plot_savefig(monkeypatch):
+    # mock darray and its plot()
+    mock_darray = MagicMock()
+    mock_darray.plot = MagicMock()
+
+    # mock DatasetIn
+    mock_input = MagicMock()
+    mock_input.get_dataarray.return_value = mock_darray
+
+    # mock plt.show
+    with patch("matplotlib.pyplot.savefig") as mock_savefig:
+        plot(mock_input, "test.png")
+
+    mock_input.get_dataarray.assert_called_once()
+    mock_darray.plot.assert_called_once()
+    mock_savefig.assert_called_once_with("test.png")

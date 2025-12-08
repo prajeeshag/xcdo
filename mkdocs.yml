@@ -6,12 +6,11 @@ theme:
   name: material
   features:
     - navigation.indexes
-    - navigation.expand
     - content.code.annotate
 
 nav:
   - Getting Started: index.md
-  - writing_custom_operators.md
+  - user_defined_operators.md
 
 plugins:
   - termynal:
