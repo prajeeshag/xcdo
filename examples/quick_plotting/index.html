@@ -1508,16 +1508,16 @@
 
 
 <h1 id="example-quick-plotting">Example: quick plotting<a class="headerlink" href="#example-quick-plotting" title="Permanent link">&para;</a></h1>
-<p>Use the <a href="operators/plot.md"><code>-plot</code></a> operator to quickly plot a dataset, like so:</p>
+<p>Use the <a href="../../operators/plot/"><code>-plot</code></a> operator to quickly plot a dataset, like so:</p>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>infile.nc
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This is give an error if the dataset has multiple data variables.
-Use the <a href="operators/selvar.md"><code>-selvar</code></a> operator to select a single data variable</p>
+Use the <a href="../../operators/selvar/"><code>-selvar</code></a> operator to select a single data variable</p>
 </div>
 <h3 id="dataset-with-multiple-data-variables">Dataset with multiple data variables<a class="headerlink" href="#dataset-with-multiple-data-variables" title="Permanent link">&para;</a></h3>
-<p>If the dataset has multiple data variables, use the <a href="operators/selvar.md"><code>-selvar</code></a> operator to select a single data variable, like so:</p>
+<p>If the dataset has multiple data variables, use the <a href="../../operators/selvar/"><code>-selvar</code></a> operator to select a single data variable, like so:</p>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
 </code></pre></div>
 <h3 id="plotting-a-single-time-step">Plotting a single time step<a class="headerlink" href="#plotting-a-single-time-step" title="Permanent link">&para;</a></h3>
@@ -1525,16 +1525,16 @@ Use the <a href="operators/selvar.md"><code>-selvar</code></a> operator to selec
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <a href="operators/plot.md"><code>-plot</code></a> operator interally use xarray's <code>plot</code> method, which plots line plots for 1D data, pcolormesh plots for 2D data, and histograms for 3D and above data.</p>
+<p>The <a href="../../operators/plot/"><code>-plot</code></a> operator interally use xarray's <code>plot</code> method, which plots line plots for 1D data, pcolormesh plots for 2D data, and histograms for 3D and above data.</p>
 </div>
 <h3 id="plotting-the-fldmean-using-cdo-fldmean-operator">Plotting the fldmean using CDO fldmean operator<a class="headerlink" href="#plotting-the-fldmean-using-cdo-fldmean-operator" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-cdo<span class="w"> </span>-fldmean<span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">cdo should be installed</p>
-<p>The <a href="operators/cdo.md"><code>-cdo</code></a> operator requires the CDO executable to be installed and available in your PATH.</p>
+<p>The <a href="../../operators/cdo/"><code>-cdo</code></a> operator requires the CDO executable to be installed and available in your PATH.</p>
 </div>
-<p>You can basically chain any number of operators together and give it to the <a href="operators/plot.md"><code>-plot</code></a> operator and it will plot the result, for example:
+<p>You can basically chain any number of operators together and give it to the <a href="../../operators/plot/"><code>-plot</code></a> operator and it will plot the result, for example:
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-isel,lon<span class="o">=</span><span class="m">50</span><span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
 $<span class="w"> </span>xcdo<span class="w"> </span>-plot<span class="w"> </span>-cdo<span class="w"> </span>-fldmean<span class="w"> </span>-ymonmean<span class="w"> </span>-selvar,var1<span class="w"> </span>infile.nc
 </code></pre></div></p>
