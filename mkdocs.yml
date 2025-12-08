@@ -10,7 +10,9 @@ theme:
 
 nav:
   - Getting Started: index.md
-  - user_defined_operators.md
+  - Custom Operators: user_defined_operators.md
+  - Examples:
+      - Quick plotting: examples/quick_plotting.md
 
 plugins:
   - termynal:
