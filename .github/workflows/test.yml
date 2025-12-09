@@ -55,7 +55,7 @@ jobs:
     if: ${{ needs.changes.outputs.tests == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest-self-hosted]
         python-version: ["3.12", "3.13", "3.14"]
 
     runs-on: ${{ matrix.os }}
