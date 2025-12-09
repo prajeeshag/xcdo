@@ -294,6 +294,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#installing-in-a-virtual-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing in a virtual environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#micromambamambaconda" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1504,6 +1515,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#installing-in-a-virtual-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing in a virtual environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#micromambamambaconda" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1614,13 +1636,20 @@
 <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/clios" />
 <img alt="Doc" src="https://github.com/prajeeshag/xcdo/actions/workflows/build-docs.yml/badge.svg" />
 <a href="https://github.com/pre-commit/pre-commit"><img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit" /></a></p>
-<p><strong>XCDO</strong> is a Python-based command-line tool built around <a href="https://docs.xarray.dev/en/stable/">Xarray</a>. It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar <a href="https://code.mpimet.mpg.de/projects/cdo/">CDO</a>-style interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.</p>
+<p><strong>XCDO</strong> is a Python-based command-line tool built around <a href="https://docs.xarray.dev/en/stable/">Xarray</a>. It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar <a href="https://code.mpimet.mpg.de/projects/cdo/">CDO</a> like interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<p><div class="highlight"><pre><span></span><code>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>xcdo
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>xcdo
 </code></pre></div>
-<br>
-You may want to install <code>xcdo</code> to an isolated virtual environment to avoid conflicts with other packages.
-Below are examples using common environment managers:</p>
+<div class="admonition known issues">
+<p class="admonition-title">Known</p>
+<ul>
+<li>Only works with Python 3.12 and 3.13 on macOS.</li>
+<li>Not well tested on Windows.</li>
+</ul>
+</div>
+<p><br></p>
+<h3 id="installing-in-a-virtual-environment">Installing in a virtual environment<a class="headerlink" href="#installing-in-a-virtual-environment" title="Permanent link">&para;</a></h3>
+<p>You may want to install <code>xcdo</code> to an isolated virtual environment to avoid conflicts with other packages.</p>
 <h3 id="micromambamambaconda"><a href="https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html">micromamba</a>/<a href="https://mamba.readthedocs.io/en/latest/">mamba</a>/<a href="https://docs.conda.io/en/latest/">conda</a><a class="headerlink" href="#micromambamambaconda" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Choose any of: micromamba, mamba, or conda</span>
 $<span class="w"> </span>micromamba<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>xcdo<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.13
