@@ -5,7 +5,7 @@ build-backend = "pdm.backend"
 [project]
 name = "xcdo"
 dynamic = ["version"]
-description = ""
+description = "Collection of command-line operators to manipulate climate datasets"
 authors = [{ name = "Prajeesh Ag", email = "prajeeshag@gmail.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
@@ -36,9 +36,9 @@ classifiers = [
 xcdo = "xcdo.main:app"
 
 [project.urls]
-homepage = "https://prajeeshag.github.io/xcdo"
+homepage = "https://prajeesh-ag.com/xcdo"
 repository = "https://github.com/prajeeshag/xcdo"
-documentation = "https://prajeeshag.github.io/xcdo"
+documentation = "https://prajeesh-ag.com/xcdo"
 
 [tool.pdm.build]
 excludes = ["tests", "docs", "examples"]
