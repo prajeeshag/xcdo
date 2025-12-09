@@ -17,9 +17,8 @@
 $ pip install xcdo
 ```
 
-!!! Known issues
-    - Only works with Python 3.12 and 3.13 on macOS.
-    - Not well tested on Windows.
+!!! warning "Windows support!"
+    - Not well tested on Windows. But it should work! :wink:
 
 <br>
 ### Installing in a virtual environment
