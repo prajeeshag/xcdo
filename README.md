@@ -9,15 +9,20 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 
-**XCDO** is a Python-based command-line tool built around [Xarray](https://docs.xarray.dev/en/stable/). It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar [CDO](https://code.mpimet.mpg.de/projects/cdo/)-style interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.
+**XCDO** is a Python-based command-line tool built around [Xarray](https://docs.xarray.dev/en/stable/). It provides a collection of operators for working with datasets such as NetCDF, GRIB, and Zarr, using a familiar [CDO](https://code.mpimet.mpg.de/projects/cdo/) like interface. With the help of Python’s type annotations, creating new operators becomes effortless, making it easy to extend the tool with simple functions and build reusable, organised analysis workflows.
 
 ## Installation
 ```bash
 $ pip install xcdo
 ```
+
+!!! Known issues
+    - Only works with Python 3.12 and 3.13 on macOS.
+    - Not well tested on Windows.
+
 <br>
+### Installing in a virtual environment
 You may want to install `xcdo` to an isolated virtual environment to avoid conflicts with other packages.
-Below are examples using common environment managers:
 
 ### [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html)/[mamba](https://mamba.readthedocs.io/en/latest/)/[conda](https://docs.conda.io/en/latest/)
 
