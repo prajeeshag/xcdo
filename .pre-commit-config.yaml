@@ -54,9 +54,8 @@ repos:
       - id: ty
         name: ty
         entry: uv run ty check xcdo
-        language: system
+        language: python
         types: [python]
-        pass_filenames: true
 
 default_install_hook_types:
   - pre-commit
