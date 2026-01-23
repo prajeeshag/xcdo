@@ -1,3 +1,5 @@
+import typing as t
+
 import xarray as xr
 
 
@@ -29,9 +31,23 @@ def open_dataset(path: str) -> xr.Dataset:
     )
 
 
-def save_dataset(dataset: xr.Dataset, path: str) -> None:
+def save_dataset_to_disk(dataset: xr.Dataset, path: str) -> None:
     format = _guess_output_format(path)
     if format == "zarr":
         dataset.to_zarr(path, mode="w")  # pyright: ignore
         return
     dataset.to_netcdf(path)  # pyright: ignore
+
+
+class SaveDataset:
+    def __init__(self):
+        self._savefn: t.Callable[[xr.Dataset, str], None] = save_dataset_to_disk
+
+    def __call__(self, dataset: xr.Dataset, path: str) -> None:
+        self._savefn(dataset, path)
+
+    def set_savefn(self, savefn: t.Callable[[xr.Dataset, str], None]) -> None:
+        self._savefn = savefn
+
+
+save_dataset = SaveDataset()
