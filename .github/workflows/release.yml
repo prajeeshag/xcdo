@@ -29,7 +29,7 @@ jobs:
           name: ${{ github.ref_name }}
           body: ${{ steps.changelog.outputs.changes }}
           token: ${{ github.token }}
-          restrictToTypes: ["feat", "fix", "refactor"]
+          restrictToTypes: feat,fix,refactor
 
       - name: Commit CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v7
