@@ -49,6 +49,15 @@ repos:
     hooks:
       - id: readme-from-mkdocs
 
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: uv run ty
+        language: system
+        types: [python]
+        pass_filenames: true
+
 default_install_hook_types:
   - pre-commit
   - pre-push
