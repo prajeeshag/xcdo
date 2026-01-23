@@ -13,7 +13,7 @@ def mermean(
     operator examples:
         xcdo -meremean infile.nc outfile.nc
     """
-    return input.cf.mean("longitude")  # type: ignore
+    return input.cf.mean("longitude")
 
 
 @operator()
@@ -26,7 +26,7 @@ def mermin(
     operator examples:
         xcdo -mermin infile.nc outfile.nc
     """
-    return input.cf.min("longitude")  # type: ignore
+    return input.cf.min("longitude")
 
 
 @operator()
@@ -39,7 +39,7 @@ def mermax(
     operator examples:
         xcdo -mermax infile.nc outfile.nc
     """
-    return input.cf.max("longitude")  # type: ignore
+    return input.cf.max("longitude")
 
 
 @operator()
@@ -52,7 +52,7 @@ def merstd(
     operator examples:
         xcdo -merstd infile.nc outfile.nc
     """
-    return input.cf.std("longitude")  # type: ignore
+    return input.cf.std("longitude")
 
 
 @operator()
@@ -65,4 +65,4 @@ def mersum(
     operator examples:
         xcdo -mersum infile.nc outfile.nc
     """
-    return input.cf.sum("longitude")  # type: ignore
+    return input.cf.sum("longitude")

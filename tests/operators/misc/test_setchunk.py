@@ -1,4 +1,4 @@
-# type: ignore
+#
 import re
 
 import pytest

@@ -1,4 +1,4 @@
-# type: ignore
+#
 import xarray as xr
 
 from xcdo.operators.misc import merge

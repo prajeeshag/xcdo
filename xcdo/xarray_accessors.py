@@ -4,7 +4,7 @@ import xarray as xarray
 from .exceptions import XcdoError
 
 
-@xarray.register_dataset_accessor("get_dataarray")  # type: ignore
+@xarray.register_dataset_accessor("get_dataarray")
 class GetDataArray:
     def __init__(self, dataset: xarray.Dataset):
         self._dataset = dataset
@@ -34,4 +34,4 @@ custom_criteria = {
         "name": "Time|time|times|Times",
     }
 }
-cf_xarray.set_options(custom_criteria=custom_criteria)  # type: ignore
+cf_xarray.set_options(custom_criteria=custom_criteria)

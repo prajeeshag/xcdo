@@ -13,7 +13,7 @@ def timemean(
     operator examples:
         xcdo -timemean infile.nc outfile.nc
     """
-    return input.cf.mean("time")  # type: ignore
+    return input.cf.mean("time")  #
 
 
 @operator()
@@ -26,7 +26,7 @@ def timemin(
     operator examples:
         xcdo -timemin infile.nc outfile.nc
     """
-    return input.cf.min("time")  # type: ignore
+    return input.cf.min("time")
 
 
 @operator()
@@ -39,7 +39,7 @@ def timemax(
     operator examples:
         xcdo -timemax infile.nc outfile.nc
     """
-    return input.cf.max("time")  # type: ignore
+    return input.cf.max("time")  #
 
 
 @operator()
@@ -52,7 +52,7 @@ def timestd(
     operator examples:
         xcdo -timestd infile.nc outfile.nc
     """
-    return input.cf.std("time")  # type: ignore
+    return input.cf.std("time")  #
 
 
 @operator()
@@ -65,4 +65,4 @@ def timesum(
     operator examples:
         xcdo -timesum infile.nc outfile.nc
     """
-    return input.cf.sum("time")  # type: ignore
+    return input.cf.sum("time")  #

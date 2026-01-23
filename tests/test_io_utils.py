@@ -1,5 +1,3 @@
-# type: ignore
-
 import xarray as xr
 
 from xcdo.io_utils import (

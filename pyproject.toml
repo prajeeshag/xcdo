@@ -68,6 +68,7 @@ dev = [
     "mypy>=1.13.0",
     "cdo>=1.6.1",
     "mkdocs-clios",
+    "ty>=0.0.13",
 ]
 docs = [
     "mkdocs>=1.6.1",

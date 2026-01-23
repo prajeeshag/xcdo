@@ -1,5 +1,3 @@
-# type: ignore
-
 import pytest
 import xarray as xr
 

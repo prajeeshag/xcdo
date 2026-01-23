@@ -13,7 +13,7 @@ def zonmean(
     operator examples:
         xcdo -zonemean infile.nc outfile.nc
     """
-    return input.cf.mean("latitude")  # type: ignore
+    return input.cf.mean("latitude")  #
 
 
 @operator()
@@ -26,7 +26,7 @@ def zonmin(
     operator examples:
         xcdo -zonmin infile.nc outfile.nc
     """
-    return input.cf.min("latitude")  # type: ignore
+    return input.cf.min("latitude")  #
 
 
 @operator()
@@ -39,7 +39,7 @@ def zonmax(
     operator examples:
         xcdo -zonmax infile.nc outfile.nc
     """
-    return input.cf.max("latitude")  # type: ignore
+    return input.cf.max("latitude")  #
 
 
 @operator()
@@ -52,7 +52,7 @@ def zonstd(
     operator examples:
         xcdo -zonstd infile.nc outfile.nc
     """
-    return input.cf.std("latitude")  # type: ignore
+    return input.cf.std("latitude")  #
 
 
 @operator()
@@ -65,4 +65,4 @@ def zonsum(
     operator examples:
         xcdo -zonsum infile.nc outfile.nc
     """
-    return input.cf.sum("latitude")  # type: ignore
+    return input.cf.sum("latitude")  #
